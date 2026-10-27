@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tro ly AI Sot xuat huyet | Dengue Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/katex.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.0/dist/contrib/auto-render.min.js"></script>
+    <style>
+        :root {
+            --blue: #0ea5e9; --cyan: #06b6d4;
+            --text: #1e293b; --muted: #64748b;
+            --border: #e2e8f0; --accent: #0ea5e9;
+        }
+        body { font-family:'Inter',sans-serif; background:#fff; color:var(--text);
+               height:100vh; margin:0; display:flex; flex-direction:column; overflow:hidden; }
+
+        .scroll-area { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; scroll-behavior:smooth; }
+        .scroll-area::-webkit-scrollbar { width:4px; }
+        .scroll-area::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:10px; }
+
+        .bubble { max-width:85%; padding:14px 16px;
+                  animation:fadeIn .3s cubic-bezier(.16,1,.3,1) forwards; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+        .user-bubble { background:linear-gradient(135deg,var(--blue),var(--cyan));
+                       color:#fff; box-shadow:0 4px 14px rgba(14,165,233,.25);
+                       border-radius:20px 20px 4px 20px; }
+        .bot-bubble  { background:#f8fafc; border:1px solid var(--border);
+                       border-radius:20px 20px 20px 4px; }
+
+        .emergency-banner { background:#fff1f2; border:1.5px solid #fecdd3;
+                            border-left:4px solid #ef4444; border-radius:8px;
+                            padding:10px 14px; margin-top:10px;
+                            font-size:13px; color:#991b1b; font-weight:600; }
+
+        .typing-dot { width:4px;height:4px;background:var(--accent);border-radius:50%;
+                      animation:bounce 1.4s infinite ease-in-out; }
+        .typing-dot:nth-child(2){animation-delay:.2s}
+        .typing-dot:nth-child(3){animation-delay:.4s}
+        @keyframes bounce{0%,80%,100%{transform:scale(.3);opacity:.4}40%{transform:scale(1);opacity:1}}
+
+        .input-pill { background:#fff; border:1px solid var(--border); transition:all .3s; }
+        .input-pill:focus-within { border-color:rgba(14,165,233,.45);
+                                   box-shadow:0 0 0 3px rgba(14,165,233,.1); }
+        .send-btn { background:linear-gradient(135deg,var(--blue),var(--cyan)); transition:all .3s; }
+        .send-btn:hover:not(:disabled){transform:scale(1.06);filter:brightness(1.05)}
+        .send-btn:disabled{opacity:.55;cursor:not-allowed}
+
+        .settings-panel { background:rgba(255,255,255,.98); backdrop-filter:blur(20px);
+                          border-left:1px solid var(--border);
+                          transition:transform .4s cubic-bezier(.16,1,.3,1); }
+        .slider { -webkit-appearance:none; width:100%; height:4px;
+                  background:#e2e8f0; border-radius:2px; outline:none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px;
+                                        background:var(--accent); border-radius:50%; cursor:pointer; }
+
+        .status-badge { display:inline-flex; align-items:center; gap:5px;
+                        font-size:10px; font-weight:700; letter-spacing:.1em;
+                        padding:4px 12px; border-radius:100px; border:1px solid; }
+        .s-online  { color:#15803d; background:#f0fdf4; border-color:#bbf7d0; }
+        .s-offline { color:#b45309; background:#fffbeb; border-color:#fde68a; }
+        .s-dot { width:6px; height:6px; border-radius:50%; }
+        .d-online  { background:#22c55e; animation:pulse-dot 2s infinite; }
+        .d-offline { background:#f59e0b; }
+        @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+
+        .bot-bubble pre  { background:#f1f5f9; border:1px solid #e2e8f0; border-radius:10px;
+                           padding:12px; overflow-x:auto; }
+        .bot-bubble code:not(pre code) { color:#0ea5e9; background:#f0f9ff;
+                                         padding:1px 5px; border-radius:4px; font-size:.9em; }
+        .quick-btn { font-size:12px; padding:6px 14px; background:#f0f9ff;
+                     border:1px solid #bae6fd; border-radius:100px; color:#0369a1;
+                     font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+        .quick-btn:hover { background:#e0f2fe; border-color:#7dd3fc; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="h-16 flex items-center justify-between px-5 md:px-10 shrink-0 border-b border-slate-200 bg-white z-50">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
+             style="background:linear-gradient(135deg,#0ea5e9,#06b6d4)">🦟</div>
+        <div>
+            <h1 class="text-base font-bold text-slate-800">Tro ly AI Sot xuat huyet</h1>
+            <p class="text-[10px] text-slate-400 uppercase tracking-[.2em] font-semibold">Dengue Assistant · Gemini API</p>
+        </div>
+    </div>
+    <div class="flex items-center gap-3">
+        <span id="api-badge" class="status-badge s-offline">
+            <span class="s-dot d-offline" id="dot"></span>
+            <span id="api-label">CHECKING</span>
+        </span>
+        <button id="btn-settings" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-all">
+            <i data-lucide="sliders-horizontal" class="w-5 h-5"></i>
+        </button>
+    </div>
+</header>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel" class="fixed top-0 right-0 h-full w-72 z-[100] translate-x-full settings-panel p-6 flex flex-col gap-5 shadow-[-12px_0_40px_rgba(0,0,0,.08)]">
+    <div class="flex items-center justify-between">
+        <h2 class="text-base font-bold text-slate-800">Settings</h2>
+        <button id="btn-close-settings" class="text-slate-400 hover:text-slate-700">
+            <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+    </div>
+    <div class="space-y-5">
+        <div class="space-y-2">
+            <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <span>Thinking Level</span><span id="think-val">low</span>
+            </div>
+            <select id="thinking-level" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none">
+                <option value="minimal">Minimal (Rất nhanh)</option>
+                <option value="low" selected>Low (Khuyên dùng)</option>
+                <option value="medium">Medium (Cân bằng)</option>
+                <option value="high">High (Suy luận sâu)</option>
+            </select>
+            <p class="text-[11px] text-slate-400">Mức độ suy luận Gemini 3+ (thay thế temperature/top_p).</p>
+        </div>
+        <div class="space-y-2">
+            <div class="flex justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
+                <span>Max Tokens</span><span id="tok-val">2048</span>
+            </div>
+            <input type="range" id="tok" min="256" max="4096" step="256" value="2048" class="slider">
+        </div>
+        <hr class="border-slate-100">
+        <div class="rounded-xl bg-slate-50 p-3 border border-slate-200 text-xs text-slate-500 space-y-1">
+            <div class="font-bold text-slate-600 mb-1">Model info</div>
+            <div id="model-info">Model: <span class="font-semibold text-slate-700">—</span></div>
+            <div class="text-[10px] text-slate-400">Key: .env / GEMINI_API_KEY</div>
+        </div>
+        <button onclick="clearHistory()"
+            class="w-full py-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm font-bold hover:bg-red-100 transition-all flex items-center justify-center gap-2">
+            <i data-lucide="trash-2" class="w-4 h-4"></i> Xoa lich su
+        </button>
+    </div>
+</div>
+
+<!-- CHAT -->
+<main id="chat-scroll" class="scroll-area px-4 flex-1">
+    <div class="max-w-3xl mx-auto space-y-5 pt-6 pb-36" id="chat-box">
+        <div class="flex gap-3 items-start">
+            <div class="bot-bubble bubble shadow-sm">
+                <p class="text-slate-700 leading-relaxed text-[15px] mb-3">
+                    Xin chao! Toi la <strong>Tro ly AI Sot xuat huyet</strong> duoc ho tro boi <strong>Google Gemini</strong>.
+                </p>
+                <ul class="text-[14px] text-slate-600 space-y-1 ml-2">
+                    <li>🌡️ Nhan biet trieu chung Sot xuat huyet</li>
+                    <li>💊 Tu van cham soc va phong ngua</li>
+                    <li>🚨 Canh bao dau hieu nguy hiem</li>
+                    <li>📊 Thong tin dich te, mua dich</li>
+                </ul>
+            </div>
+        </div>
+        <div class="flex flex-wrap gap-2 pl-1">
+            <button class="quick-btn" onclick="quickAsk('Trieu chung Sot xuat huyet la gi?')">🌡️ Trieu chung SXH?</button>
+            <button class="quick-btn" onclick="quickAsk('Khi nao can di cap cuu SXH gap?')">🚨 Dau hieu nguy hiem?</button>
+            <button class="quick-btn" onclick="quickAsk('Cach phong ngua Sot xuat huyet tai nha?')">🏠 Phong ngua SXH?</button>
+            <button class="quick-btn" onclick="quickAsk('Con bi SXH co duoc uong Ibuprofen khong?')">💊 Uong thuoc gi?</button>
+        </div>
+    </div>
+</main>
+
+<!-- INPUT -->
+<div class="fixed bottom-0 left-0 right-0 p-4 md:p-6 pointer-events-none z-50">
+    <div class="max-w-3xl mx-auto pointer-events-auto">
+        <div class="input-pill rounded-[2rem] p-2 flex items-end shadow-lg">
+            <textarea id="user-input" placeholder="Dat cau hoi ve Sot xuat huyet..." rows="1"
+                class="flex-1 bg-transparent border-none focus:ring-0 text-slate-800 placeholder-slate-400 py-3 px-3 resize-none max-h-40 leading-relaxed font-medium outline-none text-[15px]"></textarea>
+            <button id="send-btn" class="send-btn w-11 h-11 text-white rounded-full flex items-center justify-center shrink-0 mb-0.5 mr-1">
+                <i data-lucide="arrow-up" class="w-5 h-5" id="send-icon"></i>
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-slate-400 mt-2">
+            AI co the mac loi. Tinh trang khan cap hay lien he co so y te hoac goi 115.
+        </p>
+    </div>
+</div>
+
+<script>
+lucide.createIcons();
+
+// --- DOM ---
+const chatBox    = document.getElementById('chat-box');
+const chatScroll = document.getElementById('chat-scroll');
+const userInput  = document.getElementById('user-input');
+const sendBtn    = document.getElementById('send-btn');
+const apiBadge   = document.getElementById('api-badge');
+const apiLabel   = document.getElementById('api-label');
+const dot        = document.getElementById('dot');
+const thinkEl    = document.getElementById('thinking-level');
+const tokEl      = document.getElementById('tok');
+
+let chatHistory   = [];
+let isBusy        = false;
+let abortCtrl     = null;
+let isSettingsOpen = false;
+
+const EMERGENCY_KW = [
+    'chay mau chan rang', 'chay mau cam', 'non ra mau', 'di cau phan den',
+    'dau bung du doi', 'non lien tuc', 'li bi', 'vat va', 'but rut', 'hon me',
+    'tay chan lanh', 'soc dengue', 'chảy máu chân răng', 'chảy máu cam',
+    'nôn ra máu', 'đau bụng dữ dội', 'nôn liên tục', 'lì bì', 'chân tay lạnh'
+];
+
+// --- Health check ---
+async function checkHealth() {
+    try {
+        const r = await fetch('/health');
+        const d = await r.json();
+        if (d.api_ready) {
+            apiBadge.className = 'status-badge s-online';
+            dot.className = 's-dot d-online';
+            apiLabel.textContent = 'ONLINE';
+            document.getElementById('model-info').innerHTML =
+                `Model: <span class="font-semibold text-slate-700">${d.model}</span>`;
+        } else {
+            apiBadge.className = 'status-badge s-offline';
+            dot.className = 's-dot d-offline';
+            apiLabel.textContent = 'OFFLINE';
+        }
+    } catch(e) {
+        apiLabel.textContent = 'ERROR';
+    }
+}
+checkHealth();
+
+// --- Helpers ---
+function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function renderMath(el) {
+    if (window.renderMathInElement) {
+        renderMathInElement(el, {
+            delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],
+            throwOnError:false
+        });
+    }
+}
+function scrollBottom() {
+    chatScroll.scrollTo({top: chatScroll.scrollHeight, behavior:'smooth'});
+}
+function hasEmergency(text) {
+    const t = text.toLowerCase();
+    return EMERGENCY_KW.some(k => t.includes(k));
+}
+
+function appendMsg(role, text='') {
+    const row = document.createElement('div');
+    row.className = `flex gap-3 items-start ${role==='user'?'flex-row-reverse':''}`;
+    const cls = role==='user' ? 'user-bubble' : 'bot-bubble';
+    row.innerHTML = `<div class="${cls} bubble shadow-sm">
+        <div class="content leading-relaxed text-[15px]">
+            ${role==='user' ? escHtml(text) : marked.parse(text)}
+        </div>
+    </div>`;
+    chatBox.appendChild(row);
+    if (role==='bot') renderMath(row.querySelector('.content'));
+    scrollBottom();
+    return row;
+}
+
+function setContent(row, html) {
+    const el = row.querySelector('.content');
+    el.innerHTML = html;
+    renderMath(el);
+    scrollBottom();
+}
+
+// --- SSE fetch streaming ---
+async function sendMessage() {
+    const text = userInput.value.trim();
+    if (!text || isBusy) return;
+
+    userInput.value = '';
+    userInput.style.height = 'auto';
+    appendMsg('user', text);
+
+    isBusy = true;
+    abortCtrl = new AbortController();
+    sendBtn.innerHTML = '<i data-lucide="square" class="w-5 h-5"></i>';
+    lucide.createIcons();
+    sendBtn.onclick = stopGeneration;
+
+    const botRow = appendMsg('bot', '');
+    setContent(botRow,
+        '<div class="flex gap-1.5 py-2">' +
+        '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>' +
+        '</div>');
+
+    let finalText = '';
+
+    try {
+        const resp = await fetch('/predict', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                message:        text,
+                history:        chatHistory,
+                thinking_level: thinkEl ? thinkEl.value : 'low',
+                max_tokens:     parseInt(tokEl.value),
+            }),
+            signal: abortCtrl.signal,
+        });
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+        const reader  = resp.body.getReader();
+        const decoder = new TextDecoder();
+        let   buffer  = '';
+
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, {stream: true});
+
+            // Parse SSE lines
+            const lines = buffer.split('\n');
+            buffer = lines.pop();   // keep incomplete last line
+
+            for (const line of lines) {
+                if (!line.startsWith('data:')) continue;
+                try {
+                    const payload = JSON.parse(line.slice(5).trim());
+                    finalText = payload.text || '';
+                    setContent(botRow, marked.parse(finalText));
+                } catch(_) {}
+            }
+        }
+
+        // Emergency check
+        if (finalText) {
+            chatHistory.push([text, finalText]);
+            if (hasEmergency(text)) {
+                const bubble = botRow.querySelector('.bot-bubble');
+                bubble.insertAdjacentHTML('beforeend',
+                    '<div class="emergency-banner">' +
+                    '🚨 <strong>CANH BAO:</strong> Neu benh nhan co dau hieu nang, ' +
+                    'hay den NGAY co so y te gan nhat hoac goi <strong>115</strong>!' +
+                    '</div>');
+                scrollBottom();
+            }
+        }
+
+    } catch(err) {
+        if (err.name === 'AbortError') {
+            setContent(botRow, '<em class="text-slate-400">Da dung tao van ban.</em>');
+        } else {
+            console.error(err);
+            setContent(botRow, '<p class="text-red-500 text-sm">Loi ket noi. Vui long thu lai.</p>');
+        }
+    } finally {
+        isBusy = false;
+        abortCtrl = null;
+        resetSendBtn();
+    }
+}
+
+function stopGeneration() {
+    if (abortCtrl) abortCtrl.abort();
+}
+
+function resetSendBtn() {
+    sendBtn.innerHTML = '<i data-lucide="arrow-up" class="w-5 h-5"></i>';
+    lucide.createIcons();
+    sendBtn.onclick = sendMessage;
+    sendBtn.disabled = false;
+}
+
+window.quickAsk = function(q) {
+    userInput.value = q;
+    sendMessage();
+};
+
+window.clearHistory = function() {
+    chatHistory = [];
+    chatBox.innerHTML = `<div class="flex gap-3 items-start">
+        <div class="bot-bubble bubble shadow-sm">
+            <p class="text-slate-700 text-[15px]">Da xoa lich su. Ban can ho tro gi khong?</p>
+        </div>
+    </div>`;
+    toggleSettings(false);
+};
+
+// --- Settings panel ---
+function toggleSettings(open) {
+    isSettingsOpen = open;
+    const p = document.getElementById('settings-panel');
+    p.classList.toggle('translate-x-full', !open);
+    p.classList.toggle('translate-x-0', open);
+}
+document.getElementById('btn-settings').onclick = (e) => { e.stopPropagation(); toggleSettings(true); };
+document.getElementById('btn-close-settings').onclick = () => toggleSettings(false);
+document.addEventListener('click', (e) => {
+    const p = document.getElementById('settings-panel');
+    const b = document.getElementById('btn-settings');
+    if (isSettingsOpen && !p.contains(e.target) && !b.contains(e.target)) toggleSettings(false);
+});
+
+// --- Inputs & Controls ---
+if (thinkEl) thinkEl.onchange = () => document.getElementById('think-val').textContent = thinkEl.value;
+tokEl.oninput  = () => document.getElementById('tok-val').textContent  = tokEl.value;
+
+// --- Input ---
+sendBtn.onclick = sendMessage;
+userInput.onkeydown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+};
+userInput.oninput = () => {
+    userInput.style.height = 'auto';
+    userInput.style.height = userInput.scrollHeight + 'px';
+};
+</script>
+</body>
+</html>

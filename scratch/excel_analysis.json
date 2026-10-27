@@ -1,0 +1,132 @@
+{
+  "Sot 2024": {
+    "rows": 1193,
+    "cols": [
+      "Idx",
+      "TenKhoa",
+      "TenBenhNhan",
+      "NamSinh",
+      "GioiTinh",
+      "NgayVao",
+      "NgayRa",
+      "Chandoanravien",
+      "Maicd",
+      "Diachi"
+    ],
+    "icd_top": {
+      "A97": 430,
+      "A97.1": 91,
+      "J02": 54,
+      "J18": 47,
+      "B09": 42,
+      "J06": 42,
+      "B34.9": 39,
+      "R50": 33,
+      "R56.0": 30,
+      "A90": 27
+    },
+    "icd_a90_a97": 575,
+    "valid_dates": 1193,
+    "date_min": "2023-12-13 00:00:00",
+    "date_max": "2024-12-30 00:00:00"
+  },
+  "sot xuất huyết 2024": {
+    "rows": 649,
+    "cols": [
+      "Idx",
+      "TenKhoa",
+      "TenBenhNhan",
+      "NamSinh",
+      "GioiTinh",
+      "NgayVao",
+      "NgayRa",
+      "Chandoanravien",
+      "Maicd",
+      "Diachi"
+    ],
+    "icd_top": {
+      "A97": 424,
+      "A97.1": 90,
+      "A90": 24,
+      "A97.2": 21,
+      "J02": 15,
+      "J06": 9,
+      "J20": 7,
+      "J18": 6,
+      "A04": 5,
+      "A97.0": 4
+    },
+    "icd_a90_a97": 564,
+    "valid_dates": 649,
+    "date_min": "2023-12-28 00:00:00",
+    "date_max": "2024-12-30 00:00:00"
+  },
+  "sot 2025": {
+    "rows": 2069,
+    "cols": [
+      "Idx",
+      "TenKhoa",
+      "TenBenhNhan",
+      "NamSinh",
+      "GioiTinh",
+      "NgayVao",
+      "NgayRa",
+      "Chandoanravien",
+      "Maicd",
+      "Diachi"
+    ],
+    "icd_top": {
+      "A97": 834,
+      "A97.1": 337,
+      "J06": 69,
+      "R50": 45,
+      "J18": 42,
+      "J02": 34,
+      "C73": 32,
+      "J20": 30,
+      "R56.0": 28,
+      "B34.9": 25
+    },
+    "icd_a90_a97": 1242,
+    "valid_dates": 2069,
+    "date_min": "2024-12-20 00:00:00",
+    "date_max": "2025-12-31 00:00:00"
+  },
+  "sốt xuất huyết 2025": {
+    "rows": 1382,
+    "cols": [
+      "Idx",
+      "TenKhoa",
+      "TenBenhNhan",
+      "NamSinh",
+      "GioiTinh",
+      "NgayVao",
+      "NgayRa",
+      "Chandoanravien",
+      "Maicd",
+      "Diachi"
+    ],
+    "icd_top": {
+      "A97": 825,
+      "A97.1": 336,
+      "A97.2": 25,
+      "A97.0": 25,
+      "A90": 19,
+      "J06": 18,
+      "J18": 11,
+      "A04": 10,
+      "J00": 7,
+      "J20": 6
+    },
+    "icd_a90_a97": 1230,
+    "valid_dates": 1382,
+    "date_min": "2024-12-26 00:00:00",
+    "date_max": "2025-12-31 00:00:00"
+  },
+  "Ma ICD SXH": {
+    "rows": 10,
+    "cols": [
+      "A90"
+    ]
+  }
+}

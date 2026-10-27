@@ -1,0 +1,538 @@
+ Ấp 5, Tỉnh Đồng Nai
+1/50/1/8 Thanh Đa , Tp Hồ Chí Minh
+11/24/3 Lê Văn Thọ
+178/6 Nguyễn Văn Thương
+247/8 Hoàng Hoa Thám , Tp Hồ Chí Minh
+28/22 Mai Văn Ngọc, Thành phố Hồ Chí Minh
+6B
+70/14 Lê Văn Thọ , Thành phố Hồ Chí Minh
+75/73/22a Đường 48 , Tỉnh Tây Ninh
+82/10 Điện Biên Phủ  , Tp Hồ Chí Minh
+86/53/35/3 TCH36 , Thành phố Hồ Chí Minh
+9/1 Đường Số 4, Tp Hồ Chí Minh
+Bình Thạnh, Thành phố Hồ Chí Minh
+Bình Thạnh, Tp Hồ Chí Minh
+Hoà Định Tây, Tỉnh Phú Yên
+Huyện An Lão, Tỉnh Bình Định
+Huyện Ba Tri, Tỉnh Bến Tre
+Huyện Bình Chánh, Thành phố Hồ Chí Minh
+Huyện Bình Sơn, Tỉnh Quảng Ngãi
+Huyện Bù Đốp, Tỉnh Bình Phước
+Huyện Bảo Lâm, Tỉnh Lâm Đồng
+Huyện Bảo Thắng, Tỉnh Lào Cai
+Huyện Bố Trạch, Tỉnh Quảng Bình
+Huyện Cam Lâm, Tỉnh Khánh Hòa
+Huyện Can Lộc, Tỉnh Hà Tĩnh
+Huyện Châu Phú, Tỉnh An Giang
+Huyện Châu Thành A, Tỉnh Hậu Giang
+Huyện Châu Thành, Tỉnh Bến Tre
+Huyện Châu Thành, Tỉnh Tây Ninh
+Huyện Châu Đức, Tỉnh Bà Rịa - Vũng Tàu
+Huyện Chư Sê, Tỉnh Gia Lai
+Huyện Chợ Lách, Tỉnh Bến Tre
+Huyện Chợ Mới, Tỉnh An Giang
+Huyện Càng Long, Tỉnh Trà Vinh
+Huyện Cái Bè, Tỉnh Tiền Giang
+Huyện Cái Nước, Tỉnh Cà Mau
+Huyện Cát Tiên, Tỉnh Lâm Đồng
+Huyện Cù Lao Dung, Tỉnh Sóc Trăng
+Huyện Cư Kuin, Tỉnh Đắk Lắk
+Huyện Cư M'gar, Tỉnh Đắk Lắk
+Huyện Cần Đước, Tỉnh Long An
+Huyện Cầu Kè, Tỉnh Trà Vinh
+Huyện Cầu Ngang, Tỉnh Trà Vinh
+Huyện Cẩm Mỹ, Tỉnh Đồng Nai
+Huyện Củ Chi, Thành phố Hồ Chí Minh
+Huyện Di Linh, Tỉnh Lâm Đồng
+Huyện Dương Minh Châu, Tỉnh Tây Ninh
+Huyện Dầu Tiếng, Tỉnh Bình Dương
+Huyện Ea H'leo, Tỉnh Đắk Lắk
+Huyện Ea Kar, Tỉnh Đắk Lắk
+Huyện Gia Kiệm, Tỉnh Đồng Nai
+Huyện Giao Thủy, Tỉnh Nam Định
+Huyện Giồng Riềng, Tỉnh Kiên Giang
+Huyện Giồng Trôm, Tỉnh Bến Tre
+Huyện Gò Công Đông, Tỉnh Tiền Giang
+Huyện Gò Quao, Tỉnh Kiên Giang
+Huyện Hoài Ân, Tỉnh Bình Định
+Huyện Hoằng Hóa, Tỉnh Thanh Hóa
+Huyện Hàm Thuận Bắc, Tỉnh Bình Thuận
+Huyện Hàm Tân, Tỉnh Bình Thuận
+Huyện Hòa Bình, Tỉnh Bạc Liêu
+Huyện Hòn Đất, Tỉnh Kiên Giang
+Huyện Hóc Môn, Thành phố Hồ Chí Minh
+Huyện Hậu Lộc, Tỉnh Thanh Hóa
+Huyện Hồng Ngự, Tỉnh Đồng Tháp
+Huyện Hớn Quản, Tỉnh Bình Phước
+Huyện KBang, Tỉnh Gia Lai
+Huyện Kim Sơn, Tỉnh Ninh Bình
+Huyện Kiên Lương, Tỉnh Kiên Giang
+Huyện Krông Năng, Tỉnh Đắk Lắk
+Huyện Krông Pắc, Tỉnh Đắk Lắk
+Huyện Long Hồ, Tỉnh Vĩnh Long
+Huyện Long Mỹ, Tỉnh Hậu Giang
+Huyện Long Thành, Tỉnh Đồng Nai
+Huyện Lâm Hà, Tỉnh Lâm Đồng
+Huyện Lý Nhân, Tỉnh Hà Nam
+Huyện Lấp Vò, Tỉnh Đồng Tháp
+Huyện Lộc Bình, Tỉnh Lạng Sơn
+Huyện Lộc Ninh, Tỉnh Bình Phước
+Huyện Minh Long, Tỉnh Quảng Ngãi
+Huyện Mỏ Cày Nam, Tỉnh Bến Tre
+Huyện Mộ Đức, Tỉnh Quảng Ngãi
+Huyện Mỹ Xuyên, Tỉnh Sóc Trăng
+Huyện Nam Đông, Tỉnh Thừa Thiên Huế
+Huyện Nghĩa Hành, Tỉnh Quảng Ngãi
+Huyện Nghĩa Hưng, Tỉnh Nam Định
+Huyện Ngọc Lặc, Tỉnh Thanh Hóa
+Huyện Nhà Bè, Thành phố Hồ Chí Minh
+Huyện Nhơn Trạch, Tỉnh Đồng Nai
+Huyện Như Xuân, Tỉnh Thanh Hóa
+Huyện Ninh Hải, Tỉnh Ninh Thuận
+Huyện Ninh Phước, Tỉnh Ninh Thuận
+Huyện Phong Điền, Thành phố Cần Thơ
+Huyện Phong Điền, Tỉnh Thừa Thiên Huế
+Huyện Phù Cát, Tỉnh Bình Định
+Huyện Phù Cừ, Tỉnh Hưng Yên
+Huyện Phù Mỹ, Tỉnh Bình Định
+Huyện Phú Bình, Tỉnh Thái Nguyên
+Huyện Phú Riềng, Tỉnh Bình Phước
+Huyện Phú Thiện, Tỉnh Gia Lai
+Huyện Phú Tân, Tỉnh An Giang
+Huyện Phú Vang, Tỉnh Thừa Thiên Huế
+Huyện Phước Long, Tỉnh Bạc Liêu
+Huyện Quỳ Hợp, Tỉnh Nghệ An
+Huyện Quỳnh Lưu, Tỉnh Nghệ An
+Huyện Sông Hinh, Tỉnh Phú Yên
+Huyện Thanh Bình, Tỉnh Đồng Tháp
+Huyện Thiệu Hóa, Tỉnh Thanh Hóa
+Huyện Thoại Sơn, Tỉnh An Giang
+Huyện Thạnh Phú, Tỉnh Bến Tre
+Huyện Thống Nhất, Tỉnh Đồng Nai
+Huyện Tiên Lữ, Tỉnh Hưng Yên
+Huyện Tiểu Cần, Tỉnh Trà Vinh
+Huyện Trà Cú, Tỉnh Trà Vinh
+Huyện Trảng Bom, Tỉnh Đồng Nai
+Huyện Trần Đề, Tỉnh Sóc Trăng
+Huyện Trực Ninh, Tỉnh Nam Định
+Huyện Tuy Phong, Tỉnh Bình Thuận
+Huyện Tuyên Hóa, Tỉnh Quảng Bình
+Huyện Tánh Linh, Tỉnh Bình Thuận
+Huyện Tân Biên, Tỉnh Tây Ninh
+Huyện Tân Châu, Tỉnh Tây Ninh
+Huyện Tân Hiệp, Tỉnh Kiên Giang
+Huyện Tân Hồng, Tỉnh Bà Rịa - Vũng Tàu
+Huyện Tân Phú, Tỉnh Đồng Nai
+Huyện Tân Trụ, Tỉnh Long An
+Huyện Tây Hòa, Tỉnh Phú Yên
+Huyện Tư Nghĩa, Tỉnh Quảng Ngãi
+Huyện U Minh Thượng, Tỉnh Kiên Giang
+Huyện Vĩnh Hưng, Tỉnh Long An
+Huyện Vĩnh Thạnh, Thành phố Cần Thơ
+Huyện Vĩnh Thạnh, Tỉnh Bình Định
+Huyện Vũng Liêm, Tỉnh Vĩnh Long
+Huyện Vị Thủy, Tỉnh Hậu Giang
+Huyện Xuyên Mộc, Tỉnh Bà Rịa - Vũng Tàu
+Huyện Xuân Lộc, Tỉnh Đồng Nai
+Huyện Yên Mô, Tỉnh Ninh Bình
+Huyện Yên Sơn, Tỉnh Tuyên Quang
+Huyện Yên Thành, Tỉnh Nghệ An
+Huyện Yên Định, Tỉnh Thanh Hóa
+Huyện Đông Anh, Thành phố Hà Nội
+Huyện Đông Hải, Tỉnh Bạc Liêu
+Huyện Đăk Glong, Tỉnh Đắk Nông
+Huyện Đại Lộc, Tỉnh Quảng Nam
+Huyện Đắk Hà, Tỉnh Kon Tum
+Huyện Đắk R'Lấp, Tỉnh Đắk Nông
+Huyện Đắk Song, Tỉnh Đắk Nông
+Huyện Định Quán, Tỉnh Đồng Nai
+Huyện Đồng Phú, Tỉnh Bình Phước
+Huyện Đồng Xuân, Tỉnh Phú Yên
+Huyện Đức Huệ, Tỉnh Long An
+Huyện Đức Hòa, Tỉnh Long An
+Huyện Đức Linh, Tỉnh Bình Thuận
+Huyện Đức Trọng, Tỉnh Lâm Đồng
+Huyện Ứng Hòa, Thành phố Hà Nội
+Phú Giáo, Tỉnh Bình Dương
+Phước Lộc 1- Hòa Thành - Đông Hòa, Tỉnh Phú Yên
+Phường An Hội Tây, Tp Hồ Chí Minh
+Phường An Hội Đông, Tp Hồ Chí Minh
+Phường An Hội, Tỉnh Vĩnh Long
+Phường An Khánh, Thành phố Hồ Chí Minh
+Phường An Khánh, Tp Hồ Chí Minh
+Phường An Khê, Tp Đà Nẵng
+Phường An Khê, Tỉnh Gia Lai
+Phường An Lạc, Thành phố Hồ Chí Minh
+Phường An Lạc, Tp Hồ Chí Minh
+Phường An Nhơn Bắc, Tỉnh Gia Lai
+Phường An Nhơn, Thành phố Hồ Chí Minh
+Phường An Nhơn, Tp Hồ Chí Minh
+Phường An Phú Đông, Thành phố Hồ Chí Minh
+Phường An Phú Đông, Tp Hồ Chí Minh
+Phường An Phú, Tp Hồ Chí Minh
+Phường B'Lao, Tỉnh Lâm Đồng
+Phường Ba Ngòi, Tỉnh Khánh Hòa
+Phường Bàn Cờ, Thành phố Hồ Chí Minh
+Phường Bình Dương, Tp Hồ Chí Minh
+Phường Bình Hưng Hòa, Tp Hồ Chí Minh
+Phường Bình Lợi Trung, Thành phố Hồ Chí Minh
+Phường Bình Lợi Trung, Tp Hồ Chí Minh
+Phường Bình Phước, Tỉnh Đồng Nai
+Phường Bình Quới, Tp Hồ Chí Minh
+Phường Bình Thuận, Tỉnh Lâm Đồng
+Phường Bình Thạnh, Thành phố Hồ Chí Minh
+Phường Bình Thạnh, Tp Hồ Chí Minh
+Phường Bình Tiên, Tp Hồ Chí Minh
+Phường Bình Trưng, Tp Hồ Chí Minh
+Phường Bình Xuân, Tỉnh Đồng Tháp
+Phường Bình Đông, Tp Hồ Chí Minh
+Phường Bảo An, Tỉnh Khánh Hòa
+Phường Bến Thành, Tp Hồ Chí Minh
+Phường Bồng Sơn, Tỉnh Gia Lai
+Phường Cam Linh, Tỉnh Khánh Hòa
+Phường Cao Lãnh, Tỉnh Đồng Tháp
+Phường Chánh Hiệp, Tp Hồ Chí Minh
+Phường Chánh Hưng, Tp Hồ Chí Minh
+Phường Châu Đốc, Tỉnh An Giang
+Phường Chợ Quán, Tp Hồ Chí Minh
+Phường Cái Răng, Tp Cần Thơ
+Phường Cát Lái, Tp Hồ Chí Minh
+Phường Cầu Kiệu, Tp Hồ Chí Minh
+Phường Cầu Ông Lãnh, Tp Hồ Chí Minh
+Phường Diên Hồng, Tp Hồ Chí Minh
+Phường Diên Hồng, Tỉnh Gia Lai
+Phường Dĩ An, Tp Hồ Chí Minh
+Phường Gia Định, Thành phố Hồ Chí Minh
+Phường Gia Định, Tp Hồ Chí Minh
+Phường Gò Vấp, Thành phố Hồ Chí Minh
+Phường Gò Công, Tỉnh Đồng Tháp
+Phường Gò Vấp, Thành phố Hồ Chí Minh
+Phường Gò Vấp, Tp Hồ Chí Minh
+Phường Hiệp Bình, Thành phố Hồ Chí Minh
+Phường Hiệp Bình, Tp Hồ Chí Minh
+Phường Hoài Nhơn Nam, Tỉnh Gia Lai
+Phường Hoài Nhơn Đông, Tỉnh Gia Lai
+Phường Hàm Thắng, Tỉnh Lâm Đồng
+Phường Hòa Bình, Tp Hồ Chí Minh
+Phường Hòa Hưng, Tp Hồ Chí Minh
+Phường Hóa Châu, Thành phố Huế
+Phường Hạnh Thông, Tp Hồ Chí Minh
+Phường Khánh Hội, Tp Hồ Chí Minh
+Phường Kiến Tường, Tỉnh Tây Ninh
+Phường Lang Biang - Đà Lạt, Tỉnh Lâm Đồng
+Phường Long An, Tỉnh Tây Ninh
+Phường Long Bình, Tp Hồ Chí Minh
+Phường Long Bình, Tỉnh Đồng Nai
+Phường Long Hoa, Tỉnh Tây Ninh
+Phường Long Trường, Tp Hồ Chí Minh
+Phường Lái Thiêu, Tp Hồ Chí Minh
+Phường Láng Tròn, Tỉnh Cà Mau
+Phường Minh Hưng, Tỉnh Đồng Nai
+Phường Minh Phụng, Tp Hồ Chí Minh
+Phường Mỹ Phong, Tỉnh Đồng Tháp
+Phường Mỹ Trà, Tỉnh Đồng Tháp
+Phường Nghĩa Lộ, Tỉnh Quảng Ngãi
+Phường Ngã Năm, Tp Cần Thơ
+Phường Nha Trang, Tỉnh Khánh Hòa
+Phường Nhiêu Lộc, Thành phố Hồ Chí Minh
+Phường Nhiêu Lộc, Tp Hồ Chí Minh
+Phường Phan Rang, Tỉnh Khánh Hòa
+Phường Phan Thiết, Tỉnh Lâm Đồng
+Phường Phong Phú, Thành phố Huế
+Phường Phú Nhuận, Thành phố Hồ Chí Minh
+Phường Phú Nhuận, Tp Hồ Chí Minh
+Phường Phú Thượng, Thành phố Hà Nội
+Phường Phú Thạnh, Tp Hồ Chí Minh
+Phường Phú Định, Tp Hồ Chí Minh
+Phường Phước Long, Thành phố Hồ Chí Minh
+Phường Phước Long, Tp Hồ Chí Minh
+Phường Pleiku, Tỉnh Gia Lai
+Phường Rạch Giá, Tỉnh An Giang
+Phường Sài Gòn, Tp Hồ Chí Minh
+Phường Tam Bình, Tp Hồ Chí Minh
+Phường Tam Thắng, Tp Hồ Chí Minh
+Phường Thuận An, Tp Hồ Chí Minh
+Phường Thông Tây Hội, Thành phố Hồ Chí Minh
+Phường Thông Tây Hội, Tp Hồ Chí Minh
+Phường Thạnh Mỹ Tây, Tp Hồ Chí Minh
+Phường Thốt Nốt, Tp Cần Thơ
+Phường Thới An, Thành phố Hồ Chí Minh
+Phường Thới An, Tp Hồ Chí Minh
+Phường Thục Phán, Tỉnh Cao Bằng
+Phường Thủ Đức, Thành phố Hồ Chí Minh
+Phường Thủ Đức, Tp Hồ Chí Minh
+Phường Thủy Xuân, Thành phố Huế
+Phường Tiên Sơn, Tỉnh Ninh Bình
+Phường Trung Mỹ Tây, Tp Hồ Chí Minh
+Phường Trà Câu, Tỉnh Quảng Ngãi
+Phường Tân Bình, Tp Hồ Chí Minh
+Phường Tân Hiệp, Tp Hồ Chí Minh
+Phường Tân Hòa, Tp Hồ Chí Minh
+Phường Tân Sơn Hòa, Tp Hồ Chí Minh
+Phường Tân Sơn Nhì, Tp Hồ Chí Minh
+Phường Tân Sơn, Tp Hồ Chí Minh
+Phường Tân Thuận, Tp Hồ Chí Minh
+Phường Tân Thới Hiệp, Tp Hồ Chí Minh
+Phường Tân Định, Tp Hồ Chí Minh
+Phường Tây Thạnh, Tp Hồ Chí Minh
+Phường Tăng Nhơn Phú, Tp Hồ Chí Minh
+Phường Vĩnh Hội, Tp Hồ Chí Minh
+Phường Vĩnh Phước, Tp Cần Thơ
+Phường Vĩnh Tế, Tỉnh An Giang
+Phường Vũng Tàu, Tp Hồ Chí Minh
+Phường Xuân Hòa, Thành phố Hồ Chí Minh
+Phường Xuân Hòa, Tp Hồ Chí Minh
+Phường Xuân Hương - Đà Lạt, Tỉnh Lâm Đồng
+Phường Xóm Chiếu, Tp Hồ Chí Minh
+Phường Đông Hà, Tỉnh Quảng Trị
+Phường Đông Hưng Thuận, Tp Hồ Chí Minh
+Phường Đông Sơn, Tỉnh Thanh Hóa
+Phường Đức Nhuận, Thành phố Hồ Chí Minh
+Phường Đức Nhuận, Tp Hồ Chí Minh
+Quận 1, Thành phố Hồ Chí Minh
+Quận 10, Thành phố Hồ Chí Minh
+Quận 11, Thành phố Hồ Chí Minh
+Quận 12, Thành phố Hồ Chí Minh
+Quận 12, Tp Hồ Chí Minh
+Quận 3, Thành phố Hồ Chí Minh
+Quận 4, Thành phố Hồ Chí Minh
+Quận 6, Thành phố Hồ Chí Minh
+Quận 7, Thành phố Hồ Chí Minh
+Quận 8, Thành phố Hồ Chí Minh
+Quận Bình Thạnh, Thành Phố Hồ Chí Minh
+Quận Bình Thạnh, Thành phố Hồ Chí Minh
+Quận Bình Tân, Thành phố Hồ Chí Minh
+Quận Cái Răng, Thành phố Cần Thơ
+Quận Gò Vấp, Thành Phố Hồ Chí Minh
+Quận Gò Vấp, Thành phố Hồ Chí Minh
+Quận Liên Chiểu, Thành phố Đà Nẵng
+Quận Lê Chân, Thành phố Hải Phòng
+Quận Phú Nhuận, Thành phố Hồ Chí Minh
+Quận Sơn Trà, Thành phố Đà Nẵng
+Quận Thốt Nốt, Thành phố Cần Thơ
+Quận Tân Bình, Thành phố Hồ Chí Minh
+Quận Tân Phú, Thành phố Hồ Chí Minh
+Ta 1-1106 Tropic Garden 56 Đường 66, Thành phố Hồ Chí Minh
+Thành Phố Hồ Chí Minh, Thành phố Hà Nội
+Thành Phố Hồ Chí Minh, Tp Hồ Chí Minh
+Thành Phố Quảng Ngãi, Tỉnh Quảng Ngãi
+Thành phố Biên Hòa, Tỉnh Đồng Nai
+Thành phố Buôn Ma Thuột, Tỉnh Đắk Lắk
+Thành phố Bảo Lộc, Tỉnh Lâm Đồng
+Thành phố Bắc Giang, Tỉnh Bắc Giang
+Thành phố Bến Tre, Tỉnh Bến Tre
+Thành phố Cam Ranh, Tỉnh Khánh Hòa
+Thành phố Cao Lãnh, Tỉnh Đồng Tháp
+Thành phố Châu Đốc, Tỉnh An Giang
+Thành phố Cà Mau, Tỉnh Cà Mau
+Thành phố Dĩ An, Tỉnh Bình Dương
+Thành phố Gia Nghĩa, Tỉnh Đắk Nông
+Thành phố Huế, Tỉnh Thừa Thiên Huế
+Thành phố Kon Tum, Tỉnh Kon Tum
+Thành phố Long Xuyên, Tỉnh An Giang
+Thành phố Mỹ Tho, Tỉnh Tiền Giang
+Thành phố Nha Trang, Tỉnh Khánh Hòa
+Thành phố Phan Rang-Tháp Chàm, Tỉnh Ninh Thuận
+Thành phố Phan Thiết, Tỉnh Bình Thuận
+Thành phố Phú Quốc, Tỉnh Kiên Giang
+Thành phố Pleiku, Tỉnh Gia Lai
+Thành phố Quy Nhơn, Tỉnh Bình Định
+Thành phố Rạch Giá, Tỉnh Kiên Giang
+Thành phố Sa Đéc, Tỉnh Đồng Tháp
+Thành phố Tam Kỳ, Tỉnh Quảng Nam
+Thành phố Thanh Hóa, Tỉnh Thanh Hóa
+Thành phố Thuận An, Tỉnh Bình Dương
+Thành phố Thái Nguyên, Tỉnh Thái Nguyên
+Thành phố Thủ Dầu Một, Tỉnh Bình Dương
+Thành phố Thủ Đức,
+Thành phố Thủ Đức, Thành phố Hồ Chí Min
+Thành phố Thủ Đức, Thành phố Hồ Chí Minh
+Thành phố Tuy Hòa, Tỉnh Phú Yên
+Thành phố Tuyên Quang, Tỉnh Tuyên Quang
+Thành phố Tây Ninh, Tỉnh Tây Ninh
+Thành phố Vinh, Tỉnh Nghệ An
+Thành phố Vĩnh Long, Tỉnh Vĩnh Long
+Thành phố Vũng Tàu, Tỉnh Bà Rịa - Vũng Tàu
+Thành phố Đà Lạt, Tỉnh Lâm Đồng
+Thành phố Đông Hà, Tỉnh Quảng Trị
+Thôn Kim Điền, Tỉnh Lâm Đồng
+Thôn Minh Hiệp 1 Minh Khai Hoài Đức , Thành phố Hà Nội
+Thôn Vĩnh An - Khánh Cường , Tỉnh Quảng Ngãi
+Thị Xã An Nhơn, Tỉnh Bình Định
+Thị Xã Buôn Hồ , Tỉnh Đắk Lắk
+Thị Xã Phú Mỹ, Tỉnh Bà Rịa - Vũng Tàu
+Thị xã An Khê, Tỉnh Gia Lai
+Thị xã An Nhơn, Tỉnh Bình Định
+Thị xã Bến Cát, Tỉnh Bình Dương
+Thị xã Chơn Thành, Tỉnh Bình Phước
+Thị xã Giá Rai, Tỉnh Bạc Liêu
+Thị xã Gò Công, Tỉnh Tiền Giang
+Thị xã Hoài Nhơn, Tỉnh Bình Định
+Thị xã Hòa Thành, Tỉnh Tây Ninh
+Thị xã La Gi, Tỉnh Bình Thuận
+Thị xã Phước Long, Tỉnh Bình Phước
+Thị xã Sông Cầu, Tỉnh Phú Yên
+Thị xã Sơn Tây, Thành phố Hà Nội
+Thị xã Trảng Bàng, Tỉnh Tây Ninh
+Thị xã Tân Uyên, Tỉnh Bình Dương
+Thị xã Điện Bàn, Tỉnh Quảng Nam
+Thị xã Đức Phổ, Tỉnh Quảng Ngãi
+Tỉnh Quảng Nam, Thành phố Hồ Chí Minh
+Tỉnh Đắk Nông
+Tổ 9 Ấp 2, Tỉnh Đồng Nai
+Xã An Lương, Tỉnh Gia Lai
+Xã An Lục Long, Tỉnh Tây Ninh
+Xã An Nhơn Tây, Tp Hồ Chí Minh
+Xã An Nhơn Tây, Tỉnh Gia Lai
+Xã An Ninh, Tỉnh Tây Ninh
+Xã Bà Điểm, Tp Hồ Chí Minh
+Xã Bình An, Tỉnh An Giang
+Xã Bình Dương, Tỉnh Gia Lai
+Xã Bình Giang, Tỉnh An Giang
+Xã Bình Hiệp, Tỉnh Gia Lai
+Xã Bình Mỹ, Thành phố Hồ Chí Minh
+Xã Bình Mỹ, Tp Hồ Chí Minh
+Xã Bình Sơn, Tỉnh Ninh Bình
+Xã Bảo Lâm 3, Tỉnh Lâm Đồng
+Xã Bảo Thạnh, Tỉnh Vĩnh Long
+Xã Bến Lức, Tỉnh Tây Ninh
+Xã Châu Pha, Tp Hồ Chí Minh
+Xã Cư M’gar, Tỉnh Đắk Lắk
+Xã Cần Giờ, Tp Hồ Chí Minh
+Xã Dliê Ya, Tỉnh Đắk Lắk
+Xã Dầu Giây, Tỉnh Đồng Nai
+Xã Ea Kar, Tỉnh Đắk Lắk
+Xã Gia Phong, Tỉnh Ninh Bình
+Xã Hiệp Hoà, Tỉnh Tây Ninh
+Xã Hiệp Hòa, Tỉnh Bắc Ninh
+Xã Hoài Đức, Tỉnh Lâm Đồng
+Xã Hàm Thuận, Tỉnh Lâm Đồng
+Xã Hòa Hưng, Tỉnh An Giang
+Xã Hòa Hội, Tỉnh Gia Lai
+Xã Hòa Mỹ, Tỉnh Đắk Lắk
+Xã Hòn Đất, Tỉnh An Giang
+Xã Hóc Môn, Tp Hồ Chí Minh
+Xã Hưng Thịnh, Tỉnh Đồng Nai
+Xã Hảo Đước, Tỉnh Tây Ninh
+Xã Hồng Sơn, Tỉnh Lâm Đồng
+Xã Hội An, Tỉnh An Giang
+Xã Ia Hrú, Tỉnh Gia Lai
+Xã Ia Pia, Tỉnh Gia Lai
+Xã Khánh Cường, Tỉnh Quảng Ngãi
+Xã Kim Long, Tp Hồ Chí Minh
+Xã Kim Sơn, Tỉnh Ninh Bình
+Xã Krông Búk, Tỉnh Đắk Lắk
+Xã La Ngà, Tỉnh Đồng Nai
+Xã Lai Vung, Tỉnh Đồng Tháp
+Xã Liêu Tú, Tp Cần Thơ
+Xã Long Phụng, Tỉnh Quảng Ngãi
+Xã Long Vĩnh, Tỉnh Vĩnh Long
+Xã Lâm Tân, Tp Cần Thơ
+Xã Lương Hoà, Tỉnh Tây Ninh
+Xã Lương Sơn, Tỉnh Lâm Đồng
+Xã Lấp Vò, Tỉnh Đồng Tháp
+Xã Lộc Hưng, Tỉnh Đồng Nai
+Xã Lộc Quang, Tỉnh Đồng Nai
+Xã Lộc Thuận, Tỉnh Vĩnh Long
+Xã Lộc Thạnh, Tỉnh Đồng Nai
+Xã Lộc Tấn, Tỉnh Đồng Nai
+Xã Mỏ Cày, Tỉnh Quảng Ngãi
+Xã Mễ Sở, Tỉnh Hưng Yên
+Xã Mộ Đức, Tỉnh Quảng Ngãi
+Xã Mỹ Hạnh, Tỉnh Tây Ninh
+Xã Mỹ Thuận, Tỉnh An Giang
+Xã Mỹ Tịnh An, Tỉnh Đồng Tháp
+Xã Mỹ Yên, Tỉnh Tây Ninh
+Xã Nam Cát Tiên, Tỉnh Đồng Nai
+Xã Nam Cường, Tỉnh Hưng Yên
+Xã Nam Gianh, Tỉnh Quảng Trị
+Xã Nam Hải Lăng, Tỉnh Quảng Trị
+Xã Nghĩa Giang, Tỉnh Quảng Ngãi
+Xã Nghĩa Hành, Tỉnh Quảng Ngãi
+Xã Nguyễn Du, Tỉnh Hưng Yên
+Xã Nguyễn Trãi, Tỉnh Hưng Yên
+Xã Ngãi Giao, Tp Hồ Chí Minh
+Xã Nha Bích, Tỉnh Đồng Nai
+Xã Nhuận Phú Tân, Tỉnh Vĩnh Long
+Xã Nhà Bè, Tp Hồ Chí Minh
+Xã Ninh Phước, Tỉnh Khánh Hòa
+Xã Phan Rí Cửa, Tỉnh Lâm Đồng
+Xã Phong Hòa, Tỉnh Đồng Tháp
+Xã Phong Mỹ, Tỉnh Đồng Tháp
+Xã Phù Mỹ Tây, Tỉnh Gia Lai
+Xã Phú Giáo, Tp Hồ Chí Minh
+Xã Phú Hòa, Tỉnh An Giang
+Xã Phú Lâm, Tỉnh Đồng Nai
+Xã Phú Thành, Tỉnh Đồng Tháp
+Xã Phước Hậu, Tỉnh Khánh Hòa
+Xã Phước Long, Tỉnh Vĩnh Long
+Xã Phước Vĩnh Tây, Tỉnh Tây Ninh
+Xã Quang Hưng, Tỉnh Hưng Yên
+Xã Quảng Bình, Tỉnh Thanh Hóa
+Xã Quế Sơn, Tp Đà Nẵng
+Xã Suối Dầu, Tỉnh Khánh Hòa
+Xã Sơn Tịnh, Tỉnh Quảng Ngãi
+Xã Tam Hợp, Tỉnh Nghệ An
+Xã Tam Ngãi, Tỉnh Vĩnh Long
+Xã Thanh Mỹ, Tỉnh Đồng Tháp
+Xã Thái Mỹ, Tp Hồ Chí Minh
+Xã Tháp Mười, Tỉnh Đồng Tháp
+Xã Thường Phước, Tỉnh Đồng Tháp
+Xã Thạnh Lợi, Tỉnh Tây Ninh
+Xã Thạnh Phú, Tỉnh Đồng Tháp
+Xã Thạnh Phước, Tỉnh Vĩnh Long
+Xã Thạnh Đức, Tỉnh Tây Ninh
+Xã Thọ Phong, Tỉnh Quảng Ngãi
+Xã Tiên Lãng, Thành phố Hải Phòng
+Xã Tiên Thủy, Tỉnh Vĩnh Long
+Xã Trí Phải, Tỉnh Cà Mau
+Xã Trường Xuân, Tỉnh Lâm Đồng
+Xã Trảng Bom, Tỉnh Đồng Nai
+Xã Tà Lài, Tỉnh Đồng Nai
+Xã Tà Đùng, Tỉnh Lâm Đồng
+Xã Tân Biên, Tỉnh Tây Ninh
+Xã Tân Châu, Tỉnh Tây Ninh
+Xã Tân Khai, Tỉnh Đồng Nai
+Xã Tân Long, Tỉnh Đồng Tháp
+Xã Tân Mỹ, Tỉnh Quảng Trị
+Xã Tân Phú Trung, Tỉnh Đồng Tháp
+Xã Tân Phú, Tỉnh Đồng Nai
+Xã Tân Thành Bình, Tỉnh Vĩnh Long
+Xã Tân Tiến, Tỉnh Đồng Nai
+Xã Tân Vĩnh Lộc, Tp Hồ Chí Minh
+Xã Tân Đông, Tỉnh Tây Ninh
+Xã Tân Đông, Tỉnh Đồng Tháp
+Xã Tây Phương, Thành phố Hà Nội
+Xã Tư Nghĩa, Tỉnh Quảng Ngãi
+Xã Tập Sơn, Tỉnh Vĩnh Long
+Xã Tịnh Khê, Tỉnh Quảng Ngãi
+Xã Tống Sơn, Tỉnh Thanh Hóa
+Xã Vĩnh Lộc, Tp Hồ Chí Minh
+Xã Vĩnh Phước, Tỉnh Cà Mau
+Xã Vạn Ninh, Tỉnh Khánh Hòa
+Xã Vệ Giang, Tỉnh Quảng Ngãi
+Xã Xuân Hải, Tỉnh Khánh Hòa
+Xã Xuân Lộc, Tỉnh Đồng Nai
+Xã Xuân Quế, Tỉnh Đồng Nai
+Xã Xuân Sơn, Tp Hồ Chí Minh
+Xã Xuân Thành, Tỉnh Đồng Nai
+Xã Xuân Thới Sơn, Tp Hồ Chí Minh
+Xã Xuân Trường, Tỉnh Ninh Bình
+Xã Yên Phong, Tỉnh Bắc Ninh
+Xã Đinh Trang Thượng, Tỉnh Lâm Đồng
+Xã Đình Cương, Tỉnh Quảng Ngãi
+Xã Đô Lương, Tỉnh Nghệ An
+Xã Đông Sơn, Tỉnh Quảng Ngãi
+Xã Đông Thạnh, Thành phố Hồ Chí Minh
+Xã Đông Thạnh, Tp Hồ Chí Minh
+Xã Đất Đỏ, Tp Hồ Chí Minh
+Xã Đắk Liêng, Tỉnh Đắk Lắk
+Xã Định Quán, Tỉnh Đồng Nai
+Xã Đồng Dương, Thành phố Đà Nẵng
+Xã Đồng Kho, Tỉnh Lâm Đồng
+Xã Đồng Phú, Tỉnh Đồng Nai
+Xã Đồng Xuân, Tỉnh Đắk Lắk
+Xã Đức Hòa, Tỉnh Tây Ninh
+Xã Đức Trọng, Tỉnh Lâm Đồng
+Yên Lợi - Ý Yên, Tỉnh Nam Định
+Đồng Xoài, Tỉnh Bình Phước

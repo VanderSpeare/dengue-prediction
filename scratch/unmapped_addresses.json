@@ -1,0 +1,17 @@
+{
+  "sot xuất huyết 2024": {
+    "total": 649,
+    "valid_prov_count": 649,
+    "missing_prov_count": 0,
+    "missing_addresses": []
+  },
+  "sốt xuất huyết 2025": {
+    "total": 1382,
+    "valid_prov_count": 1380,
+    "missing_prov_count": 2,
+    "missing_addresses": [
+      "Thành phố Thủ Đức,",
+      "6B"
+    ]
+  }
+}

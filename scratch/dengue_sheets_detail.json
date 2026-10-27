@@ -1,0 +1,258 @@
+{
+  "sot xuất huyết 2024": {
+    "total_rows": 649,
+    "icd_counts": {
+      "A97": 424,
+      "A97.1": 90,
+      "A90": 24,
+      "A97.2": 21,
+      "J02": 15,
+      "J06": 9,
+      "J20": 7,
+      "J18": 6,
+      "A04": 5,
+      "A97.0": 4,
+      "R50": 4,
+      "B09": 3,
+      "J96": 3,
+      "B34.9": 3,
+      "J15": 3,
+      "A04.8": 2,
+      "J03": 2,
+      "J00": 2,
+      "R50.9": 1,
+      "J18.0": 1,
+      "J18.8": 1,
+      "K52.2": 1,
+      "T78.4": 1,
+      "K52.9": 1,
+      "J21": 1,
+      "K21.9": 1,
+      "R94.5": 1,
+      "O36.5": 1,
+      "A92": 1,
+      "J40": 1,
+      "D56": 1,
+      "N92": 1,
+      "N61": 1,
+      "I50": 1,
+      "A15.0": 1,
+      "A49": 1,
+      "A87": 1,
+      "A41": 1,
+      "A97.9": 1,
+      "R74": 1
+    },
+    "non_dengue_count": 85,
+    "non_dengue_samples": [
+      {
+        "TenBenhNhan": "Lê Hoàng Khanh",
+        "Chandoanravien": " Viêm họng cấp(J02); Sốt xuất huyết Dengue(A97) n3",
+        "Maicd": "J02",
+        "Diachi": "Quận 12, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Huỳnh Văn Hiền",
+        "Chandoanravien": " SỐT XUẤT HUYẾT NGÀY 8 ỔN- VIÊM HỌNG THANH QUẢN CẤP ỔN - TĂNG HUYẾT ÁP - ĐÁI THÁO ĐƯỜNG TÍP 2 - BỆNH THẬN MẠN GIAI ĐOẠN 3A- RỐI LOẠN LIPID MÁU- BỆNH TRÀO NGƯỢC DẠ DÀY THỰC QUẢN",
+        "Maicd": "J02",
+        "Diachi": "Phường Cầu Kiệu, Tp Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Đinh Quang Vinh",
+        "Chandoanravien": "TD Viêm họng cấp - TD Sốt xuất huyết Dengue không có dấu hiệu cảnh báo",
+        "Maicd": "J02",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Nguyễn Hoàng Khôi Nguyên",
+        "Chandoanravien": "Nhiễm trùng đường ruột- Sốt xuất huyết Dengue",
+        "Maicd": "A04",
+        "Diachi": "Phường Bình Lợi Trung, Tp Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Hồ Thanh Phong",
+        "Chandoanravien": "VIÊM RUỘT (A04.8) - THEO DÕI SỐT XUẤT HUYẾT DENGUE (A97) - TRƯỢT ĐỐT SỐNG L4 ĐỘ 2 (M43.0) - VIÊM GAN SIÊU VI B MẠN/ U ÁC VÒM CHƯA ĐIỀU TRỊ (C10)",
+        "Maicd": "A04.8",
+        "Diachi": "Huyện Phú Tân, Tỉnh An Giang"
+      },
+      {
+        "TenBenhNhan": "Trần Ngọc Sơn",
+        "Chandoanravien": "Viêm phế quản - Tăng huyết áp - Co thắt nửa mặt - Sốt xuất huyết giai đoạn hồi phục  - Nhiễm trùng da mô mềm vùng mông (P) do Staphylococcus haemolitycus - Di chứng TBMMN",
+        "Maicd": "J18.0",
+        "Diachi": "Quận 12, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Trần Hà Thiện",
+        "Chandoanravien": "SỐT XUẤT HUYẾT DENGUE ĐÃ ỔN (R50.9)- TĂNG MEN GAN (K77)- VIÊM HỌNG CẤP (J02)",
+        "Maicd": "R50.9",
+        "Diachi": "Quận 12, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Trương Tấn Huy",
+        "Chandoanravien": "Viêm dạ dày ruột (K52.9) - Sốt xuất huyết dengue (A97) ngày 7",
+        "Maicd": "K52.9",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Nguyễn Thanh Vạn",
+        "Chandoanravien": "Viêm Amiđan (J03) - Sốt xuất huyết Dengue có dấu hiệu cảnh báo (A97.1) ",
+        "Maicd": "J03",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Nguyễn Ngọc Bảo Trâm",
+        "Chandoanravien": "Nhiễm siêu vi (B34.9), chưa loại trừ sốt xuất huyết Dengue - Viêm dạ dày trào ngược (K21)",
+        "Maicd": "B34.9",
+        "Diachi": "Quận 12, Thành phố Hồ Chí Minh"
+      }
+    ]
+  },
+  "sốt xuất huyết 2025": {
+    "total_rows": 1382,
+    "icd_counts": {
+      "A97": 825,
+      "A97.1": 336,
+      "A97.2": 25,
+      "A97.0": 25,
+      "A90": 19,
+      "J06": 18,
+      "J18": 11,
+      "A04": 10,
+      "J00": 7,
+      "J20": 6,
+      "B09": 5,
+      "J02": 5,
+      "J96": 4,
+      "R50": 3,
+      "J18.8": 3,
+      "O60.0": 3,
+      "R57.8": 3,
+      "O80.0": 3,
+      "J45": 2,
+      "J06.9": 2,
+      "Z35": 2,
+      "N39.0": 2,
+      "J96.0": 2,
+      "B34": 2,
+      "I80": 2,
+      "R04.1": 2,
+      "R57.9": 2,
+      "T78.0": 1,
+      "Z96.0": 1,
+      "A93": 1,
+      "A08.3": 1,
+      "O34.2": 1,
+      "A94": 1,
+      "R21": 1,
+      "K22.6": 1,
+      "G40": 1,
+      "R19": 1,
+      "J04.2": 1,
+      "T78.2": 1,
+      "B34.9": 1,
+      "M12.5": 1,
+      "J15": 1,
+      "A96": 1,
+      "N17": 1,
+      "N30": 1,
+      "A99": 1,
+      "R56": 1,
+      "R50.9": 1,
+      "R51": 1,
+      "P22": 1,
+      "J18.0": 1,
+      "J15.9": 1,
+      "G43": 1,
+      "B08.4": 1,
+      "H81": 1,
+      "O82.1": 1,
+      "R57.2": 1,
+      "K29": 1,
+      "J03": 1,
+      "I15": 1,
+      "J03.9": 1,
+      "N20.0": 1,
+      "J11": 1,
+      "I61": 1,
+      "A41.8": 1,
+      "R57.1": 1,
+      "I49.5": 1,
+      "N94.6": 1,
+      "B05": 1,
+      "T78.4": 1,
+      "N83.1": 1,
+      "A04.9": 1,
+      "A41.9": 1,
+      "G00": 1,
+      "N92.0": 1,
+      "K92.2": 1,
+      "I50": 1,
+      "D25.0": 1,
+      "K52.9": 1,
+      "I10": 1
+    },
+    "non_dengue_count": 152,
+    "non_dengue_samples": [
+      {
+        "TenBenhNhan": "Nguyễn Minh Thư",
+        "Chandoanravien": "Suy hô hấp ổn - Viêm phổi mắc phải cộng đồng không yếu tố đa kháng ổn - Chảy máu mũi (T) đã cầm  - Sốt xuất huyết Dengue có dấu hiệu cảnh báo hiện ổn - Còn ống động mạch biến chứng tăng áp phổi - Hội ",
+        "Maicd": "J96.0",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Trần Thị Kim Luông",
+        "Chandoanravien": "Theo dõi sốt xuất huyết Dengue N6 có dấu hiệu cảnh báo (A97)- Tổn thương gan cấp nghĩ trong bệnh cảnh nhiễm siêu vi (K75)- Viêm họng cấp (J02)",
+        "Maicd": "R50",
+        "Diachi": "Quận Gò Vấp, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Thạch Thị Mỹ An",
+        "Chandoanravien": "JJ niệu quản sau tán sỏi niệu quản trái (Z96.0), Nhiễm khuẩn niệu (N39.0), Sốt xuất huyết Dengue (A97)",
+        "Maicd": "Z96.0",
+        "Diachi": "Thị xã Phước Long, Tỉnh Bình Phước"
+      },
+      {
+        "TenBenhNhan": "Phạm Hoàng Minh Phát",
+        "Chandoanravien": "Sốt xuất huyết Dengue  - Trào ngược dạ dày thực quản - Viêm họng cấp",
+        "Maicd": "B09",
+        "Diachi": "Phường Thới An, Tp Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Huỳnh Tuấn Kiệt",
+        "Chandoanravien": "Viêm hô hấp trên (j06) td sốt xuất huyết dengue ngày 8 (a97)",
+        "Maicd": "J06",
+        "Diachi": "Phường Cầu Kiệu, Tp Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Bùi Như Ngọc",
+        "Chandoanravien": "Nhiễm trùng đường ruột do vi khuẩn khác(A04); Sốt xuất huyết Dengue(A97)",
+        "Maicd": "A04",
+        "Diachi": "Phường An Khánh, Tp Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Bùi Thị Vân Anh",
+        "Chandoanravien": "Tiêu chảy cấp nghĩ do siêu vi (A08.3); Theo dõi sốt xuất huyết Dengue N4 chưa có dấu hiệu cảnh báo (A97)",
+        "Maicd": "A08.3",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Chương Thị Kim Ngân",
+        "Chandoanravien": "Con lần 2, thai 36 tuần 3 ngày, ngôi đầu, chưa chuyển dạ, sốt xuất huyết Dengue chưa dấu cảnh báo ngày 5, vết mổ cũ Vết mổ cũ (O34.2)",
+        "Maicd": "O34.2",
+        "Diachi": "Huyện Trần Đề, Tỉnh Sóc Trăng"
+      },
+      {
+        "TenBenhNhan": "Lê Thị Thu Hiền",
+        "Chandoanravien": "Nhiễm khuẩn niệu - Sốt xuất huyết Dengue ngày 10 không có dấu hiệu cảnh báo -  Trào ngược dạ dày thực quản - Rối loạn tiền đình ",
+        "Maicd": "N39.0",
+        "Diachi": "Quận 12, Thành phố Hồ Chí Minh"
+      },
+      {
+        "TenBenhNhan": "Hồ Nguyên Hạ",
+        "Chandoanravien": "Sốt xuất huyết ngày 7 có dấu hiệu cảnh báo - Trào ngược dạ dày thực quản",
+        "Maicd": "A93",
+        "Diachi": "Quận Bình Thạnh, Thành phố Hồ Chí Minh"
+      }
+    ]
+  }
+}

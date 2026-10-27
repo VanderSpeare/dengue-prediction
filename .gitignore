@@ -1,0 +1,32 @@
+# Byte Order Mark workaround - create pure ASCII .gitignore
+# Environment secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Data & outputs (tuỳ chọn – xoá dòng nếu muốn track)
+data/raw/
+outputs/
+
+# Model artifacts
+models/*.pkl
+models/*.joblib
+models/*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

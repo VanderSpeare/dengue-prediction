@@ -1,0 +1,12 @@
+# Dengue AI Chatbot - Dependencies
+# Install: pip install -r chatbot_demo/requirements_demo.txt
+
+# Web server
+fastapi>=0.100.0
+uvicorn>=0.14.0
+
+# Google Gemini API (new SDK - replaces deprecated google-generativeai)
+google-genai>=1.0.0
+
+# Environment variables
+python-dotenv>=1.0.0

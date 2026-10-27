@@ -1,0 +1,13 @@
+{
+  "dengue_sheets": [
+    "sot xuất huyết 2024",
+    "sốt xuất huyết 2025"
+  ],
+  "year_counts": {
+    "2023": 2,
+    "2024": 655,
+    "2025": 1374
+  },
+  "total_rows": 2031,
+  "total_valid_province": 2030
+}
