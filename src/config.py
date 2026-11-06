@@ -67,6 +67,15 @@ class _Settings:
             "https://archive-api.open-meteo.com/v1/archive"
         )
 
+    # ---- WeatherAPI.com (ưu tiên cho dữ liệu thời tiết lịch sử) ------
+    @property
+    def WEATHERAPI_KEY(self) -> str | None:
+        """API key của WeatherAPI.com (https://www.weatherapi.com).
+        Lấy tại: https://www.weatherapi.com/my/
+        Biến .env: WEATHERAPI_KEY
+        """
+        return os.getenv("WEATHERAPI_KEY") or os.getenv("WEATHER_API_KEY")
+
     # ---- Logging -------------------------------------------------------
     @property
     def LOG_LEVEL(self) -> str:

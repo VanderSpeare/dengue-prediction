@@ -1,0 +1,43 @@
+{
+  "evaluation_title": "Đánh giá Dịch tễ Sốt xuất huyết Dengue TP.HCM: Xu hướng Tăng và Dự báo Mùa Khô 2026",
+  "executive_summary": "Năm 2025 chứng kiến sự gia tăng đáng báo động về số ca Sốt xuất huyết Dengue tại TP. Hồ Chí Minh, với tổng số 1677 ca, cao gấp gần ba lần so với 576 ca của năm 2024. Diễn biến dịch tễ cho thấy một chu kỳ rõ rệt, với số ca bắt đầu tăng từ giữa mùa mưa và đạt đỉnh vào tháng 10 (227 ca), sau các tháng có lượng mưa và độ ẩm cao nhất. Mặc dù số ca có xu hướng giảm nhẹ vào cuối năm, tháng 12/2025 vẫn ghi nhận 205 ca, một con số cao bất thường khi bước vào mùa khô. Điều này cho thấy áp lực dịch tễ vẫn còn đáng kể và nguy cơ bùng phát trở lại khi mùa mưa đến là rất cao. Dự báo cho ba tháng đầu năm 2026 cho thấy sự giảm dần số ca theo quy luật mùa khô, nhưng với mức nền cao hơn đáng kể so với các năm trước, đòi hỏi các biện pháp phòng ngừa chủ động và liên tục để kiểm soát dịch bệnh.",
+  "epidemiological_risk_level": "Nguy cơ Cao",
+  "climate_correlation_insight": "Phân tích dữ liệu cho thấy mối tương quan chặt chẽ giữa các yếu tố khí tượng và diễn biến dịch Sốt xuất huyết. Đỉnh mưa vào tháng 8 (453.2mm) và tháng 9 (470.9mm) đã tạo điều kiện lý tưởng cho sự phát triển của ổ bọ gậy và gia tăng mật độ muỗi Aedes. Độ ẩm không khí duy trì ở mức cao (>85%) từ tháng 8 đến tháng 10 không chỉ kéo dài tuổi thọ của muỗi mà còn rút ngắn chu kỳ phát triển của virus Dengue trong cơ thể muỗi (thời gian ủ bệnh ngoại lai), làm tăng khả năng truyền bệnh. Đỉnh dịch vào tháng 10 (227 ca) xảy ra sau một độ trễ khoảng 1-2 tháng so với đỉnh mưa và độ ẩm, phản ánh chu kỳ sinh học của muỗi và virus. Dữ liệu PM2.5, dù không trực tiếp liên quan đến vector truyền bệnh, cho thấy xu hướng tăng nhẹ vào cuối năm, có thể phản ánh điều kiện khí hậu khô hơn hoặc các yếu tố môi trường khác cần được theo dõi thêm.",
+  "monthly_predictions": [
+    {
+      "month_label": "Tháng 01/2026",
+      "predicted_cases": 182,
+      "lower_bound": 160,
+      "upper_bound": 205,
+      "trend": "Giảm dần theo mùa khô",
+      "risk_level": "Nguy cơ Cao",
+      "rationale": "Lượng mưa giảm mạnh so với tháng 12/2025 (151.9mm) và tháng 1/2025 (26.2mm), nhưng mật độ muỗi trưởng thành và ổ bọ gậy từ mùa mưa vẫn còn tồn lưu, cùng với số ca cao cuối năm 2025 tạo áp lực dịch tễ."
+    },
+    {
+      "month_label": "Tháng 02/2026",
+      "predicted_cases": 158,
+      "lower_bound": 135,
+      "upper_bound": 180,
+      "trend": "Giảm",
+      "risk_level": "Nguy cơ Trung bình",
+      "rationale": "Mùa khô cao điểm, độ ẩm và lượng mưa tiếp tục giảm (tháng 2/2025: 49.2mm, 71.72%), hạn chế đáng kể sự phát triển của bọ gậy và muỗi trưởng thành."
+    },
+    {
+      "month_label": "Tháng 03/2026",
+      "predicted_cases": 139,
+      "lower_bound": 115,
+      "upper_bound": 165,
+      "trend": "Chạm đáy mùa khô",
+      "risk_level": "Nguy cơ Trung bình",
+      "rationale": "Nhiệt độ tăng cao (tháng 3/2025: 28.73°C) kết hợp lượng mưa thấp nhất trong năm (tháng 3/2025: 20.7mm) làm giảm vòng đời muỗi và khả năng truyền bệnh, tuy nhiên vẫn cần cảnh giác do tổng thể dịch bệnh năm 2025 cao."
+    }
+  ],
+  "recommendations": [
+    "Tăng cường giám sát dịch tễ chủ động tại cộng đồng và cơ sở y tế, đặc biệt tại các khu vực có nguy cơ cao hoặc ghi nhận nhiều ca bệnh trong mùa mưa 2025.",
+    "Đẩy mạnh các chiến dịch diệt lăng quăng/bọ gậy và vệ sinh môi trường, loại bỏ các vật dụng chứa nước đọng, đặc biệt trong các tháng đầu mùa khô để giảm thiểu nguồn lây cho mùa mưa tiếp theo.",
+    "Nâng cao nhận thức cộng đồng về phòng chống Sốt xuất huyết, khuyến khích người dân chủ động thực hiện các biện pháp bảo vệ cá nhân và tham gia vào các hoạt động phòng chống dịch tại địa phương."
+  ],
+  "success": true,
+  "source": "Google Gemini (gemini-2.5-flash)",
+  "timestamp": "05/11/2026 15:50"
+}

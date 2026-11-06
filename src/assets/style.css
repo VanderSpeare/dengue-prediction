@@ -1,0 +1,302 @@
+/* ==========================================================================
+   style.css - Giao diện Trắng & Xanh dương, thân thiện người lớn tuổi
+   Nguyên tắc: chữ lớn, độ tương phản cao, nút to, viền nổi bật khi chọn.
+   Chỉ thay đổi hiển thị - không ảnh hưởng logic Python.
+   ========================================================================== */
+
+:root {
+    --blue-900: #0B2E6B;
+    --blue-700: #1D4ED8;
+    --blue-800: #1E40AF;
+    --blue-100: #DBEAFE;
+    --blue-50:  #EFF6FF;
+    --ink:      #0F1E3D;   /* chữ chính, tương phản cao trên nền trắng */
+    --ink-soft: #3B4A68;
+    --line:     #BFD3F2;
+    --focus:    #F59E0B;   /* vàng hổ phách: viền nổi bật khi bàn phím/chọn */
+    --radius:   14px;
+}
+
+/* ---------- Nền & cỡ chữ cơ bản ---------- */
+.stApp {
+    background: #FFFFFF;
+    color: var(--ink);
+}
+.block-container {
+    padding-top: 1.5rem;
+    padding-bottom: 4rem;
+    max-width: 1400px;
+}
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stText"],
+label, .stRadio label, .stCheckbox label {
+    font-size: 1.2rem !important;
+    line-height: 1.65 !important;
+    color: var(--ink);
+}
+[data-testid="stCaptionContainer"],
+[data-testid="stCaptionContainer"] p {
+    font-size: 1.05rem !important;
+    color: var(--ink-soft) !important;
+}
+h1 { font-size: 2.3rem !important; color: var(--blue-900); }
+h2 { font-size: 1.9rem !important; color: var(--blue-900); }
+h3 { font-size: 1.6rem !important; color: var(--blue-800); }
+h4 { font-size: 1.35rem !important; color: var(--blue-800); }
+
+/* ---------- Banner đầu trang (hero.html) ---------- */
+.hero {
+    background: var(--blue-700);
+    border-radius: 18px;
+    padding: 28px 34px;
+    margin-bottom: 22px;
+    border-bottom: 8px solid var(--blue-900);
+}
+.hero h1 {
+    margin: 0 0 8px 0;
+    font-size: 2.1rem !important;
+    line-height: 1.3;
+    color: #FFFFFF !important;
+}
+.hero p {
+    margin: 0;
+    font-size: 1.25rem !important;
+    line-height: 1.55;
+    color: #E6EEFF !important;
+}
+
+/* ---------- Nút bấm LỚN ---------- */
+.stButton > button,
+.stFormSubmitButton > button,
+.stDownloadButton > button,
+[data-testid="stBaseButton-secondary"],
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-secondaryFormSubmit"],
+[data-testid="stBaseButton-primaryFormSubmit"] {
+    min-height: 3.6rem;
+    padding: 0.7rem 1.6rem;
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    border-radius: var(--radius);
+    border: 3px solid var(--blue-700);
+    background: #FFFFFF;
+    color: var(--blue-700);
+    transition: background .15s ease, box-shadow .15s ease, transform .1s ease;
+}
+.stButton > button p,
+.stFormSubmitButton > button p,
+.stDownloadButton > button p {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: inherit !important;
+}
+
+/* Rê chuột: nền xanh nhạt + bóng sáng */
+.stButton > button:hover,
+.stFormSubmitButton > button:hover,
+.stDownloadButton > button:hover {
+    background: var(--blue-100);
+    border-color: var(--blue-800);
+    color: var(--blue-900);
+    box-shadow: 0 0 0 5px rgba(29, 78, 216, .22);
+    transform: translateY(-2px);
+}
+
+/* Nút chính (primary): xanh đặc, chữ trắng */
+.stButton > button[kind="primary"],
+.stFormSubmitButton > button[kind="primary"],
+[data-testid="stBaseButton-primary"],
+[data-testid="stBaseButton-primaryFormSubmit"] {
+    background: var(--blue-700);
+    color: #FFFFFF;
+    border-color: var(--blue-900);
+}
+.stButton > button[kind="primary"]:hover,
+.stFormSubmitButton > button[kind="primary"]:hover,
+[data-testid="stBaseButton-primary"]:hover,
+[data-testid="stBaseButton-primaryFormSubmit"]:hover {
+    background: var(--blue-800);
+    color: #FFFFFF;
+    box-shadow: 0 0 0 6px rgba(29, 78, 216, .30);
+}
+
+/* Đang nhấn / đang chọn / dùng bàn phím: viền vàng rất rõ */
+.stButton > button:focus-visible,
+.stFormSubmitButton > button:focus-visible,
+.stButton > button:active,
+.stFormSubmitButton > button:active {
+    outline: 5px solid var(--focus) !important;
+    outline-offset: 3px;
+}
+
+/* ---------- Ô nhập liệu ---------- */
+[data-baseweb="input"],
+[data-baseweb="textarea"],
+[data-baseweb="select"] > div {
+    border: 2px solid var(--line) !important;
+    border-radius: 12px !important;
+    background: #FFFFFF !important;
+}
+[data-baseweb="input"] input,
+[data-baseweb="textarea"] textarea,
+[data-baseweb="select"] div {
+    font-size: 1.2rem !important;
+    color: var(--ink) !important;
+}
+[data-baseweb="input"] input,
+[data-baseweb="select"] > div {
+    min-height: 3.2rem;
+}
+[data-baseweb="input"]:focus-within,
+[data-baseweb="textarea"]:focus-within,
+[data-baseweb="select"] > div:focus-within {
+    border-color: var(--blue-700) !important;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, .55) !important;
+}
+
+/* ---------- Tab điều hướng: to, rõ tab đang chọn ---------- */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 10px;
+    padding: 8px;
+    background: var(--blue-50);
+    border-radius: 16px;
+    border-bottom: none;
+    flex-wrap: wrap;
+}
+.stTabs [data-baseweb="tab"] {
+    height: auto;
+    min-height: 3.4rem;
+    padding: 10px 22px;
+    background: #FFFFFF;
+    border: 2px solid var(--line);
+    border-radius: 12px;
+}
+.stTabs [data-baseweb="tab"] p {
+    font-size: 1.2rem !important;
+    font-weight: 700 !important;
+    color: var(--blue-800) !important;
+}
+.stTabs [data-baseweb="tab"]:hover {
+    background: var(--blue-100);
+    border-color: var(--blue-700);
+}
+.stTabs [aria-selected="true"] {
+    background: var(--blue-700) !important;
+    border-color: var(--blue-900) !important;
+    box-shadow: 0 4px 0 var(--blue-900);
+}
+.stTabs [aria-selected="true"] p {
+    color: #FFFFFF !important;
+}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {
+    display: none;
+}
+
+/* ---------- Thẻ số liệu (st.metric) ---------- */
+[data-testid="stMetric"] {
+    background: #FFFFFF;
+    border: 2px solid var(--line);
+    border-left: 8px solid var(--blue-700);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+}
+[data-testid="stMetricLabel"] p {
+    font-size: 1.15rem !important;
+    font-weight: 600;
+    color: var(--ink-soft) !important;
+}
+[data-testid="stMetricValue"] {
+    font-size: 2.4rem !important;
+    font-weight: 800;
+    color: var(--blue-900);
+}
+
+/* ---------- Khung có viền (thẻ lịch hẹn, bệnh nhân) ---------- */
+[data-testid="stVerticalBlockBorderWrapper"] {
+    border: 2px solid var(--line) !important;
+    border-radius: var(--radius) !important;
+    background: #FFFFFF;
+}
+
+/* ---------- Thông báo: chữ lớn, viền dày ---------- */
+[data-testid="stAlert"] {
+    border-radius: var(--radius);
+    border-width: 2px;
+    padding: 6px 10px;
+}
+[data-testid="stAlert"] p {
+    font-size: 1.2rem !important;
+    font-weight: 600;
+}
+
+/* ---------- Expander ---------- */
+[data-testid="stExpander"] {
+    border: 2px solid var(--line) !important;
+    border-radius: var(--radius) !important;
+}
+[data-testid="stExpander"] summary {
+    min-height: 3.2rem;
+    background: var(--blue-50);
+    border-radius: 12px;
+}
+[data-testid="stExpander"] summary p {
+    font-size: 1.2rem !important;
+    font-weight: 700;
+    color: var(--blue-800) !important;
+}
+[data-testid="stExpander"] summary:hover {
+    background: var(--blue-100);
+}
+
+/* ---------- Thanh bên ---------- */
+[data-testid="stSidebar"] {
+    background: var(--blue-50);
+    border-right: 3px solid var(--line);
+}
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3 {
+    font-size: 1.5rem !important;
+}
+
+/* ---------- Chat AI ---------- */
+[data-testid="stChatMessage"] {
+    border: 2px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    background: #FFFFFF;
+}
+[data-testid="stChatInput"] textarea {
+    font-size: 1.2rem !important;
+}
+
+/* ---------- Nhãn trạng thái (badge.html) ---------- */
+.status-badge {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border: 2px solid transparent;
+}
+.status-badge.cancelled   { background: #FEE2E2; color: #991B1B; border-color: #F87171; }
+.status-badge.in-progress { background: var(--blue-100); color: var(--blue-900); border-color: var(--blue-700); }
+.status-badge.completed   { background: #DCFCE7; color: #14532D; border-color: #4ADE80; }
+.status-badge.no-show     { background: #FEF3C7; color: #78350F; border-color: #F59E0B; }
+.status-badge.waiting     { background: var(--blue-50); color: var(--blue-800); border-color: var(--line); }
+
+/* ---------- Ẩn phần thừa ---------- */
+footer { visibility: hidden; }
+
+/* ---------- Màn hình nhỏ / điện thoại ---------- */
+@media (max-width: 720px) {
+    .hero { padding: 20px; }
+    .hero h1 { font-size: 1.6rem !important; }
+    .stTabs [data-baseweb="tab"] { flex: 1 1 100%; }
+}
+
+/* Tôn trọng người dùng tắt hiệu ứng chuyển động */
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+}

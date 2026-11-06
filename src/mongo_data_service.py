@@ -43,7 +43,10 @@ COLLECTION_MAPPING = {
     "historical_weather": "historical_weather",
     "latest_predictions": "latest_predictions",
     "weather_cache": "weather_cache",
-    "vector_store": "vector_store"
+    "vector_store": "vector_store",
+    "weatherdata_hcmc_monthly": "weatherdata_hcmc_monthly",
+    "weatherdata_cleaned": "weatherdata_cleaned",
+    "weatherdata_raw_meteo": "weatherdata_raw_meteo"
 }
 
 FILE_PATH_MAPPING = {
@@ -56,7 +59,10 @@ FILE_PATH_MAPPING = {
     "historical_weather": paths.PROCESSED_DIR / "historical_weather.csv",
     "latest_predictions": paths.PREDICTIONS_CSV,
     "weather_cache": paths.PROCESSED_DIR / "weather_cache.csv",
-    "vector_store": paths.VECTOR_STORE_FILE
+    "vector_store": paths.VECTOR_STORE_FILE,
+    "weatherdata_hcmc_monthly": getattr(paths, 'WEATHERDATA_MONTHLY_CSV', paths.PROCESSED_DIR / "weatherdata_hcmc_monthly.csv"),
+    "weatherdata_cleaned": getattr(paths, 'WEATHERDATA_CLEANED_CSV', paths.DATA_DIR / "weatherdata" / "processed" / "cleaned_final.csv"),
+    "weatherdata_raw_meteo": getattr(paths, 'WEATHERDATA_RAW_METEO_CSV', paths.DATA_DIR / "weatherdata" / "raw" / "raw_openmeteo.csv")
 }
 
 

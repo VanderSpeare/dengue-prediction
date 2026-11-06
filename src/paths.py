@@ -27,6 +27,11 @@ EPIDEMIC_CLUSTERS_CSV = PROCESSED_DIR / "epidemic_clusters.csv"
 HCMC_HOTSPOTS_CSV = PROCESSED_DIR / "hcmc_hotspots.csv"
 PREDICTIONS_CSV = PROCESSED_DIR / "latest_predictions.csv"
 VECTOR_STORE_FILE = PROCESSED_DIR / "vector_store.json"
+WEATHERDATA_DIR = DATA_DIR / "weatherdata"
+WEATHERDATA_PROCESSED_DIR = WEATHERDATA_DIR / "processed"
+WEATHERDATA_CLEANED_CSV = WEATHERDATA_PROCESSED_DIR / "cleaned_final.csv"
+WEATHERDATA_RAW_METEO_CSV = WEATHERDATA_DIR / "raw" / "raw_openmeteo.csv"
+WEATHERDATA_MONTHLY_CSV = PROCESSED_DIR / "weatherdata_hcmc_monthly.csv"
 
 
 MODELS_DIR = PROJECT_ROOT / "models"
