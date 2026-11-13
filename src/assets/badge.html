@@ -1,1 +1,96 @@
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  badge.html — THÀNH PHẦN NHỎ (nhãn, phiếu hẹn, các phần của bài kiến thức)   ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Mỗi khối bắt đầu bằng dòng  @template ten  và kết thúc bằng dòng  @end      ║
+║  Chỗ trống {{ten}} do Python điền vào (ui_theme.py / dashboard.py).          ║
+║                                                                              ║
+║   1. badge         nhãn trạng thái ở Cổng bác sĩ                             ║
+║   2. ticket        phiếu hẹn khám dạng vé (sau khi đặt lịch)                 ║
+║   3. article_head  đầu bài kiến thức (đường dẫn, tiêu đề, tóm tắt, nhãn)     ║
+║   4. callout       hộp lưu ý trong bài (màu đỏ = cảnh báo, xanh = mẹo)       ║
+║   5. toc           mục lục bên cạnh bài                                      ║
+║   6. article_meta  cuối bài (nguồn tham khảo + lưu ý y tế)                   ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+
+
+<!-- ══════════ 1. BADGE — nhãn trạng thái ══════════ -->
+<!-- Dùng ở: dashboard.py → status_badge() trong danh sách bệnh nhân của Cổng bác sĩ. -->
+<!-- {{text}}      = chữ hiển thị, ví dụ "⏳ Đang chờ khám" -->
+<!-- {{css_class}} = quyết định màu: waiting | in-progress | completed | no-show | cancelled -->
+<!-- @template badge -->
 <span class="status-badge {{css_class}}">{{text}}</span>
+<!-- @end -->
+
+
+<!-- ══════════ 2. TICKET — phiếu hẹn khám dạng vé ══════════ -->
+<!-- Dùng ở: dashboard.py → ticket_card() ngay sau khi đặt lịch thành công. -->
+<!-- Gồm 2 phần: thân phiếu (bên trái) và cuống phiếu có số thứ tự (bên phải). -->
+<!-- {{symptoms_html}} = dòng "Triệu chứng", chỉ có khi bệnh nhân đã nhập -->
+<!-- @template ticket -->
+<div class="kaf-ticket">
+    <!-- thân phiếu -->
+    <div class="kaf-ticket__main">
+        <span class="kaf-ticket__tag">PHIẾU HẸN KHÁM</span>
+        <div class="kaf-ticket__name">👨‍⚕️ {{doctor}}</div>
+        <div class="kaf-ticket__spec">{{specialty}}</div>
+        <div class="kaf-ticket__row"><b>📍 Địa điểm</b><span>{{location}}</span></div>
+        <div class="kaf-ticket__row"><b>⏰ Thời gian</b><span>{{time}} — ngày {{date}}</span></div>
+        <div class="kaf-ticket__row"><b>👤 Bệnh nhân</b><span>{{patient}}</span></div>
+        <div class="kaf-ticket__row"><b>📞 Điện thoại</b><span>{{phone}}</span></div>
+        {{symptoms_html}}
+    </div>
+    <!-- cuống phiếu: số thứ tự và mã đặt lịch -->
+    <div class="kaf-ticket__stub">
+        <div class="kaf-ticket__lbl">SỐ THỨ TỰ</div>
+        <div class="kaf-ticket__stt">#{{queue}}</div>
+        <div class="kaf-ticket__code">{{code}}</div>
+    </div>
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 3. ARTICLE_HEAD — đầu bài kiến thức ══════════ -->
+<!-- Dùng ở: ui_theme._article_body(), trong hộp thoại mở từ khối KIẾN THỨC. -->
+<!-- {{chips_html}} = các nhãn nhỏ "Cập nhật: ...", "5 mục" -->
+<!-- @template article_head -->
+<!-- đường dẫn: Trang chủ / Kiến thức / tên bài -->
+<div class="wiki-crumb"><a href="#kaf-top">Trang chủ</a><span class="sep">/</span><span>Kiến thức</span><span class="sep">/</span><span class="cur">{{title}}</span></div>
+<div class="wiki-title">{{icon}} {{title}}</div>
+<div class="wiki-lead">{{summary}}</div>
+<div class="wiki-chips">{{chips_html}}</div>
+<!-- @end -->
+
+
+<!-- ══════════ 4. CALLOUT — hộp lưu ý trong bài ══════════ -->
+<!-- Dùng ở: ui_theme._callout_html(). Trong file .md viết:  > [!warn] Tiêu đề -->
+<!-- {{kind}} = warn (đỏ) | tip (xanh lá) | info (màu nhấn) -->
+<!-- @template callout -->
+<div class="wiki-callout wiki-callout--{{kind}}">
+    <div class="wiki-callout__t">{{title}}</div>
+    {{body_html}}
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 5. TOC — mục lục bài viết ══════════ -->
+<!-- Dùng ở: ui_theme.render_article(toc=True). {{count}} = số mục, {{items_html}} = danh sách link -->
+<!-- @template toc -->
+<nav class="wiki-toc" aria-label="Mục lục">
+    <div class="wiki-toc__h">Mục lục <span>{{count}}</span></div>
+    <ol>{{items_html}}</ol>
+</nav>
+<!-- @end -->
+
+
+<!-- ══════════ 6. ARTICLE_META — cuối bài ══════════ -->
+<!-- Dùng ở: ui_theme._article_body(). {{sources_html}} = danh sách nguồn tham khảo -->
+<!-- {{disclaimer}} = lưu ý "thông tin mang tính tham khảo, không thay thế chẩn đoán của bác sĩ" -->
+<!-- @template article_meta -->
+<div class="wiki-meta">
+    <div class="wiki-meta__h">Về bài viết này</div>
+    {{sources_html}}
+    <p>{{disclaimer}}</p>
+</div>
+<!-- @end -->

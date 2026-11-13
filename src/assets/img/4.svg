@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">
+  <defs>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <linearGradient id="tealGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+    <linearGradient id="purpleGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <!-- Outer ring -->
+  <circle cx="60" cy="60" r="54" stroke="url(#tealGrad)" stroke-width="1.5" fill="none" opacity="0.6" filter="url(#glow)"/>
+  <circle cx="60" cy="60" r="48" stroke="url(#purpleGrad)" stroke-width="0.5" fill="none" opacity="0.3"/>
+  <!-- Medical cross -->
+  <g filter="url(#glow)">
+    <rect x="52" y="30" width="16" height="60" rx="3" fill="url(#tealGrad)" opacity="0.9"/>
+    <rect x="30" y="52" width="60" height="16" rx="3" fill="url(#tealGrad)" opacity="0.9"/>
+  </g>
+  <!-- DNA helix strands -->
+  <g stroke="url(#purpleGrad)" stroke-width="1.5" fill="none" opacity="0.7" filter="url(#glow)">
+    <path d="M25,25 Q40,40 35,60 Q30,80 45,95"/>
+    <path d="M95,25 Q80,40 85,60 Q90,80 75,95"/>
+  </g>
+  <!-- DNA rungs -->
+  <g stroke="#a78bfa" stroke-width="0.8" opacity="0.4">
+    <line x1="30" y1="35" x2="90" y2="35"/>
+    <line x1="33" y1="50" x2="87" y2="50"/>
+    <line x1="33" y1="70" x2="87" y2="70"/>
+    <line x1="36" y1="85" x2="84" y2="85"/>
+  </g>
+  <!-- Pulse dots -->
+  <circle cx="60" cy="60" r="2" fill="#2dd4bf" opacity="0.9" filter="url(#glow)"/>
+</svg>

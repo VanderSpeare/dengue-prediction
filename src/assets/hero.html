@@ -1,4 +1,182 @@
-<div class="hero">
-    <h1>{{icon}} {{title}}</h1>
-    <p>{{subtitle}}</p>
+<!--
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  hero.html — KHUNG TRANG (các khối lớn, từ trên xuống dưới)                  ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  Mỗi khối bắt đầu bằng dòng  @template ten  và kết thúc bằng dòng  @end      ║
+║  Chỗ trống {{ten}} do Python điền vào (kaf_layout.py).                       ║
+║  Chữ hiển thị nằm ở kaf_content.json, màu/khoảng cách nằm ở style.css.      ║
+║                                                                              ║
+║   1. loader    màn hình chờ lúc mở trang                                     ║
+║   2. header    thanh menu cố định trên cùng                                  ║
+║   3. hero      banner đầu trang (video / ảnh bìa + tiêu đề)                  ║
+║   4. outline   khối GIỚI THIỆU                                               ║
+║   5. head      tiêu đề chung của các khối (giám sát, trợ lý AI, đặt lịch...) ║
+║   6. item      thẻ có biểu tượng lớn (trợ lý AI, cẩm nang)                   ║
+║   7. profile   đầu khối BÁC SĨ                                               ║
+║   8. partners  lưới NGUỒN THAM KHẢO                                          ║
+║   9. footer    chân trang                                                    ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+-->
+
+
+<!-- ══════════ 1. LOADER — màn hình chờ ══════════ -->
+<!-- Dùng ở: kaf_layout._loader().  Hiện 1 lần mỗi phiên rồi tự mờ đi. -->
+<!-- {{rows_html}} = 7 hàng chữ "ĐANG TRUY CẬP 🌀 ĐANG TẢI..." chạy xen kẽ hai chiều -->
+<!-- @template loader -->
+<div class="kaf-loader" aria-hidden="true">
+    {{rows_html}}
 </div>
+<!-- @end -->
+
+
+<!-- ══════════ 2. HEADER — thanh menu cố định ══════════ -->
+<!-- Dùng ở: kaf_layout._header(). -->
+<!-- {{left}} {{year}}   = logo bên trái (GIÁM SÁT SXH 2026) -->
+<!-- {{nav_html}}        = 8 link menu (giới thiệu, giám sát, ...) -->
+<!-- {{right}} {{right_href}} = nút bên phải (CỔNG BÁC SĨ ↗) và nơi nó dẫn tới -->
+<!-- @template header -->
+<div class="kaf-header">
+    <!-- ô tích ẩn: bấm nút ☰ trên điện thoại thì mở/đóng menu (không cần JavaScript) -->
+    <input type="checkbox" id="kaf-menu" class="kaf-menu-toggle">
+    <!-- logo trái: bấm để lên đầu trang -->
+    <a class="kaf-header__logo" href="#kaf-top"><b>{{left}}</b><span>{{year}}</span></a>
+    <!-- danh sách link menu -->
+    <nav class="kaf-header__nav" aria-label="Menu"><ul>{{nav_html}}</ul></nav>
+    <!-- nút bên phải -->
+    <a class="kaf-header__logo kaf-header__logo--r" href="{{right_href}}">{{right}}</a>
+    <!-- nút ☰ (chỉ hiện trên điện thoại) -->
+    <label for="kaf-menu" class="kaf-menu-btn" aria-label="Menu"><i></i><i></i><i></i></label>
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 3. HERO — banner đầu trang ══════════ -->
+<!-- Dùng ở: kaf_layout._hero(). Các lớp xếp chồng từ dưới lên trên: -->
+<!--   ảnh bìa → video YouTube → vệt sáng trái/phải → hình muỗi → chữ → dải chữ chạy -->
+<!-- {{video_html}}   = khung video nền (rỗng nếu tắt video) -->
+<!-- {{title_en}}     = tiêu đề lớn (hiện 2 lần: 1 lần đặc, 1 lần chỉ có viền) -->
+<!-- {{title_vi}}     = dòng mô tả bên dưới tiêu đề -->
+<!-- {{marquee_html}} = dải "CUỘN XUỐNG 🔻" lặp lại -->
+<!-- @template hero -->
+<!-- điểm neo cho nút "LÊN ĐẦU TRANG" -->
+<div id="kaf-top"></div>
+<section class="kaf-hero">
+    <!-- lớp 1: ảnh bìa -->
+    <div class="kaf-hero__bg"></div>
+    <!-- lớp 2: video YouTube (nếu có) -->
+    {{video_html}}
+    <!-- lớp 3: hai vệt sáng trái và phải -->
+    <div class="kaf-hero__l"></div>
+    <div class="kaf-hero__r"></div>
+    <!-- lớp 4: hình muỗi ở giữa (mv-model.svg) -->
+    <div class="kaf-hero__model"></div>
+    <!-- lớp 5: chữ -->
+    <div class="kaf-hero__body">
+        <div class="kaf-hero__h1" role="heading" aria-level="1">
+            <span>{{title_en}}</span>
+            <span aria-hidden="true">{{title_en}}</span>
+        </div>
+        <div class="kaf-hero__vi">{{title_vi}}</div>
+    </div>
+    <!-- lớp 6: dải chữ chạy sát đáy -->
+    <div class="kaf-marq" aria-hidden="true"><div class="kaf-marq__track">{{marquee_html}}</div></div>
+</section>
+<!-- @end -->
+
+
+<!-- ══════════ 4. OUTLINE — khối GIỚI THIỆU ══════════ -->
+<!-- Dùng ở: kaf_layout._outline(). -->
+<!-- {{label}}        = nhãn nhỏ "giới thiệu" -->
+<!-- {{logo}}         = chữ lớn chỉ có viền -->
+<!-- {{intro_label}}  = nhãn "mở đầu" -->
+<!-- {{intro_html}}   = đoạn mở đầu (4 dòng thường + 4 dòng đậm) -->
+<!-- {{summary_label}} {{summary_title}} = tiêu đề bảng TỔNG QUAN -->
+<!-- {{rows_html}}    = các hàng TÊN / ĐỊA ĐIỂM / ĐẶT LỊCH -->
+<!-- {{cta}} {{cta_href}} = nút cuối khối và nơi nó dẫn tới -->
+<!-- @template outline -->
+<div id="outline" class="kaf-anchor"></div>
+<div class="kaf-label"><span>{{label}}</span></div>
+<div class="kaf-outline__logo" aria-hidden="true">{{logo}}</div>
+<!-- đoạn mở đầu -->
+<div class="kaf-intro">
+    <div class="kaf-intro__label">{{intro_label}}</div>
+    <div class="kaf-intro__text">{{intro_html}}</div>
+</div>
+<!-- bảng tổng quan -->
+<div class="kaf-summary">
+    <div class="kaf-summary__head"><span class="en">{{summary_label}}</span><span class="ja">{{summary_title}}</span></div>
+    <div class="kaf-summary__list">{{rows_html}}</div>
+</div>
+<!-- nút kêu gọi -->
+<a class="kaf-btn" href="{{cta_href}}">{{cta}}</a>
+<!-- @end -->
+
+
+<!-- ══════════ 5. HEAD — tiêu đề chung của khối ══════════ -->
+<!-- Dùng ở: kaf_layout._head() cho các khối giám sát, trợ lý AI, đặt lịch, cẩm nang. -->
+<!-- {{id}}    = mã neo để menu cuộn tới đúng khối -->
+<!-- {{label}} = nhãn nhỏ có đường kẻ    {{en}} = chữ lớn    {{ja}} = dòng phụ màu nhấn -->
+<!-- @template head -->
+<div id="{{id}}" class="kaf-anchor"></div>
+<div class="kaf-label"><span>{{label}}</span></div>
+<div class="kaf-head">
+    <div class="kaf-head__en">{{en}}</div>
+    <div class="kaf-head__ja">{{ja}}</div>
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 6. ITEM — thẻ có biểu tượng lớn ══════════ -->
+<!-- Dùng ở: kaf_layout._item() cho khối trợ lý AI và cẩm nang nhanh. -->
+<!-- {{tag}} = nhãn nhỏ    {{icon}} = biểu tượng lớn    {{name}} = tên -->
+<!-- {{notes_html}} = các dòng ghi chú bên dưới -->
+<!-- @template item -->
+<div class="kaf-item">
+    <div class="kaf-item__tag">{{tag}}</div>
+    <div class="kaf-item__img" aria-hidden="true">{{icon}}</div>
+    <div class="kaf-item__name">{{name}}</div>
+    {{notes_html}}
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 7. PROFILE — đầu khối BÁC SĨ ══════════ -->
+<!-- Dùng ở: kaf_layout._profile(). Hình lớn bên trái, chữ bên phải. -->
+<!-- {{icon}} = hình    {{name_en}} {{name_vi}} = tên    {{tagline}} = câu giới thiệu -->
+<!-- {{bio_html}} = các đoạn mô tả    {{links_html}} = các nút link nhanh -->
+<!-- @template profile -->
+<div id="doctor" class="kaf-anchor"></div>
+<div class="kaf-profile">
+    <!-- cột trái: hình -->
+    <div class="kaf-profile__visual" aria-hidden="true">{{icon}}</div>
+    <!-- cột phải: chữ -->
+    <div class="kaf-profile__body">
+        <div class="kaf-profile__en" role="heading" aria-level="2">{{name_en}}</div>
+        <div class="kaf-profile__ja">{{name_vi}}</div>
+        <div class="kaf-profile__tag">{{tagline}}</div>
+        <div class="kaf-profile__bio">{{bio_html}}</div>
+        <div class="kaf-profile__links">{{links_html}}</div>
+    </div>
+</div>
+<!-- @end -->
+
+
+<!-- ══════════ 8. PARTNERS — nguồn tham khảo ══════════ -->
+<!-- Dùng ở: kaf_layout._partners(). -->
+<!-- {{title}} {{sub}} = tiêu đề    {{items_html}} = các ô WHO, WHO Việt Nam, CDC, Vinmec -->
+<!-- @template partners -->
+<div class="kaf-partners__h">{{title}}<span>{{sub}}</span></div>
+<div class="kaf-partners__grid">{{items_html}}</div>
+<!-- @end -->
+
+
+<!-- ══════════ 9. FOOTER — chân trang ══════════ -->
+<!-- Dùng ở: kaf_layout._footer(). -->
+<!-- @template footer -->
+<div class="kaf-foot">
+    <div class="kaf-foot__brand">{{brand}}</div>
+    <div class="kaf-foot__label">{{label}}</div>
+    <a class="kaf-btn" href="{{href}}" target="_blank" rel="noopener">{{button}}</a>
+    <div class="kaf-foot__copy">{{copy}}</div>
+</div>
+<!-- @end -->

@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <!-- Ảnh bìa ĐÊM (vector): nền xanh đêm, chùm sáng chéo, lưới HUD, chấm halftone, mưa mảnh -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#03050C"/>
+      <stop offset=".55" stop-color="#071431"/>
+      <stop offset="1" stop-color="#020611"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx=".72" cy=".42" r=".55">
+      <stop offset="0" stop-color="#2F7BFF" stop-opacity=".55"/>
+      <stop offset=".5" stop-color="#1D4ED8" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#1D4ED8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx=".95" cy=".95" r=".5">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9CC8FF" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#9CC8FF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur40"><feGaussianBlur stdDeviation="40"/></filter>
+    <pattern id="grid" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M80 0H0V80" fill="none" stroke="#5B8CFF" stroke-opacity=".08" stroke-width="1"/>
+    </pattern>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="7" cy="7" r="1.4" fill="#8FB6FF" fill-opacity=".22"/>
+    </pattern>
+    <radialGradient id="dotMask" cx=".82" cy=".22" r=".35">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <mask id="m"><rect width="1920" height="1080" fill="url(#dotMask)"/></mask>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#bg)"/>
+  <rect width="1920" height="1080" fill="url(#glowA)"/>
+  <rect width="1920" height="1080" fill="url(#glowB)"/>
+  <rect width="1920" height="1080" fill="url(#grid)"/>
+  <rect width="1920" height="1080" fill="url(#dots)" mask="url(#m)"/>
+
+  <!-- chùm sáng chéo từ trên xuống -->
+  <g filter="url(#blur40)" opacity=".9">
+    <polygon points="760,-40 900,-40 1240,1100 980,1100" fill="url(#beam)"/>
+    <polygon points="980,-40 1040,-40 1420,1100 1300,1100" fill="url(#beam)" opacity=".6"/>
+    <polygon points="600,-40 640,-40 820,1100 740,1100" fill="url(#beam)" opacity=".35"/>
+  </g>
+
+  <!-- vòng tròn HUD mờ -->
+  <g fill="none" stroke="#7FB0FF" stroke-opacity=".18">
+    <circle cx="1400" cy="520" r="300"/>
+    <circle cx="1400" cy="520" r="380" stroke-dasharray="2 10"/>
+    <circle cx="1400" cy="520" r="460" stroke-opacity=".08"/>
+    <path d="M1000 520H1800M1400 120V920" stroke-opacity=".10"/>
+  </g>
+
+  <!-- mưa mảnh -->
+  <g stroke="#BFD6FF" stroke-opacity=".18" stroke-width="1.2" stroke-linecap="round">
+    <path d="M120 80l-6 40M260 300l-6 40M420 140l-6 40M560 620l-6 40M700 380l-6 40M880 760l-6 40M1040 220l-6 40M1180 900l-6 40M1320 120l-6 40M1480 680l-6 40M1620 300l-6 40M1780 820l-6 40M1860 140l-6 40M340 880l-6 40M980 520l-6 40M1700 520l-6 40"/>
+  </g>
+  <!-- hạt sáng -->
+  <g fill="#DDEBFF">
+    <circle cx="1560" cy="260" r="2.2" opacity=".8"/><circle cx="1650" cy="410" r="1.6" opacity=".6"/>
+    <circle cx="1720" cy="640" r="2" opacity=".7"/><circle cx="1490" cy="760" r="1.4" opacity=".5"/>
+    <circle cx="1280" cy="330" r="1.8" opacity=".6"/><circle cx="1820" cy="380" r="1.2" opacity=".5"/>
+    <circle cx="1350" cy="860" r="1.6" opacity=".5"/><circle cx="1600" cy="900" r="2" opacity=".6"/>
+  </g>
+</svg>

@@ -18,6 +18,7 @@ from typing import AsyncGenerator, Optional, List, Dict, Any
 
 from fastapi import FastAPI, Query, Header, HTTPException, Depends
 from fastapi.responses import HTMLResponse, StreamingResponse, JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -555,8 +556,12 @@ def toggle_slot_block(
 
 
 # ---------------------------------------------------------------------------
-# 4. ROOT HTML VIEW
+# 4. STATIC FILES & ROOT HTML VIEW
 # ---------------------------------------------------------------------------
+_ASSETS_DIR = _BOOKING_DIR / "assets"
+if _ASSETS_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(_ASSETS_DIR)), name="assets")
+
 @app.get("/", response_class=HTMLResponse)
 def serve_ui():
     booking_html = _BOOKING_DIR / "index.html"

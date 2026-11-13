@@ -84,9 +84,9 @@ def _scatter_map_compat(df, lat, lon, size, color, hover_name,
     )
     try:
         if hasattr(px, 'scatter_map'):
-            return px.scatter_map(df, map_style="open-street-map", **common, **kwargs)
+            return px.scatter_map(df, map_style=ui.map_style(), **common, **kwargs)
         elif hasattr(px, 'scatter_mapbox'):
-            return px.scatter_mapbox(df, mapbox_style="open-street-map", **common, **kwargs)
+            return px.scatter_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
         else:
             raise AttributeError("Plotly không hỗ trợ scatter map API.")
     except Exception as exc:
@@ -106,9 +106,9 @@ def _choropleth_map_compat(df, geojson, locations, featureidkey,
     )
     try:
         if hasattr(px, 'choropleth_map'):
-            return px.choropleth_map(df, map_style="open-street-map", **common, **kwargs)
+            return px.choropleth_map(df, map_style=ui.map_style(), **common, **kwargs)
         elif hasattr(px, 'choropleth_mapbox'):
-            return px.choropleth_mapbox(df, mapbox_style="open-street-map", **common, **kwargs)
+            return px.choropleth_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
         else:
             raise AttributeError("Plotly không hỗ trợ choropleth map API.")
     except Exception as exc:
@@ -124,44 +124,110 @@ st.set_page_config(
     page_icon="🦟"
 )
 
-st.title("🦟 Hệ thống Giám sát Dịch Sốt xuất huyết & Cổng Y Tế Trực Tuyến")
-st.markdown("Giám sát dịch tễ, dự báo vùng nguy cơ, tư vấn AI và hệ thống đặt lịch khám bệnh trực tiếp với Bác sĩ chuyên khoa.")
+# Giao diện kiểu trang KAF: nạp CSS + bảng điều khiển giao diện, rồi dựng khung trang.
+import ui_theme as ui
+import kaf_layout
+
+ui.apply_theme()
+# Khung trang (header, banner, các khối). Các chức năng bên dưới được đổ vào từng khối.
+_kaf_sec = kaf_layout.build_kaf_page()
 
 # ---------------------------------------------------------------------------
-# Sidebar Management
+# Database Status Badge (Đầu trang — đèn xanh / đỏ)
 # ---------------------------------------------------------------------------
-st.sidebar.header("📍 Cấp Độ Giám Sát Dịch Tễ")
-st.sidebar.caption("🗺️ Hỗ trợ 4 cấp độ: **Phố > Phường > Quận > Toàn Quốc** kèm khoanh vùng bán kính ổ dịch trực quan.")
-
-st.sidebar.header("🍃 Cơ Sở Dữ Liệu")
 if mongo_manager.is_connected:
-    st.sidebar.success(f"🟢 MongoDB: Đã kết nối (`{mongo_manager.db_name}`)")
-    stat = mongo_manager.get_status()
-    st.sidebar.caption(f"📊 Đã lưu: {stat.get('total_bookings_stored', 0)} vé khám • {stat.get('total_doctors', 0)} bác sĩ")
-    if st.sidebar.button("🔄 Đồng bộ dữ liệu lên MongoDB"):
-        s_cnt, t_slots = booking_service.sync_to_mongodb()
-        st.sidebar.info(f"Đã đồng bộ {s_cnt} lịch hẹn và {t_slots} khung giờ lên MongoDB!")
+    _db_stat = mongo_manager.get_status()
+    st.markdown(
+        f'<div class="kaf-db-status" title="MongoDB đã kết nối ({mongo_manager.db_name})">'
+        '<span>🟢</span>'
+        f'<span>MongoDB · {_db_stat.get("total_bookings_stored", 0)} vé · {_db_stat.get("total_doctors", 0)} BS</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 else:
-    st.sidebar.warning("🟡 Lưu trữ: Bộ nhớ tạm (In-Memory)")
-    if st.sidebar.button("🔌 Kết nối lại MongoDB Atlas"):
-        if mongo_manager.connect():
-            st.sidebar.success("Kết nối MongoDB thành công!")
-            st.rerun()
-        else:
-            st.sidebar.error("Chưa kết nối được. Vui lòng mở IP Access List (0.0.0.0/0) trên MongoDB Atlas Network Access.")
+    st.markdown(
+        '<div class="kaf-db-status" title="Lưu trữ tạm (In-Memory) — Chưa kết nối MongoDB">'
+        '<span>🔴</span>'
+        '<span>Database: In-Memory</span>'
+        '</div>',
+        unsafe_allow_html=True,
+    )
 
-# Hiển thị thông tin Bác sĩ nếu đã đăng nhập
+# ---------------------------------------------------------------------------
+# Sidebar Management (Tất cả nằm trong ⚙️, dạng drop box ký hiệu + tên chức năng)
+# ---------------------------------------------------------------------------
+uploaded_file = None
+_sb_options = [
+    "⋮ Tùy chỉnh",
+    "📍 Giám sát dịch tễ",
+    "🗄️ Cơ sở dữ liệu",
+    "📁 Dữ liệu dịch tễ",
+    "🗺️ Tải bản đồ GeoJSON",
+]
 if "logged_in_doctor" in st.session_state and st.session_state.logged_in_doctor:
-    doc = st.session_state.logged_in_doctor
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(f"👨‍⚕️ **Bác sĩ đang trực:**\n\n**{doc.title} {doc.full_name}**\n\n*{doc.specialty}* ({doc.room})")
-    if st.sidebar.button("🚪 Đăng xuất Bác sĩ"):
-        st.session_state.logged_in_doctor = None
-        st.session_state.doctor_token = None
-        st.rerun()
+    _sb_options.append("👨‍⚕️ Bác sĩ đang trực")
 
-st.sidebar.header("📁 Quản lý Dữ liệu Dịch tễ")
-uploaded_file = st.sidebar.file_uploader("Tải lên dữ liệu bệnh nhân mới (Excel)", type=['xlsx'])
+with st.sidebar.expander("⚙️", expanded=False):
+    _sb_func = st.selectbox(
+        "⚙️ Chức năng",
+        _sb_options,
+        key="sb_func_dropbox",
+        label_visibility="collapsed",
+    )
+
+    if _sb_func == "⋮ Tùy chỉnh":
+        ui.render_customize_panel()
+
+    elif _sb_func == "📍 Giám sát dịch tễ":
+        st.caption("🗺️ Hỗ trợ 4 cấp độ: **Phố > Phường > Quận > Toàn Quốc** kèm khoanh vùng bán kính ổ dịch trực quan.")
+
+    elif _sb_func == "🗄️ Cơ sở dữ liệu":
+        if mongo_manager.is_connected:
+            stat = mongo_manager.get_status()
+            st.caption(f"📊 Đã lưu: {stat.get('total_bookings_stored', 0)} vé khám • {stat.get('total_doctors', 0)} bác sĩ")
+            if st.button("🔄 Đồng bộ dữ liệu lên MongoDB", key="sb_sync_mongo", use_container_width=True):
+                s_cnt, t_slots = booking_service.sync_to_mongodb()
+                st.info(f"Đã đồng bộ {s_cnt} lịch hẹn và {t_slots} khung giờ lên MongoDB!")
+        else:
+            st.caption("🟡 Lưu trữ: Bộ nhớ tạm (In-Memory)")
+            if st.button("🔌 Kết nối lại MongoDB Atlas", key="sb_reconnect_mongo", use_container_width=True):
+                if mongo_manager.connect():
+                    st.success("Kết nối MongoDB thành công!")
+                    st.rerun()
+                else:
+                    st.error("Chưa kết nối được. Vui lòng mở IP Access List (0.0.0.0/0) trên MongoDB Atlas Network Access.")
+
+    elif _sb_func == "📁 Dữ liệu dịch tễ":
+        uploaded_file = st.file_uploader("📤 Tải lên dữ liệu bệnh nhân mới (Excel)", type=['xlsx'])
+
+    elif _sb_func == "🗺️ Tải bản đồ GeoJSON":
+        if paths.MAP_OUTPUT_FILE.exists():
+            with open(paths.MAP_OUTPUT_FILE, 'rb') as f:
+                st.download_button(
+                    "🗺️ Tải Bản Đồ Tỉnh GeoJSON",
+                    f,
+                    "dengue_map.geojson",
+                    key="sb_dl_map_geojson",
+                    use_container_width=True,
+                )
+        clusters_geojson_path = getattr(paths, 'EPIDEMIC_CLUSTERS_GEOJSON', paths.OUTPUTS_DIR / "epidemic_clusters.geojson")
+        if clusters_geojson_path.exists():
+            with open(clusters_geojson_path, 'rb') as f:
+                st.download_button(
+                    "🎯 Tải Bản Đồ Khoanh Vùng Ổ Dịch GeoJSON",
+                    f,
+                    "epidemic_clusters.geojson",
+                    key="sb_dl_clusters_geojson",
+                    use_container_width=True,
+                )
+
+    elif _sb_func == "👨‍⚕️ Bác sĩ đang trực" and st.session_state.get("logged_in_doctor"):
+        doc = st.session_state.logged_in_doctor
+        st.markdown(f"**{doc.title} {doc.full_name}**\n\n*{doc.specialty}* ({doc.room})")
+        if st.button("🚪 Đăng xuất Bác sĩ", key="sb_doc_logout", use_container_width=True):
+            st.session_state.logged_in_doctor = None
+            st.session_state.doctor_token = None
+            st.rerun()
 
 
 @st.cache_data
@@ -236,7 +302,7 @@ hcmc_hotspots_df = load_hcmc_hotspots()
 predictions_df = load_predictions()
 
 if uploaded_file:
-    st.sidebar.success("File uploaded! Processing...")
+    st.sidebar.success("⏳ Đang xử lý dữ liệu...")
     with st.spinner("Đang xử lý dữ liệu và ánh xạ địa bàn..."):
         new_data = load_and_process_new_data(uploaded_file, paths.POP_DATA_FILE)
 
@@ -249,20 +315,15 @@ if uploaded_file:
 
         paths.PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
         mongo_data_service.save_dataset("historical", df, paths.HISTORICAL_CSV)
-        st.sidebar.success("Dữ liệu đã được lưu thành công vào MongoDB và Local!")
-        st.sidebar.info("Vui lòng chạy `python main.py` để huấn luyện lại mô hình và cập nhật dự báo.")
+        st.sidebar.success("✅ Dữ liệu đã được lưu thành công vào MongoDB và Local!")
+        st.sidebar.info("🔄 Vui lòng chạy `python main.py` để huấn luyện lại mô hình và cập nhật dự báo.")
 
 # ===========================================================================
 # 6 TABS UI: GIÁM SÁT, AI DỰ BÁO & ĐÁNH GIÁ, TRỢ LÝ AI, ĐẶT LỊCH, TRA CỨU, CỔNG BÁC SĨ
 # ===========================================================================
-tab1, tab_ai, tab2, tab3, tab4, tab5 = st.tabs([
-    "📊 Giám sát & Dự báo Dịch bệnh",
-    "🧠 AI Dự Báo & Đánh Giá Dịch Tễ (Gemini)",
-    "💬 Trợ lý AI Hỏi đáp",
-    "📅 Đặt Lịch Khám Bệnh",
-    "🔍 Tra Cứu & Hủy Lịch Hẹn",
-    "🩺 Cổng Bác Sĩ (Doctor Portal)"
-])
+tab1, tab_ai, tab2, tab3, tab4, tab5 = (
+    _kaf_sec[k] for k in ("surveillance", "forecast", "assistant", "booking", "lookup", "doctor")
+)
 
 # ===========================================================================
 # TAB 1: GIÁM SÁT & DỰ BÁO DỊCH BỆNH (GIỮ NGUYÊN HOÀN TOÀN)
@@ -1187,15 +1248,6 @@ with tab1:
                 )
         else:
             st.info("Chưa có dữ liệu dự báo cho khu vực TP. Hồ Chí Minh. Vui lòng chạy `python main.py` để cập nhật.")
-
-        # Download buttons in sidebar
-        if paths.MAP_OUTPUT_FILE.exists():
-            with open(paths.MAP_OUTPUT_FILE, 'rb') as f:
-                st.sidebar.download_button("🗺️ Tải Bản Đồ Tỉnh GeoJSON", f, "dengue_map.geojson")
-        clusters_geojson_path = getattr(paths, 'EPIDEMIC_CLUSTERS_GEOJSON', paths.OUTPUTS_DIR / "epidemic_clusters.geojson")
-        if clusters_geojson_path.exists():
-            with open(clusters_geojson_path, 'rb') as f:
-                st.sidebar.download_button("🎯 Tải Bản Đồ Khoanh Vùng Ổ Dịch GeoJSON", f, "epidemic_clusters.geojson")
     else:
         st.info("Chưa có dữ liệu lịch sử. Vui lòng tải file Excel dữ liệu bệnh nhân ở thanh bên trái.")
 
@@ -1826,25 +1878,9 @@ with tab3:
         tk = st.session_state.last_booked_ticket
         st.markdown("---")
         st.subheader("🎟️ Phiếu Hẹn Khám Bệnh Trực Tuyến")
-        
-        ticket_box = st.container(border=True)
-        with ticket_box:
-            t_col1, t_col2 = st.columns([2, 1])
-            with t_col1:
-                st.markdown(f"### 👨‍⚕️ {tk.doctor_name}")
-                st.markdown(f"*{tk.doctor_specialty}*")
-                st.markdown(f"📍 **Địa điểm khám:** {tk.clinic_location}")
-                st.markdown(f"⏰ **Thời gian khám:** `{tk.appointment_time}` Ngày `{tk.appointment_date}`")
-            with t_col2:
-                st.metric("SỐ THỨ TỰ (STT)", f"#{tk.queue_number:02d}")
-                st.code(tk.booking_code, language="text")
-
-            st.markdown("---")
-            p_col1, p_col2 = st.columns(2)
-            p_col1.markdown(f"👤 **Bệnh nhân:** {tk.patient_name}")
-            p_col2.markdown(f"📞 **SĐT:** {tk.patient_phone}")
-            if tk.symptoms:
-                st.markdown(f"📝 **Triệu chứng ban đầu:** *{tk.symptoms}*")
+        # Phiếu dạng vé (khuôn "ticket" trong assets/badge.html)
+        ui.ticket_card(tk)
+        st.code(tk.booking_code, language="text")
 
 
 # ===========================================================================

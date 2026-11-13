@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <!-- Ảnh bìa NGÀY (vector): xanh trời sâu, dải cực quang, vòng HUD, chấm halftone.
+       Vẫn đủ tối để chữ trắng của banner đọc rõ. -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B2A6F"/>
+      <stop offset=".5" stop-color="#1D4ED8"/>
+      <stop offset="1" stop-color="#0E7490"/>
+    </linearGradient>
+    <linearGradient id="rib1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#A5F3FC" stop-opacity="0"/>
+      <stop offset=".5" stop-color="#A5F3FC" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#A5F3FC" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rib2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#C4B5FD" stop-opacity="0"/>
+      <stop offset=".6" stop-color="#C4B5FD" stop-opacity=".45"/>
+      <stop offset="1" stop-color="#C4B5FD" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="sun" cx=".78" cy=".2" r=".45">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="28"/></filter>
+    <pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse">
+      <circle cx="8" cy="8" r="1.6" fill="#FFFFFF" fill-opacity=".18"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="1" y2="0">
+      <stop offset=".45" stop-color="#000"/>
+      <stop offset="1" stop-color="#fff"/>
+    </linearGradient>
+    <mask id="m"><rect width="1920" height="1080" fill="url(#fade)"/></mask>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <rect width="1920" height="1080" fill="url(#sun)"/>
+
+  <g filter="url(#soft)">
+    <path d="M-100 620 C 400 380, 900 820, 1400 520 S 2100 360, 2100 360 L 2100 470 C 1700 520, 1500 700, 1100 700 S 300 520, -100 760 Z" fill="url(#rib1)"/>
+    <path d="M-100 300 C 500 160, 1000 520, 1500 260 S 2100 120, 2100 120 L 2100 200 C 1600 360, 1200 520, 800 420 S 100 300, -100 420 Z" fill="url(#rib2)"/>
+  </g>
+
+  <rect width="1920" height="1080" fill="url(#dots)" mask="url(#m)"/>
+
+  <g fill="none" stroke="#FFFFFF" stroke-opacity=".22">
+    <circle cx="1420" cy="540" r="290"/>
+    <circle cx="1420" cy="540" r="370" stroke-dasharray="2 12"/>
+    <circle cx="1420" cy="540" r="450" stroke-opacity=".1"/>
+  </g>
+</svg>

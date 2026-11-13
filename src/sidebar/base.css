@@ -1,0 +1,8 @@
+/* Mọi ký hiệu trong sidebar đều màu xám */
+[data-testid="stSidebar"] {
+    filter: grayscale(100%);
+}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary p {
+    font-size: 1.25rem !important;
+    color: var(--text-soft) !important;
+}

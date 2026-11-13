@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="360" viewBox="0 0 360 360">
+  <!-- fx/halftone.svg — mảng chấm halftone nhỏ dần về một góc (hiệu ứng "dots" ở góc mỗi khối).
+       Màu trắng; CSS dùng nó làm mask nên sẽ tự nhận màu nhấn. -->
+  <g fill="#FFFFFF">
+    <circle cx="12" cy="12" r="5"/><circle cx="36" cy="12" r="4.6"/><circle cx="60" cy="12" r="4.2"/><circle cx="84" cy="12" r="3.8"/><circle cx="108" cy="12" r="3.4"/><circle cx="132" cy="12" r="3"/><circle cx="156" cy="12" r="2.6"/><circle cx="180" cy="12" r="2.2"/><circle cx="204" cy="12" r="1.8"/><circle cx="228" cy="12" r="1.4"/><circle cx="252" cy="12" r="1"/>
+    <circle cx="12" cy="36" r="4.6"/><circle cx="36" cy="36" r="4.2"/><circle cx="60" cy="36" r="3.8"/><circle cx="84" cy="36" r="3.4"/><circle cx="108" cy="36" r="3"/><circle cx="132" cy="36" r="2.6"/><circle cx="156" cy="36" r="2.2"/><circle cx="180" cy="36" r="1.8"/><circle cx="204" cy="36" r="1.4"/><circle cx="228" cy="36" r="1"/>
+    <circle cx="12" cy="60" r="4.2"/><circle cx="36" cy="60" r="3.8"/><circle cx="60" cy="60" r="3.4"/><circle cx="84" cy="60" r="3"/><circle cx="108" cy="60" r="2.6"/><circle cx="132" cy="60" r="2.2"/><circle cx="156" cy="60" r="1.8"/><circle cx="180" cy="60" r="1.4"/><circle cx="204" cy="60" r="1"/>
+    <circle cx="12" cy="84" r="3.8"/><circle cx="36" cy="84" r="3.4"/><circle cx="60" cy="84" r="3"/><circle cx="84" cy="84" r="2.6"/><circle cx="108" cy="84" r="2.2"/><circle cx="132" cy="84" r="1.8"/><circle cx="156" cy="84" r="1.4"/><circle cx="180" cy="84" r="1"/>
+    <circle cx="12" cy="108" r="3.4"/><circle cx="36" cy="108" r="3"/><circle cx="60" cy="108" r="2.6"/><circle cx="84" cy="108" r="2.2"/><circle cx="108" cy="108" r="1.8"/><circle cx="132" cy="108" r="1.4"/><circle cx="156" cy="108" r="1"/>
+    <circle cx="12" cy="132" r="3"/><circle cx="36" cy="132" r="2.6"/><circle cx="60" cy="132" r="2.2"/><circle cx="84" cy="132" r="1.8"/><circle cx="108" cy="132" r="1.4"/><circle cx="132" cy="132" r="1"/>
+    <circle cx="12" cy="156" r="2.6"/><circle cx="36" cy="156" r="2.2"/><circle cx="60" cy="156" r="1.8"/><circle cx="84" cy="156" r="1.4"/><circle cx="108" cy="156" r="1"/>
+    <circle cx="12" cy="180" r="2.2"/><circle cx="36" cy="180" r="1.8"/><circle cx="60" cy="180" r="1.4"/><circle cx="84" cy="180" r="1"/>
+    <circle cx="12" cy="204" r="1.8"/><circle cx="36" cy="204" r="1.4"/><circle cx="60" cy="204" r="1"/>
+    <circle cx="12" cy="228" r="1.4"/><circle cx="36" cy="228" r="1"/>
+    <circle cx="12" cy="252" r="1"/>
+  </g>
+</svg>

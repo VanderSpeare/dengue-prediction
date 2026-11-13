@@ -1,0 +1,191 @@
+{
+  "_ghi_chu": "Toan bo chu tren trang nam o day. Sua chu, them muc tin tuc / cau hoi / nguon tham khao ma khong can sua Python.",
+
+  "brand": { "left": "GIÁM SÁT SXH", "year": "2026", "right": "CỔNG BÁC SĨ ↗", "right_href": "#doctor" },
+
+  "nav": [
+    ["giới thiệu", "outline"],
+    ["giám sát", "surveillance"],
+    ["dự báo ai", "forecast"],
+    ["trợ lý ai", "ai-assistant"],
+    ["đặt lịch", "booking"],
+    ["cẩm nang", "guide"],
+    ["tin tức", "news"],
+    ["kiến thức", "special"],
+    ["hỏi đáp", "qa"]
+  ],
+
+  "loader": { "text": "ĐANG TRUY CẬP", "emoji": "🌀", "word": "ĐANG TẢI", "dots": "...", "rows": 7 },
+
+  "hero": {
+    "title_en": "GIÁM SÁT SỐT XUẤT HUYẾT",
+    "title_vi": "Hệ thống Giám sát Dịch Sốt xuất huyết & Cổng Y Tế Trực Tuyến",
+    "marquee": "CUỘN XUỐNG",
+    "marquee_repeat": 11
+  },
+
+  "outline": {
+    "label": "giới thiệu",
+    "logo": "GIỚI THIỆU",
+    "intro_label": "mở đầu",
+    "intro_normal": [
+      "Mỗi mùa mưa, sốt xuất huyết lại quay về.",
+      "Hệ thống gom số ca bệnh,",
+      "bản đồ ổ dịch và dự báo ba tháng tới",
+      "vào một nơi để bạn nắm tình hình."
+    ],
+    "intro_bold": [
+      "Xem dữ liệu dịch tễ,",
+      "hỏi Trợ lý AI,",
+      "đặt lịch khám với bác sĩ,",
+      "ngay trên một trang."
+    ],
+    "summary_label": "TỔNG QUAN",
+    "summary_title": "thông tin chính",
+    "rows": [
+      ["TÊN", "Hệ thống Giám sát Sốt xuất huyết 2026<br>Giám sát dịch tễ & Y tế trực tuyến"],
+      ["ĐỊA ĐIỂM", "Phòng Khám Đa Khoa Quốc Tế<br>Phòng 302, Tầng 3, 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"],
+      ["ĐẶT LỊCH", "Đặt lịch trực tuyến mọi lúc<br>Khung giờ hiển thị theo từng ngày"]
+    ],
+    "cta": "Đọc cẩm nang sốt xuất huyết ↗",
+    "cta_href": "#special"
+  },
+
+  "surveillance": {
+    "label": "giám sát",
+    "en": "GIÁM SÁT",
+    "ja": "giám sát & dự báo dịch bệnh",
+    "cards": [
+      ["Khoanh vùng ổ dịch", "Theo cụm bệnh nhân", "※Cập nhật theo dữ liệu đã tải lên", "TRỰC TIẾP"],
+      ["Bản đồ theo quận, huyện & phường, xã", "Chọn cấp độ ở thanh bên", "※Màu càng đậm, số ca càng nhiều", "BẢN ĐỒ"],
+      ["So sánh 12 tháng", "Năm 2024 và năm 2025", "※Có bảng số liệu chi tiết", "12 THÁNG"],
+      ["Dự báo 3 tháng tới", "Mô hình XGBoost", "※Khu vực TP. Hồ Chí Minh", "AI"]
+    ],
+    "map_note": "Dữ liệu và bản đồ bên dưới tự cập nhật theo thanh bên",
+    "cta": "Xem kiến thức phòng bệnh ↗",
+    "cta_href": "#special"
+  },
+
+  "forecast": {
+    "label": "dự báo ai",
+    "en": "DỰ BÁO AI",
+    "ja": "đánh giá & dự báo dịch tễ bằng Google Gemini",
+    "cards": [
+      ["Đánh giá dịch tễ", "Dữ liệu 2024 – 2025", "※Kết hợp số ca và dữ liệu thời tiết", "GEMINI"],
+      ["Dự báo theo thời tiết", "Nhiệt độ, độ ẩm, lượng mưa", "※Trạm quan trắc trên MongoDB Atlas", "AI"]
+    ]
+  },
+
+  "ai": {
+    "label": "trợ lý ai",
+    "en": "TRỢ LÝ AI",
+    "ja": "hỏi đáp cùng trợ lý",
+    "item_tag": "trợ lý ai",
+    "item_icon": "💬",
+    "item_name": "Trợ lý AI — Powered by Google Gemini",
+    "item_note": "※Thông tin chỉ mang tính tham khảo, không thay thế chẩn đoán của bác sĩ."
+  },
+
+  "booking": {
+    "label": "đặt lịch",
+    "en": "ĐẶT LỊCH",
+    "ja": "đặt lịch & tra cứu lịch hẹn",
+    "cards": [
+      ["Đặt lịch khám mới", "Chọn ngày, khung giờ, bác sĩ", "※Nhận phiếu hẹn và số thứ tự ngay", "01"],
+      ["Tra cứu & hủy lịch", "Nhập mã đặt lịch", "※Mã dạng DK-YYYYMMDD-XXXX", "02"]
+    ],
+    "foot": "※Một số ca có thể bị khóa nếu bác sĩ bận đột xuất. Vui lòng chọn ca còn trống.",
+    "lookup_label": "tra cứu",
+    "lookup_en": "TRA CỨU",
+    "lookup_ja": "tra cứu & quản lý lịch hẹn"
+  },
+
+  "guide": {
+    "label": "cẩm nang",
+    "en": "CẨM NANG",
+    "ja": "dấu hiệu cần đi viện",
+    "item_tag": "cẩm nang nhanh",
+    "item_icon": "🚨",
+    "item_name": "Dấu hiệu nguy hiểm — đi viện ngay",
+    "item_notes": [
+      "Đau bụng dữ dội, nôn nhiều hoặc nôn ra máu, chảy máu chân răng hoặc mũi, tay chân lạnh, li bì, thở nhanh, tiểu ít.",
+      "Có một dấu hiệu là đến cơ sở y tế ngay. Trường hợp nặng, gọi cấp cứu 115."
+    ],
+    "foot": "※Thông tin tham khảo từ WHO, CDC. Xem bài đầy đủ ở mục KIẾN THỨC bên dưới."
+  },
+
+  "news": {
+    "label": "tin tức",
+    "en": "TIN TỨC",
+    "ja": "cập nhật hệ thống",
+    "echo": "tin tức",
+    "button": "XEM",
+    "items": [
+      ["20261107", "📚", "Bổ sung 5 bài cẩm nang sốt xuất huyết", "#special"],
+      ["20261107", "💬", "Trợ lý AI sẵn sàng giải đáp 24/7", "#ai-assistant"],
+      ["20261107", "📅", "Đặt lịch khám trực tuyến đang mở", "#booking"],
+      ["20261107", "📊", "Bản đồ ổ dịch và dự báo 3 tháng", "#surveillance"]
+    ]
+  },
+
+  "special": {
+    "label": "kiến thức",
+    "en": "KIẾN THỨC",
+    "ja": "bài viết chuyên đề",
+    "echo": "kiến thức",
+    "button": "XEM ↗"
+  },
+
+  "qa": {
+    "label": "hỏi đáp",
+    "en": "HỎI ĐÁP",
+    "ja": "câu hỏi thường gặp",
+    "echo": "hỏi đáp",
+    "q_mark": "Hỏi",
+    "a_mark": "Đáp",
+    "items": [
+      ["Sốt xuất huyết lây qua đường nào?", "Bệnh lây qua vết đốt của muỗi vằn đã hút máu người nhiễm virus. Bệnh không lây trực tiếp từ người sang người. Xem bài đầy đủ ở mục <a href=\"#special\">KIẾN THỨC</a>."],
+      ["Hết sốt rồi thì có yên tâm chưa?", "Chưa chắc. Nhiều ca nặng xảy ra đúng lúc vừa hạ sốt, vì vậy hãy theo dõi sát người bệnh 1 đến 2 ngày sau khi hết sốt."],
+      ["Khi nào cần đi viện ngay?", "Khi có đau bụng dữ dội, nôn nhiều hoặc nôn ra máu, chảy máu chân răng hoặc mũi, tay chân lạnh, li bì, thở nhanh hay tiểu ít. Trường hợp nặng hãy gọi cấp cứu 115."],
+      ["Có thể dùng thuốc hạ sốt nào?", "Chỉ dùng paracetamol đơn chất, đúng liều ghi trên nhãn hoặc theo bác sĩ. Không tự dùng aspirin, ibuprofen hay analgin vì có thể làm tăng nguy cơ chảy máu."]
+    ],
+    "contacts": [
+      ["Liên hệ phòng khám", "Phòng Khám Đa Khoa Quốc Tế — Phòng 302, Tầng 3, 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"],
+      ["Trường hợp khẩn cấp", "Gọi cấp cứu 115 hoặc đến cơ sở y tế gần nhất"]
+    ]
+  },
+
+  "profile": {
+    "label": "bác sĩ",
+    "icon": "🩺",
+    "name_en": "BÁC SĨ",
+    "name_vi": "Cổng dành riêng cho bác sĩ",
+    "tagline": "Nơi bác sĩ theo dõi lịch khám và hồ sơ bệnh nhân.",
+    "bio": [
+      "Bác sĩ đăng nhập bằng tài khoản riêng để xem danh sách bệnh nhân theo từng ngày khám.",
+      "Cổng cho phép ghi hồ sơ bệnh án, kê toa thuốc và cập nhật tình trạng khám của từng bệnh nhân.",
+      "Khi bận đột xuất, bác sĩ có thể khóa hoặc mở lại ca khám để bệnh nhân không đặt nhầm."
+    ],
+    "links": [["giám sát", "#surveillance"], ["trợ lý ai", "#ai-assistant"], ["đặt lịch", "#booking"], ["cẩm nang", "#guide"], ["hỏi đáp", "#qa"]],
+    "top": "LÊN ĐẦU TRANG ↑"
+  },
+
+  "partners": {
+    "title": "NGUỒN THAM KHẢO",
+    "sub": "tài liệu y tế uy tín",
+    "items": [
+      ["WHO", "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue"],
+      ["WHO Việt Nam", "https://www.who.int/vietnam/vi/news/questions-and-answers/q-a-detail/dengue-and-severe-dengue"],
+      ["CDC", "https://www.cdc.gov/dengue/symptoms"],
+      ["Vinmec", "https://www.vinmec.com/vie/bai-viet/luu-y-khi-tu-theo-doi-sot-xuat-huyet-tai-nha-de-tranh-dien-bien-nang-vi"]
+    ]
+  },
+
+  "footer": {
+    "brand": "GIÁM SÁT SXH",
+    "label": "TÀI LIỆU CHÍNH THỨC",
+    "button": "Tài liệu của WHO",
+    "href": "https://www.who.int/news-room/fact-sheets/detail/dengue-and-severe-dengue",
+    "copy": "© 2026 Hệ thống Giám sát Sốt xuất huyết. Thông tin mang tính tham khảo, không thay thế chẩn đoán của bác sĩ."
+  }
+}

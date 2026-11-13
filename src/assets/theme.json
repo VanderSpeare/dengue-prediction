@@ -1,0 +1,62 @@
+{
+  "_ghi_chu": "File duy nhat can sua de doi giao dien. Anh bia: tha file vao assets/covers/ roi chon trong thanh ben (Giao dien > Anh bia), hoac sua 'default_cover'.",
+
+  "default_mode": "night",
+  "default_accent": "blue",
+  "default_effects": "calm",
+  "default_font": "large",
+  "default_cover": { "day": "aurora-day.svg", "night": "kv-night.jpg" },
+  "cover_scope": "banner",
+
+  "hero_video": { "youtube_id": "qTyS9On68NE", "mode": "banner" },
+
+  "hero": {
+    "title_en": "DENGUE WATCH",
+    "title_vi": "Hệ thống Giám sát Dịch Sốt xuất huyết & Cổng Y Tế Trực Tuyến",
+    "subtitle": "Giám sát dịch tễ, dự báo vùng nguy cơ, tư vấn AI và đặt lịch khám trực tiếp với Bác sĩ chuyên khoa."
+  },
+
+  "loader": { "line1": "ĐANG TRUY CẬP", "line2": "CONNECTING TO DENGUE_WATCH..." },
+
+  "ticker": [
+    "DENGUE WATCH 🔻 GIÁM SÁT DỊCH TỄ",
+    "AI ASSISTANT 🔻 TRỢ LÝ HỎI ĐÁP",
+    "BOOK A DOCTOR 🔻 ĐẶT LỊCH KHÁM",
+    "SỐT CAO ĐỘT NGỘT? ĐI KHÁM SỚM 🔻"
+  ],
+
+  "accents": {
+    "blue":   { "label": "Xanh dương",
+      "day":   { "main": "#1D4ED8", "strong": "#1E40AF", "soft": "#DBEAFE", "on": "#FFFFFF" },
+      "night": { "main": "#60A5FA", "strong": "#93C5FD", "soft": "#12234F", "on": "#04122E" } },
+    "violet": { "label": "Tím",
+      "day":   { "main": "#6D28D9", "strong": "#5B21B6", "soft": "#EDE9FE", "on": "#FFFFFF" },
+      "night": { "main": "#A78BFA", "strong": "#C4B5FD", "soft": "#241A4F", "on": "#12082E" } },
+    "cyan":   { "label": "Ngọc lam",
+      "day":   { "main": "#0E7490", "strong": "#155E75", "soft": "#CFFAFE", "on": "#FFFFFF" },
+      "night": { "main": "#22D3EE", "strong": "#67E8F9", "soft": "#0B2F3A", "on": "#04202A" } },
+    "amber":  { "label": "Hổ phách",
+      "day":   { "main": "#B45309", "strong": "#92400E", "soft": "#FEF3C7", "on": "#FFFFFF" },
+      "night": { "main": "#FBBF24", "strong": "#FCD34D", "soft": "#3A2A05", "on": "#2A1C00" } }
+  },
+
+  "presets": {
+    "off":  [],
+    "calm": ["loader", "ticker", "zoom", "orbit", "glow", "shine", "reveal", "dots"],
+    "full": ["loader", "ticker", "zoom", "orbit", "glow", "shine", "reveal", "dots", "grain", "scan", "particles"]
+  },
+
+  "effect_labels": {
+    "loader": "Màn hình chờ khi mở trang",
+    "ticker": "Dải chữ chạy",
+    "zoom": "Ảnh bìa phóng nhẹ",
+    "orbit": "Vòng HUD xoay ở banner",
+    "glow": "Viền phát sáng",
+    "shine": "Ánh lướt khi rê chuột",
+    "reveal": "Hiện dần khi cuộn",
+    "dots": "Chấm halftone góc khối",
+    "grain": "Hạt nhiễu phim",
+    "scan": "Vân quét màn hình",
+    "particles": "Hạt sáng bay"
+  }
+}
