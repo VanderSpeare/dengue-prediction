@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -24,6 +25,20 @@ try:
 except ImportError:
     from src.mongo_data_service import mongo_data_service
 
+try:
+    import map_pins_service
+except ImportError:
+    from src import map_pins_service
+
+_location_btn_component = components.declare_component(
+    "user_location_button",
+    path=str(_HERE / "location_component"),
+)
+_interactive_pin_map = components.declare_component(
+    "interactive_pin_map",
+    path=str(_HERE / "map_component"),
+)
+
 # Import Weather Service with Parallel Data Source Support
 try:
     import weather_service
@@ -36,59 +51,34 @@ try:
 except ImportError:
     from src import ai_prediction_service
 
-# Import Core Booking & Doctor Portal Module
-try:
-    from booking import (
-        mongo_manager,
-        doctor_auth_service,
-        DoctorProfile,
-        hash_password_sha256,
-        PREDEFINED_DOCTORS,
-        booking_service,
-        BookingTicket,
-        TimeSlotInfo,
-        SlotStatus,
-        BookingStatus,
-        ExaminationStatus,
-        STANDARD_TIME_SLOTS
-    )
-except ImportError:
-    from src.booking import (
-        mongo_manager,
-        doctor_auth_service,
-        DoctorProfile,
-        hash_password_sha256,
-        PREDEFINED_DOCTORS,
-        booking_service,
-        BookingTicket,
-        TimeSlotInfo,
-        SlotStatus,
-        BookingStatus,
-        ExaminationStatus,
-        STANDARD_TIME_SLOTS
-    )
-
 
 # ---------------------------------------------------------------------------
 # Plotly Version Compatibility Helpers
 # ---------------------------------------------------------------------------
+MAP_HEIGHT = 900
+
+
 def _scatter_map_compat(df, lat, lon, size, color, hover_name,
                         hover_data, color_continuous_scale,
                         size_max, zoom, center, title, **kwargs):
     """Render a scatter bubble map compatible with both Plotly old & new versions."""
+    height = kwargs.pop("height", MAP_HEIGHT)
     common = dict(
         lat=lat, lon=lon, size=size, color=color,
         hover_name=hover_name, hover_data=hover_data,
         color_continuous_scale=color_continuous_scale,
         size_max=size_max, zoom=zoom, center=center, title=title,
+        height=height,
     )
     try:
         if hasattr(px, 'scatter_map'):
-            return px.scatter_map(df, map_style=ui.map_style(), **common, **kwargs)
+            fig = px.scatter_map(df, map_style=ui.map_style(), **common, **kwargs)
         elif hasattr(px, 'scatter_mapbox'):
-            return px.scatter_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
+            fig = px.scatter_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
         else:
             raise AttributeError("Plotly không hỗ trợ scatter map API.")
+        fig.update_layout(height=height)
+        return fig
     except Exception as exc:
         raise RuntimeError(f"Không thể dựng scatter map: {exc}") from exc
 
@@ -98,28 +88,73 @@ def _choropleth_map_compat(df, geojson, locations, featureidkey,
                            color_continuous_scale, center, zoom,
                            opacity, title, **kwargs):
     """Render a choropleth map compatible with both Plotly old & new versions."""
+    height = kwargs.pop("height", MAP_HEIGHT)
     common = dict(
         geojson=geojson, locations=locations, featureidkey=featureidkey,
         color=color, hover_name=hover_name, hover_data=hover_data,
         color_continuous_scale=color_continuous_scale,
         center=center, zoom=zoom, opacity=opacity, title=title,
+        height=height,
     )
     try:
         if hasattr(px, 'choropleth_map'):
-            return px.choropleth_map(df, map_style=ui.map_style(), **common, **kwargs)
+            fig = px.choropleth_map(df, map_style=ui.map_style(), **common, **kwargs)
         elif hasattr(px, 'choropleth_mapbox'):
-            return px.choropleth_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
+            fig = px.choropleth_mapbox(df, mapbox_style=ui.map_style(), **common, **kwargs)
         else:
             raise AttributeError("Plotly không hỗ trợ choropleth map API.")
+        fig.update_layout(height=height)
+        return fig
     except Exception as exc:
         raise RuntimeError(f"Không thể dựng choropleth map: {exc}") from exc
+
+
+def _apply_user_location_to_map(fig, user_loc, zoom=13):
+    """Overlay user's current position on a Plotly map and center the viewport on it."""
+    if not user_loc or user_loc.get("lat") is None or user_loc.get("lon") is None:
+        return fig
+    u_lat = float(user_loc["lat"])
+    u_lon = float(user_loc["lon"])
+    trace_type = fig.data[0].type if fig.data else ""
+    use_new_map = trace_type in ("scattermap", "choroplethmap") or (
+        not trace_type and hasattr(go, "Scattermap")
+    )
+    if use_new_map and hasattr(go, "Scattermap"):
+        fig.add_trace(
+            go.Scattermap(
+                lat=[u_lat],
+                lon=[u_lon],
+                mode="markers+text",
+                marker=dict(size=18, color="#2563eb"),
+                text=["📍 Vị trí của bạn"],
+                textposition="top center",
+                name="📍 Vị trí của bạn",
+                hovertemplate="<b>📍 Vị trí của bạn</b><br>Lat: %{lat:.5f}<br>Lon: %{lon:.5f}<extra></extra>",
+            )
+        )
+        fig.update_layout(map_center={"lat": u_lat, "lon": u_lon}, map_zoom=zoom)
+    elif hasattr(go, "Scattermapbox"):
+        fig.add_trace(
+            go.Scattermapbox(
+                lat=[u_lat],
+                lon=[u_lon],
+                mode="markers+text",
+                marker=dict(size=18, color="#2563eb"),
+                text=["📍 Vị trí của bạn"],
+                textposition="top center",
+                name="📍 Vị trí của bạn",
+                hovertemplate="<b>📍 Vị trí của bạn</b><br>Lat: %{lat:.5f}<br>Lon: %{lon:.5f}<extra></extra>",
+            )
+        )
+        fig.update_layout(mapbox_center={"lat": u_lat, "lon": u_lon}, mapbox_zoom=zoom)
+    return fig
 
 
 # ---------------------------------------------------------------------------
 # Page Configuration
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Hệ thống Giám sát Dịch Sốt xuất huyết & Đặt Lịch Khám Bác Sĩ",
+    page_title="Hệ thống Giám sát & Dự Báo Dịch Sốt xuất huyết",
     layout="wide",
     page_icon="🦟"
 )
@@ -135,20 +170,19 @@ _kaf_sec = kaf_layout.build_kaf_page()
 # ---------------------------------------------------------------------------
 # Database Status Badge (Đầu trang — đèn xanh / đỏ)
 # ---------------------------------------------------------------------------
-if mongo_manager.is_connected:
-    _db_stat = mongo_manager.get_status()
+if mongo_data_service.is_connected:
     st.markdown(
-        f'<div class="kaf-db-status" title="MongoDB đã kết nối ({mongo_manager.db_name})">'
+        f'<div class="kaf-db-status" title="MongoDB đã kết nối ({mongo_data_service.db_name})">'
         '<span>🟢</span>'
-        f'<span>MongoDB · {_db_stat.get("total_bookings_stored", 0)} vé · {_db_stat.get("total_doctors", 0)} BS</span>'
+        f'<span>MongoDB · {mongo_data_service.db_name}</span>'
         '</div>',
         unsafe_allow_html=True,
     )
 else:
     st.markdown(
-        '<div class="kaf-db-status" title="Lưu trữ tạm (In-Memory) — Chưa kết nối MongoDB">'
+        '<div class="kaf-db-status" title="Lưu trữ cục bộ (Local CSV) — Chưa kết nối MongoDB">'
         '<span>🔴</span>'
-        '<span>Database: In-Memory</span>'
+        '<span>Database: Local CSV</span>'
         '</div>',
         unsafe_allow_html=True,
     )
@@ -164,8 +198,6 @@ _sb_options = [
     "📁 Dữ liệu dịch tễ",
     "🗺️ Tải bản đồ GeoJSON",
 ]
-if "logged_in_doctor" in st.session_state and st.session_state.logged_in_doctor:
-    _sb_options.append("👨‍⚕️ Bác sĩ đang trực")
 
 with st.sidebar.expander("⚙️", expanded=False):
     _sb_func = st.selectbox(
@@ -182,16 +214,12 @@ with st.sidebar.expander("⚙️", expanded=False):
         st.caption("🗺️ Hỗ trợ 4 cấp độ: **Phố > Phường > Quận > Toàn Quốc** kèm khoanh vùng bán kính ổ dịch trực quan.")
 
     elif _sb_func == "🗄️ Cơ sở dữ liệu":
-        if mongo_manager.is_connected:
-            stat = mongo_manager.get_status()
-            st.caption(f"📊 Đã lưu: {stat.get('total_bookings_stored', 0)} vé khám • {stat.get('total_doctors', 0)} bác sĩ")
-            if st.button("🔄 Đồng bộ dữ liệu lên MongoDB", key="sb_sync_mongo", use_container_width=True):
-                s_cnt, t_slots = booking_service.sync_to_mongodb()
-                st.info(f"Đã đồng bộ {s_cnt} lịch hẹn và {t_slots} khung giờ lên MongoDB!")
+        if mongo_data_service.is_connected:
+            st.caption(f"🟢 Đã kết nối MongoDB Atlas (`{mongo_data_service.db_name}`)")
         else:
-            st.caption("🟡 Lưu trữ: Bộ nhớ tạm (In-Memory)")
+            st.caption("🟡 Lưu trữ: Dữ liệu cục bộ (Local CSV)")
             if st.button("🔌 Kết nối lại MongoDB Atlas", key="sb_reconnect_mongo", use_container_width=True):
-                if mongo_manager.connect():
+                if mongo_data_service.connect():
                     st.success("Kết nối MongoDB thành công!")
                     st.rerun()
                 else:
@@ -220,14 +248,6 @@ with st.sidebar.expander("⚙️", expanded=False):
                     key="sb_dl_clusters_geojson",
                     use_container_width=True,
                 )
-
-    elif _sb_func == "👨‍⚕️ Bác sĩ đang trực" and st.session_state.get("logged_in_doctor"):
-        doc = st.session_state.logged_in_doctor
-        st.markdown(f"**{doc.title} {doc.full_name}**\n\n*{doc.specialty}* ({doc.room})")
-        if st.button("🚪 Đăng xuất Bác sĩ", key="sb_doc_logout", use_container_width=True):
-            st.session_state.logged_in_doctor = None
-            st.session_state.doctor_token = None
-            st.rerun()
 
 
 @st.cache_data
@@ -293,6 +313,82 @@ def load_vietnam_geojson(geojson_str_path: str):
         return json.load(f)
 
 
+@st.cache_data(show_spinner=False)
+def load_vietnam_geojson_simplified(geojson_str_path: str, tolerance: float = 0.02):
+    """Return a lightweight simplified GeoJSON (~200KB) for fast interactive Leaflet rendering."""
+    raw = load_vietnam_geojson(geojson_str_path)
+    if not raw or "features" not in raw:
+        return raw
+    try:
+        from shapely.geometry import shape, mapping
+        features = []
+        for feat in raw["features"]:
+            geom = feat.get("geometry")
+            props = feat.get("properties") or {}
+            if not geom:
+                continue
+            simp = shape(geom).simplify(tolerance, preserve_topology=True)
+            features.append({
+                "type": "Feature",
+                "properties": {"adm1_name1": props.get("adm1_name1", "")},
+                "geometry": mapping(simp),
+            })
+        return {"type": "FeatureCollection", "features": features}
+    except Exception:
+        return raw
+
+
+def _render_main_interactive_map(
+    *,
+    title: str,
+    center_lat: float,
+    center_lon: float,
+    zoom: int,
+    view_key: str,
+    markers=None,
+    geojson_data=None,
+    choropleth_values=None,
+):
+    """Render the unified main interactive map (1350px height, My Location, & direct pinning)."""
+    st.markdown(f"**{title}**")
+    saved_pins = map_pins_service.load_pins()
+    map_event = _interactive_pin_map(
+        center_lat=center_lat,
+        center_lon=center_lon,
+        zoom=zoom,
+        theme=ui.mode(),
+        map_style=ui.map_style(),
+        view_key=view_key,
+        markers=markers or [],
+        geojson_data=geojson_data,
+        choropleth_values=choropleth_values or {},
+        pins=saved_pins,
+        user_location=st.session_state.get("user_location"),
+        selected_pin=st.session_state.get("draft_map_pin"),
+        key="main_unified_interactive_map",
+    )
+    if isinstance(map_event, dict):
+        action = map_event.get("action")
+        ts = map_event.get("ts")
+        if action == "pin_selected" and ts != st.session_state.get("_last_pin_ts"):
+            st.session_state["draft_map_pin"] = {
+                "lat": float(map_event["lat"]),
+                "lon": float(map_event["lon"]),
+            }
+            st.session_state["_last_pin_ts"] = ts
+            st.rerun()
+        elif action == "user_location" and ts != st.session_state.get("_last_loc_ts"):
+            st.session_state["user_location"] = {
+                "lat": float(map_event["lat"]),
+                "lon": float(map_event["lon"]),
+                "accuracy": map_event.get("accuracy"),
+                "source": map_event.get("source"),
+                "ts": ts,
+            }
+            st.session_state["_last_loc_ts"] = ts
+            st.rerun()
+
+
 df = load_historical()
 district_df = load_district_breakdown()
 ward_df = load_ward_breakdown()
@@ -319,10 +415,10 @@ if uploaded_file:
         st.sidebar.info("🔄 Vui lòng chạy `python main.py` để huấn luyện lại mô hình và cập nhật dự báo.")
 
 # ===========================================================================
-# 6 TABS UI: GIÁM SÁT, AI DỰ BÁO & ĐÁNH GIÁ, TRỢ LÝ AI, ĐẶT LỊCH, TRA CỨU, CỔNG BÁC SĨ
+# 3 SECTIONS UI: GIÁM SÁT, AI DỰ BÁO & ĐÁNH GIÁ, TRỢ LÝ AI
 # ===========================================================================
-tab1, tab_ai, tab2, tab3, tab4, tab5 = (
-    _kaf_sec[k] for k in ("surveillance", "forecast", "assistant", "booking", "lookup", "doctor")
+tab1, tab_ai, tab2 = (
+    _kaf_sec[k] for k in ("surveillance", "forecast", "assistant")
 )
 
 # ===========================================================================
@@ -375,6 +471,36 @@ with tab1:
                 sel_month = 1
 
         st.markdown("---")
+
+        # Nút vị trí người dùng (hỗ trợ cả di động và máy tính)
+        col_loc_btn, col_loc_reset = st.columns([4, 1])
+        with col_loc_btn:
+            _cur_loc = st.session_state.get("user_location")
+            _cur_label = (
+                f"Đã xác định ({_cur_loc['lat']:.5f}, {_cur_loc['lon']:.5f}) · "
+                f"<a href='https://www.google.com/maps?q={_cur_loc['lat']},{_cur_loc['lon']}' "
+                f"target='_blank' rel='noopener noreferrer' style='color:inherit;font-weight:700;text-decoration:underline;'>"
+                f"Your current location in Google Maps ↗</a>"
+                if _cur_loc else ""
+            )
+            _loc_res = _location_btn_component(
+                theme=ui.mode(),
+                current_label=_cur_label,
+                key="user_loc_btn_comp",
+            )
+            if (
+                isinstance(_loc_res, dict)
+                and _loc_res.get("lat") is not None
+                and _loc_res.get("ts") != st.session_state.get("_last_loc_ts")
+            ):
+                st.session_state["user_location"] = _loc_res
+                st.session_state["_last_loc_ts"] = _loc_res.get("ts")
+                st.rerun()
+        with col_loc_reset:
+            if st.session_state.get("user_location"):
+                if st.button("🔄 Về mặc định", key="reset_user_loc_btn", use_container_width=True):
+                    st.session_state.pop("user_location", None)
+                    st.rerun()
 
         # Color map for risk levels
         RISK_COLOR_MAP = {
@@ -452,31 +578,41 @@ with tab1:
             if not c_prov_filtered.empty and 'lat' in c_prov_filtered.columns and 'lon' in c_prov_filtered.columns:
                 center_lat = float(c_prov_filtered['lat'].mean())
                 center_lon = float(c_prov_filtered['lon'].mean())
+                max_c = max(float(c_prov_filtered['cases'].max()), 1.0)
+                cluster_markers = []
+                for _, _r in c_prov_filtered.iterrows():
+                    if pd.isna(_r.get('lat')) or pd.isna(_r.get('lon')):
+                        continue
+                    _cases = int(_r.get('cases', 0))
+                    _risk = str(_r.get('risk_level', ''))
+                    _col = RISK_COLOR_MAP.get(_risk, '#d90429')
+                    _rad_m = float(_r.get('radius_meters', 0) or 0)
+                    _rad_px = max(7, min(22, 7 + 15 * (_cases / max_c)))
+                    _popup = (
+                        f"<b>{_r.get('name', '')}</b><br/>"
+                        f"Cấp: {_r.get('level', '')} · {_cases:,} ca<br/>"
+                        f"Nguy cơ: {_risk}<br/>"
+                        f"Bán kính: {int(_rad_m)} m<br/>"
+                        f"<small>{_r.get('recommendation', '')}</small>"
+                    )
+                    cluster_markers.append({
+                        "lat": float(_r['lat']),
+                        "lon": float(_r['lon']),
+                        "radius_px": _rad_px,
+                        "radius_meters": _rad_m,
+                        "color": _col,
+                        "title": f"{_r.get('name', '')} ({_cases} ca)",
+                        "popup_html": _popup,
+                    })
 
-                # Render Map with Outbreak Zones
-                fig_clusters = _scatter_map_compat(
-                    c_prov_filtered,
-                    lat='lat', lon='lon',
-                    size='cases',
-                    color='risk_level',
-                    hover_name='name',
-                    hover_data={
-                        'cases': True,
-                        'level': True,
-                        'radius_meters': True,
-                        'recommendation': True,
-                        'lat': False,
-                        'lon': False,
-                        'risk_level': False
-                    },
-                    color_continuous_scale=None,
-                    color_discrete_map=RISK_COLOR_MAP,
-                    size_max=32,
+                _render_main_interactive_map(
+                    title=f"Bản đồ Khoanh Vùng Ổ Dịch & Nguy Cơ — {sel_c_prov} (T{sel_month:02d}/{sel_year})",
+                    center_lat=center_lat,
+                    center_lon=center_lon,
                     zoom=11 if sel_c_dist != "Tất cả Quận/Huyện" else 10,
-                    center={"lat": center_lat, "lon": center_lon},
-                    title=f"Bản đồ Khoanh Vùng Ổ Dịch & Nguy Cơ — {sel_c_prov} (T{sel_month:02d}/{sel_year})"
+                    view_key=f"L1_{sel_c_prov}_{sel_c_dist}_{sel_c_ward}_{sel_year}_{sel_month}",
+                    markers=cluster_markers,
                 )
-                st.plotly_chart(fig_clusters, width='stretch')
 
                 # Actionable Table
                 st.subheader("📋 Danh Sách Điểm Nóng & Hành Động Dập Dịch Cần Triển Khai")
@@ -536,22 +672,38 @@ with tab1:
             if not w_prov_filtered.empty and 'lat' in w_prov_filtered.columns and 'lon' in w_prov_filtered.columns:
                 c_lat = float(w_prov_filtered['lat'].mean())
                 c_lon = float(w_prov_filtered['lon'].mean())
+                max_w = max(float(w_prov_filtered['cases'].max()), 1.0)
+                ward_markers = []
+                for _, _r in w_prov_filtered.iterrows():
+                    if pd.isna(_r.get('lat')) or pd.isna(_r.get('lon')):
+                        continue
+                    _cases = int(_r.get('cases', 0))
+                    _risk = str(_r.get('risk_level', ''))
+                    _col = RISK_COLOR_MAP.get(_risk, '#f77f00')
+                    _rad_px = max(7, min(22, 7 + 15 * (_cases / max_w)))
+                    _popup = (
+                        f"<b>{_r.get('ward', '')}</b> ({_r.get('district', '')})<br/>"
+                        f"Số ca: {_cases:,} ca<br/>"
+                        f"Mức độ: {_risk}"
+                    )
+                    ward_markers.append({
+                        "lat": float(_r['lat']),
+                        "lon": float(_r['lon']),
+                        "radius_px": _rad_px,
+                        "radius_meters": 0,
+                        "color": _col,
+                        "title": f"{_r.get('ward', '')} ({_cases} ca)",
+                        "popup_html": _popup,
+                    })
 
-                fig_ward_map = _scatter_map_compat(
-                    w_prov_filtered,
-                    lat='lat', lon='lon',
-                    size='cases',
-                    color='risk_level',
-                    hover_name='ward',
-                    hover_data={'cases': True, 'district': True, 'risk_level': True, 'lat': False, 'lon': False},
-                    color_continuous_scale=None,
-                    color_discrete_map=RISK_COLOR_MAP,
-                    size_max=28,
+                _render_main_interactive_map(
+                    title=f"Bản đồ Ca Nhiễm Cấp Phường/Xã — {sel_w_prov} (T{sel_month:02d}/{sel_year})",
+                    center_lat=c_lat,
+                    center_lon=c_lon,
                     zoom=11,
-                    center={"lat": c_lat, "lon": c_lon},
-                    title=f"Bản đồ Ca Nhiễm Cấp Phường/Xã — {sel_w_prov} (T{sel_month:02d}/{sel_year})"
+                    view_key=f"L2_{sel_w_prov}_{sel_year}_{sel_month}",
+                    markers=ward_markers,
                 )
-                st.plotly_chart(fig_ward_map, width='stretch')
 
                 col_w_left, col_w_right = st.columns([3, 2])
                 with col_w_left:
@@ -607,21 +759,39 @@ with tab1:
             if not d_prov_filtered.empty and 'lat' in d_prov_filtered.columns and 'lon' in d_prov_filtered.columns:
                 c_lat = float(d_prov_filtered['lat'].mean())
                 c_lon = float(d_prov_filtered['lon'].mean())
+                max_d = max(float(d_prov_filtered['cases'].max()), 1.0)
+                dist_markers = []
+                for _, _r in d_prov_filtered.iterrows():
+                    if pd.isna(_r.get('lat')) or pd.isna(_r.get('lon')):
+                        continue
+                    _cases = int(_r.get('cases', 0))
+                    _inc = float(_r.get('incidence_rate', 0) or 0)
+                    _ratio = _cases / max_d
+                    _col = "#d90429" if _ratio > 0.6 else ("#f77f00" if _ratio > 0.3 else "#fcbf49")
+                    _rad_px = max(8, min(24, 8 + 16 * _ratio))
+                    _popup = (
+                        f"<b>{_r.get('district', '')}</b><br/>"
+                        f"Số ca: {_cases:,} ca<br/>"
+                        f"Tỷ lệ mắc: {_inc:.2f} / 100k dân"
+                    )
+                    dist_markers.append({
+                        "lat": float(_r['lat']),
+                        "lon": float(_r['lon']),
+                        "radius_px": _rad_px,
+                        "radius_meters": 0,
+                        "color": _col,
+                        "title": f"{_r.get('district', '')} ({_cases} ca)",
+                        "popup_html": _popup,
+                    })
 
-                fig_dist_map = _scatter_map_compat(
-                    d_prov_filtered,
-                    lat='lat', lon='lon',
-                    size='cases',
-                    color='incidence_rate' if 'incidence_rate' in d_prov_filtered.columns else 'cases',
-                    hover_name='district',
-                    hover_data={'cases': True, 'incidence_rate': ':.2f', 'lat': False, 'lon': False},
-                    color_continuous_scale='YlOrRd',
-                    size_max=30,
+                _render_main_interactive_map(
+                    title=f"Bản đồ Dịch Tễ Cấp Quận/Huyện — {sel_d_prov} (T{sel_month:02d}/{sel_year})",
+                    center_lat=c_lat,
+                    center_lon=c_lon,
                     zoom=10,
-                    center={"lat": c_lat, "lon": c_lon},
-                    title=f"Bản đồ Dịch Tễ Cấp Quận/Huyện — {sel_d_prov} (T{sel_month:02d}/{sel_year})"
+                    view_key=f"L3_{sel_d_prov}_{sel_year}_{sel_month}",
+                    markers=dist_markers,
                 )
-                st.plotly_chart(fig_dist_map, width='stretch')
 
                 col_dl, col_dr = st.columns([3, 2])
                 with col_dl:
@@ -674,23 +844,25 @@ with tab1:
 
             geojson_path = getattr(paths, 'BOUNDARY_FILE', paths.DATA_DIR / "population" / "vietnam_34_provinces_2025.geojson")
             if geojson_path.exists() and not df_month.empty:
-                vn_geojson = load_vietnam_geojson(str(geojson_path))
+                vn_geojson = load_vietnam_geojson_simplified(str(geojson_path))
                 if vn_geojson:
-                    fig_map = _choropleth_map_compat(
-                        df_month,
-                        geojson=vn_geojson,
-                        locations='province',
-                        featureidkey="properties.adm1_name1",
-                        color='cases',
-                        hover_name='province',
-                        hover_data={'cases': True, 'incidence_rate': ':.2f'},
-                        color_continuous_scale="Reds",
-                        center={"lat": 14.0583, "lon": 108.2772},
-                        zoom=4.5,
-                        opacity=0.75,
-                        title=f"Bản đồ Ca nhiễm Sốt xuất huyết 34 Tỉnh/Thành — Tháng {sel_month:02d}/{sel_year}"
+                    choro_vals = {}
+                    for _, _r in df_month.iterrows():
+                        _prov = str(_r.get('province', ''))
+                        if _prov:
+                            choro_vals[_prov] = {
+                                "cases": int(_r.get('cases', 0)),
+                                "incidence_rate": float(_r.get('incidence_rate', 0) or 0),
+                            }
+                    _render_main_interactive_map(
+                        title=f"Bản đồ Ca nhiễm Sốt xuất huyết 34 Tỉnh/Thành — Tháng {sel_month:02d}/{sel_year}",
+                        center_lat=15.5,
+                        center_lon=107.8,
+                        zoom=6,
+                        view_key=f"L4_{sel_year}_{sel_month}",
+                        geojson_data=vn_geojson,
+                        choropleth_values=choro_vals,
                     )
-                    st.plotly_chart(fig_map, width='stretch')
 
             col_left, col_right = st.columns([3, 2])
             with col_left:
@@ -718,6 +890,109 @@ with tab1:
                 )
                 fig_bar.update_traces(textposition='outside')
                 st.plotly_chart(fig_bar, width='stretch')
+
+        # -------------------------------------------------------------------
+        # GHIM BẢN ĐỒ & Ý KIẾN / BÌNH LUẬN CỘNG ĐỒNG
+        # -------------------------------------------------------------------
+        st.markdown("---")
+        st.subheader("📌 Ý Kiến & Bình Luận Tại Khu Vực Đã Ghim Trên Bản Đồ")
+        st.markdown(
+            "Chạm hoặc nhấp trực tiếp vào bất kỳ điểm nào trên **bản đồ chính ở trên** để đặt ghim "
+            "và chia sẻ ý kiến, phản ánh tình hình muỗi/nước đọng/ổ dịch tại khu vực đó."
+        )
+
+        saved_pins = map_pins_service.load_pins()
+
+        _draft_pin = st.session_state.get("draft_map_pin")
+        _pin_col_info, _pin_col_use_loc = st.columns([3, 2])
+        with _pin_col_info:
+            if _draft_pin:
+                st.success(
+                    f"📍 Đang chọn ghim tại tọa độ: **{_draft_pin['lat']:.5f}, {_draft_pin['lon']:.5f}**"
+                )
+            else:
+                st.info("👆 Hãy chạm/nhấp vào bản đồ ở trên để chọn tọa độ cần ghim.")
+        with _pin_col_use_loc:
+            if st.session_state.get("user_location"):
+                if st.button("📌 Ghim tại vị trí của tôi", key="pin_at_my_loc_btn", use_container_width=True):
+                    _ul = st.session_state["user_location"]
+                    st.session_state["draft_map_pin"] = {
+                        "lat": float(_ul["lat"]),
+                        "lon": float(_ul["lon"]),
+                    }
+                    st.rerun()
+
+        with st.form("map_pin_comment_form", clear_on_submit=True):
+            _fc1, _fc2, _fc3 = st.columns([1, 1, 1])
+            with _fc1:
+                _pin_author = st.text_input("👤 Tên của bạn", value="Người dân")
+            with _fc2:
+                _pin_area = st.text_input("📍 Khu vực / Địa chỉ (tùy chọn)", placeholder="VD: Hẻm 123 Lê Văn Việt, Thủ Đức")
+            with _fc3:
+                _pin_category = st.selectbox(
+                    "🏷️ Phân loại",
+                    [
+                        "🦟 Nhiều muỗi / Nguy cơ cao",
+                        "💧 Nước đọng / Lăng quăng",
+                        "🏥 Có ca nghi nhiễm",
+                        "✅ Đã phun thuốc / An toàn",
+                        "💬 Ý kiến khác",
+                    ],
+                )
+            _pin_comment = st.text_area(
+                "💬 Ý kiến / Bình luận tại khu vực đã ghim",
+                placeholder="Nhập nhận xét, cảnh báo hoặc phản ánh của bạn về khu vực này...",
+                height=90,
+            )
+            _submit_pin = st.form_submit_button("📌 Lưu Ghim & Bình Luận", use_container_width=True)
+            if _submit_pin:
+                if not _draft_pin:
+                    st.warning("Vui lòng chạm/nhấp lên bản đồ (hoặc dùng nút 'Ghim tại vị trí của tôi') trước khi lưu.")
+                elif not (_pin_comment or "").strip():
+                    st.warning("Vui lòng nhập nội dung ý kiến / bình luận.")
+                else:
+                    map_pins_service.add_pin(
+                        lat=_draft_pin["lat"],
+                        lon=_draft_pin["lon"],
+                        comment=_pin_comment,
+                        author=_pin_author,
+                        area_name=_pin_area,
+                        category=_pin_category,
+                    )
+                    st.session_state.pop("draft_map_pin", None)
+                    st.success("✅ Đã lưu điểm ghim và bình luận lên bản đồ!")
+                    st.rerun()
+
+        with st.expander(f"💬 Danh sách ý kiến & khu vực đã ghim ({len(saved_pins)})", expanded=bool(saved_pins)):
+            if not saved_pins:
+                st.caption("Chưa có bình luận nào được ghim trên bản đồ. Hãy là người đầu tiên đóng góp ý kiến!")
+            else:
+                _filter_cat = st.selectbox(
+                    "Lọc theo phân loại:",
+                    ["Tất cả"] + sorted({p.get("category", "💬 Ý kiến khác") for p in saved_pins}),
+                    key="pin_list_cat_filter",
+                )
+                _shown_pins = [
+                    p for p in saved_pins
+                    if _filter_cat == "Tất cả" or p.get("category") == _filter_cat
+                ]
+                for _idx, _p in enumerate(_shown_pins):
+                    _p_col1, _p_col2 = st.columns([6, 1])
+                    with _p_col1:
+                        _area_txt = f" — 📍 {_p['area_name']}" if _p.get("area_name") else ""
+                        st.markdown(
+                            f"**{_p.get('category', '💬 Ý kiến')}**{_area_txt}  \n"
+                            f"{_p.get('comment', '')}  \n"
+                            f"<small>👤 {_p.get('author', 'Người dân')} · "
+                            f"🌐 `{_p.get('lat')}, {_p.get('lon')}` · "
+                            f"🕒 {_p.get('created_at', '')}</small>",
+                            unsafe_allow_html=True,
+                        )
+                    with _p_col2:
+                        if st.button("🗑️", key=f"del_pin_{_p.get('id', _idx)}", help="Xóa ghim này"):
+                            map_pins_service.delete_pin(_p.get("id", ""))
+                            st.rerun()
+                    st.divider()
 
         # -------------------------------------------------------------------
         # SO SÁNH DIỄN BIẾN SỐ CA NHIỄM 12 THÁNG (NĂM 2024 vs 2025)
@@ -1779,346 +2054,3 @@ with tab2:
 
         if answer_text:
             st.session_state.messages.append({"role": "assistant", "content": answer_text})
-
-
-# ===========================================================================
-# TAB 3: ĐẶT LỊCH KHÁM BỆNH TRỰC TUYẾN
-# ===========================================================================
-with tab3:
-    st.header("📅 Đặt Lịch Khám Bệnh Trực Tuyến")
-    st.info("🏥 **Địa điểm khám:** Phòng Khám Đa Khoa Quốc Tế — Phòng 302, Tầng 3, 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh")
-
-    col_book_left, col_book_right = st.columns([1, 1], gap="large")
-
-    with col_book_left:
-        st.subheader("1. Chọn Thời Gian & Khung Giờ Khám")
-        booking_date = st.date_input(
-            "Chọn ngày khám:",
-            value=datetime.today().date(),
-            min_value=datetime.today().date(),
-            key="book_date_input"
-        )
-        date_str = booking_date.strftime("%Y-%m-%d")
-
-        # Lấy lịch từ service
-        slots_list = booking_service.get_schedule(date_str)
-
-        st.markdown("**Trạng thái các ca khám trong ngày:**")
-        # Render grid nhỏ hiển thị trạng thái
-        slot_cols = st.columns(4)
-        for i, s in enumerate(slots_list):
-            with slot_cols[i % 4]:
-                if s.status == SlotStatus.AVAILABLE:
-                    st.success(f"🟢 **{s.start_time}**\n\nTrống")
-                elif s.status == SlotStatus.BOOKED:
-                    st.error(f"🔴 **{s.start_time}**\n\nĐã đặt")
-                elif s.status == SlotStatus.CANCELLED_LOCKED:
-                    st.warning(f"🟡 **{s.start_time}**\n\nHủy <24h")
-                elif s.status == SlotStatus.BLOCKED_BY_DOCTOR:
-                    st.info(f"🟣 **{s.start_time}**\n\nBS bận")
-
-        # Danh sách các ca còn trống
-        available_starts = [s.start_time for s in slots_list if s.status == SlotStatus.AVAILABLE]
-
-        if available_starts:
-            selected_start_time = st.selectbox(
-                "👉 Chọn khung giờ bạn muốn khám:",
-                options=available_starts,
-                format_func=lambda t: f"Ca khám {t} - {next((s[1] for s in STANDARD_TIME_SLOTS if s[0] == t), '')}",
-                key="book_slot_select"
-            )
-        else:
-            st.error("⚠️ Ngày được chọn đã kín lịch hoặc tạm khóa. Vui lòng chọn ngày khác.")
-            selected_start_time = None
-
-    with col_book_right:
-        st.subheader("2. Thông Tin Người Khám")
-        with st.form("form_booking"):
-            patient_name = st.text_input("Họ và Tên bệnh nhân (*):", placeholder="Ví dụ: Nguyễn Văn An")
-            patient_phone = st.text_input("Số điện thoại liên hệ (*):", placeholder="Ví dụ: 0912345678")
-            patient_email = st.text_input("Email nhận phiếu (tùy chọn):", placeholder="nguyenvanan@gmail.com")
-
-            assigned_doctor = st.selectbox(
-                "Bác sĩ chuyên khoa phụ trách:",
-                [
-                    "BS. CKI Nguyễn Văn A (Bệnh Truyền Nhiễm & SXH)",
-                    "BS. CKII Trần Thị B (Dịch Tễ Học Lâm Sàng)",
-                    "ThS. BS Lê Hoàng C (Cấp Cứu Nhi & SXH Nặng)",
-                    "BS. CKI Phạm Minh D (Nội Tổng Quát & Nhiễm)"
-                ]
-            )
-
-            symptoms = st.text_area("Lý do khám / Triệu chứng ban đầu:", placeholder="Ví dụ: Sốt cao liên tục 2 ngày, nhức đầu, mệt mỏi...")
-
-            submit_book = st.form_submit_button("🚀 Xác Nhận Đặt Lịch Khám", use_container_width=True, type="primary")
-
-            if submit_book:
-                if not selected_start_time:
-                    st.error("Vui lòng chọn một khung giờ còn trống trước khi xác nhận!")
-                else:
-                    success, ticket, msg = booking_service.book_appointment(
-                        patient_name=patient_name,
-                        patient_phone=patient_phone,
-                        appointment_date=date_str,
-                        start_time=selected_start_time,
-                        patient_email=patient_email,
-                        symptoms=symptoms,
-                        assigned_doctor=assigned_doctor
-                    )
-
-                    if success and ticket:
-                        st.session_state.last_booked_ticket = ticket
-                        st.success("🎉 " + msg)
-                        st.balloons()
-                    else:
-                        st.error("❌ " + msg)
-
-    # Hiển thị Phiếu Đặt Lịch Khám vừa tạo thành công
-    if "last_booked_ticket" in st.session_state and st.session_state.last_booked_ticket:
-        tk = st.session_state.last_booked_ticket
-        st.markdown("---")
-        st.subheader("🎟️ Phiếu Hẹn Khám Bệnh Trực Tuyến")
-        # Phiếu dạng vé (khuôn "ticket" trong assets/badge.html)
-        ui.ticket_card(tk)
-        st.code(tk.booking_code, language="text")
-
-
-# ===========================================================================
-# TAB 4: TRA CỨU & HỦY LỊCH HẸN
-# ===========================================================================
-with tab4:
-    st.header("🔍 Tra Cứu & Quản Lý Lịch Hẹn")
-    st.markdown("Nhập mã đặt lịch (dạng `DK-YYYYMMDD-XXXX`) để tra cứu thông tin hoặc hủy lịch hẹn.")
-
-    col_search1, col_search2 = st.columns([3, 1])
-    with col_search1:
-        search_code = st.text_input("Nhập mã đặt lịch:", placeholder="Ví dụ: DK-20261005-A1B2", key="lookup_input").strip().upper()
-    with col_search2:
-        st.write("")
-        st.write("")
-        btn_search = st.button("🔎 Tra Cứu", use_container_width=True)
-
-    if search_code or btn_search:
-        found_ticket = booking_service.get_booking(search_code)
-        if found_ticket:
-            st.success("Đã tìm thấy thông tin lịch hẹn!")
-            box = st.container(border=True)
-            with box:
-                b_c1, b_c2 = st.columns([2, 1])
-                with b_c1:
-                    st.markdown(f"### Mã: `{found_ticket.booking_code}` — STT: `#{found_ticket.queue_number:02d}`")
-                    st.markdown(f"👤 **Bệnh nhân:** {found_ticket.patient_name} — 📞 **SĐT:** {found_ticket.patient_phone}")
-                    st.markdown(f"⏰ **Thời gian:** `{found_ticket.appointment_time}` ngày `{found_ticket.appointment_date}`")
-                    st.markdown(f"📍 **Địa điểm:** {found_ticket.clinic_location}")
-                    st.markdown(f"👨‍⚕️ **Bác sĩ:** {found_ticket.doctor_name}")
-
-                with b_c2:
-                    if found_ticket.status == BookingStatus.CANCELLED:
-                        st.error("❌ TRẠNG THÁI: ĐÃ HỦY")
-                    else:
-                        st.success("✅ TRẠNG THÁI: ĐÃ XÁC NHẬN")
-                    
-                    exam_st = found_ticket.examination_status
-                    if exam_st == ExaminationStatus.IN_PROGRESS:
-                        st.info("🔄 Tiến độ: Đang khám")
-                    elif exam_st == ExaminationStatus.COMPLETED:
-                        st.success("🏆 Tiến độ: Đã hoàn thành")
-                    elif exam_st == ExaminationStatus.NO_SHOW:
-                        st.warning("⚠️ Tiến độ: Vắng mặt")
-                    else:
-                        st.markdown("⏳ Tiến độ: Đang chờ khám")
-
-                if found_ticket.clinical_record:
-                    st.markdown("---")
-                    st.markdown("🩺 **Hồ Sơ Bệnh Án & Chẩn Đoán Của Bác Sĩ:**")
-                    rec = found_ticket.clinical_record
-                    st.info(f"**Chẩn đoán:** {rec.get('diagnosis')}\n\n**Chỉ định xét nghiệm:** {rec.get('tests_recommended') or 'Không'}\n\n**Đơn thuốc / Lời dặn:** {rec.get('prescription') or 'Không'}")
-
-                if found_ticket.status != BookingStatus.CANCELLED:
-                    st.markdown("---")
-                    cancel_reason = st.text_input("Lý do hủy lịch (nếu có):", placeholder="Bận việc đột xuất...", key="cancel_reason_input")
-                    if st.button("🚫 Xác Nhận Hủy Lịch Khám Này", type="secondary"):
-                        c_ok, c_tk, c_msg = booking_service.cancel_appointment(
-                            booking_code=found_ticket.booking_code,
-                            cancellation_reason=cancel_reason
-                        )
-                        if c_ok:
-                            st.warning(c_msg)
-                            st.rerun()
-                        else:
-                            st.error(c_msg)
-        else:
-            if search_code:
-                st.error(f"Không tìm thấy lịch hẹn với mã `{search_code}`.")
-
-
-# ===========================================================================
-# TAB 5: CỔNG BÁC SĨ (DOCTOR PORTAL - MẬT KHẨU SHA-256)
-# ===========================================================================
-with tab5:
-    st.header("🩺 Cổng Dành Riêng Cho Bác Sĩ")
-
-    # Kiểm tra trạng thái đăng nhập
-    if "logged_in_doctor" not in st.session_state or not st.session_state.logged_in_doctor:
-        st.warning("🔒 **Khu vực bảo mật:** Vui lòng đăng nhập bằng 1 trong 4 tài khoản Bác sĩ bên dưới (mật khẩu mã hóa SHA-256).")
-
-        col_login_form, col_quick_docs = st.columns([1, 1], gap="large")
-
-        with col_login_form:
-            st.subheader("Đăng Nhập Tài Khoản Bác Sĩ")
-            with st.form("form_doctor_login"):
-                doc_username = st.text_input("Tên đăng nhập (Username):", placeholder="Ví dụ: bs_nguyenvana", key="doc_user_in")
-                doc_password = st.text_input("Mật khẩu:", type="password", placeholder="Nhập mật khẩu...", key="doc_pass_in")
-                btn_login = st.form_submit_button("🔑 Đăng Nhập", use_container_width=True, type="primary")
-
-                if btn_login:
-                    auth_res = doctor_auth_service.authenticate_doctor(
-                        username=doc_username,
-                        password_plain=doc_password,
-                        mongo_db=mongo_manager.db if mongo_manager.is_connected else None
-                    )
-                    if auth_res:
-                        token, doc_profile = auth_res
-                        st.session_state.logged_in_doctor = doc_profile
-                        st.session_state.doctor_token = token
-                        st.success(f"Chào mừng {doc_profile.title} {doc_profile.full_name} đăng nhập thành công!")
-                        st.rerun()
-                    else:
-                        st.error("Tên đăng nhập hoặc mật khẩu không chính xác!")
-
-        with col_quick_docs:
-            st.subheader("📋 4 Tài Khoản Bác Sĩ Mẫu")
-            st.caption("Mật khẩu mặc định: `Bacsi@123` (Đã mã hóa SHA-256)")
-            for d in PREDEFINED_DOCTORS:
-                with st.container(border=True):
-                    dc1, dc2 = st.columns([3, 1])
-                    with dc1:
-                        st.markdown(f"**{d['full_name']}** (`{d['username']}`)")
-                        st.caption(f"{d['specialty']} — {d['room']}")
-                    with dc2:
-                        if st.button("Chọn", key=f"quick_{d['username']}"):
-                            auth_res = doctor_auth_service.authenticate_doctor(
-                                username=d['username'],
-                                password_plain="Bacsi@123",
-                                mongo_db=mongo_manager.db if mongo_manager.is_connected else None
-                            )
-                            if auth_res:
-                                token, doc_profile = auth_res
-                                st.session_state.logged_in_doctor = doc_profile
-                                st.session_state.doctor_token = token
-                                st.rerun()
-
-    else:
-        # DOCTOR WORKSPACE (ĐÃ ĐĂNG NHẬP)
-        current_doc = st.session_state.logged_in_doctor
-        
-        # Banner Bác sĩ
-        st.success(f"👨‍⚕️ **Bác sĩ đang trực:** {current_doc.title} **{current_doc.full_name}** | Chuyên khoa: *{current_doc.specialty}* | {current_doc.room}")
-
-        doc_filter_date = st.date_input(
-            "📅 Chọn ngày làm việc:",
-            value=datetime.today().date(),
-            key="doc_portal_date_filter"
-        )
-        doc_date_str = doc_filter_date.strftime("%Y-%m-%d")
-
-        # Lấy danh sách bệnh nhân
-        all_appts = booking_service.list_all_bookings(date_filter=doc_date_str)
-        doc_slots = booking_service.get_schedule(doc_date_str)
-
-        # Thống kê nhanh 4 chỉ số
-        m_c1, m_c2, m_c3, m_c4 = st.columns(4)
-        total_ap = len(all_appts)
-        waiting_ap = sum(1 for b in all_appts if b.examination_status == ExaminationStatus.WAITING and b.status == BookingStatus.CONFIRMED)
-        in_prog_ap = sum(1 for b in all_appts if b.examination_status == ExaminationStatus.IN_PROGRESS and b.status == BookingStatus.CONFIRMED)
-        done_ap = sum(1 for b in all_appts if b.examination_status == ExaminationStatus.COMPLETED)
-
-        m_c1.metric("Tổng Lịch Hẹn", f"{total_ap} ca")
-        m_c2.metric("Chờ Khám", f"{waiting_ap} ca")
-        m_c3.metric("Đang Khám", f"{in_prog_ap} ca")
-        m_c4.metric("Đã Hoàn Thành", f"{done_ap} ca")
-
-        st.markdown("---")
-        st.subheader(f"📋 Danh Sách Bệnh Nhân Khám Ngày {doc_date_str}")
-
-        if not all_appts:
-            st.info("Chưa có lịch hẹn nào của bệnh nhân trong ngày này.")
-        else:
-            for b in all_appts:
-                is_cancelled = (b.status == BookingStatus.CANCELLED)
-                with st.container(border=True):
-                    c1, c2, c3 = st.columns([2, 2, 2])
-                    with c1:
-                        st.markdown(f"**STT #{b.queue_number:02d}** | Mã: `{b.booking_code}`")
-                        st.markdown(f"👤 **Bệnh nhân:** `{b.patient_name}` — 📞 `{b.patient_phone}`")
-                        st.caption(f"Giờ hẹn: {b.appointment_time}")
-                    with c2:
-                        st.markdown(f"📝 **Triệu chứng:** *{b.symptoms or 'Không ghi chú'}*")
-                        if is_cancelled:
-                            st.error("Đã hủy")
-                        elif b.examination_status == ExaminationStatus.IN_PROGRESS:
-                            st.info("🔄 Đang khám")
-                        elif b.examination_status == ExaminationStatus.COMPLETED:
-                            st.success("✅ Đã hoàn thành")
-                        elif b.examination_status == ExaminationStatus.NO_SHOW:
-                            st.warning("⚠️ Vắng mặt")
-                        else:
-                            st.markdown("⏳ Đang chờ khám")
-                    with c3:
-                        if not is_cancelled:
-                            act_col1, act_col2 = st.columns(2)
-                            with act_col1:
-                                if st.button("📞 Gọi Khám", key=f"start_{b.booking_code}"):
-                                    mongo_manager.update_doctor_examination_status(b.booking_code, "IN_PROGRESS", current_doc.full_name)
-                                    b.examination_status = ExaminationStatus.IN_PROGRESS
-                                    st.rerun()
-                            with act_col2:
-                                if st.button("⚠️ Vắng Mặt", key=f"noshow_{b.booking_code}"):
-                                    mongo_manager.update_doctor_examination_status(b.booking_code, "NO_SHOW", current_doc.full_name)
-                                    b.examination_status = ExaminationStatus.NO_SHOW
-                                    st.rerun()
-
-                    # Form ghi bệnh án
-                    if not is_cancelled:
-                        with st.expander(f"🩺 Ghi Hồ Sơ Bệnh Án & Toa Thuốc cho {b.patient_name} (#{b.queue_number:02d})"):
-                            diag = st.text_input("Chẩn đoán lâm sàng (*):", value=b.clinical_record.get('diagnosis', '') if b.clinical_record else "", key=f"diag_{b.booking_code}")
-                            tests = st.text_input("Chỉ định xét nghiệm (NS1Ag, CTM...):", value=b.clinical_record.get('tests_recommended', '') if b.clinical_record else "", key=f"tests_{b.booking_code}")
-                            presc = st.text_area("Đơn thuốc & Lời dặn điều trị:", value=b.clinical_record.get('prescription', '') if b.clinical_record else "", key=f"presc_{b.booking_code}")
-
-                            if st.button("💾 Lưu Bệnh Án & Hoàn Thành Ca", key=f"save_rec_{b.booking_code}", type="primary"):
-                                if not diag.strip():
-                                    st.error("Vui lòng nhập chẩn đoán lâm sàng!")
-                                else:
-                                    mongo_manager.save_doctor_clinical_record(b.booking_code, diag, tests, presc, current_doc.full_name)
-                                    b.examination_status = ExaminationStatus.COMPLETED
-                                    b.clinical_record = {
-                                        "diagnosis": diag,
-                                        "tests_recommended": tests,
-                                        "prescription": presc,
-                                        "doctor_name": current_doc.full_name
-                                    }
-                                    st.success("Đã lưu bệnh án và đánh dấu hoàn thành ca khám!")
-                                    st.rerun()
-
-        # Quản lý khóa / mở ca khám của Bác sĩ
-        st.markdown("---")
-        st.subheader("🚫 Quản Lý Khóa / Mở Ca Khám Đột Xuất (Bác Sĩ Bận)")
-        st.caption("Khóa ca khám khi Bác sĩ bận hội chẩn hoặc trực cấp cứu đột xuất.")
-
-        b_cols = st.columns(4)
-        for idx, s in enumerate(doc_slots):
-            with b_cols[idx % 4]:
-                if s.status == SlotStatus.BLOCKED_BY_DOCTOR:
-                    st.info(f"🟣 **{s.start_time}** (Đã khóa)")
-                    if st.button("Mở lại ca", key=f"unblock_{s.start_time}"):
-                        mongo_manager.toggle_slot_block_by_doctor(doc_date_str, s.start_time, False, "", current_doc.full_name)
-                        st.rerun()
-                elif s.status == SlotStatus.AVAILABLE:
-                    st.success(f"🟢 **{s.start_time}** (Còn trống)")
-                    if st.button("Khóa ca", key=f"block_{s.start_time}"):
-                        mongo_manager.toggle_slot_block_by_doctor(doc_date_str, s.start_time, True, "Bác sĩ bận hội chẩn", current_doc.full_name)
-                        st.rerun()
-                elif s.status == SlotStatus.BOOKED:
-                    st.error(f"🔴 **{s.start_time}** (Đã đặt)")
-                elif s.status == SlotStatus.CANCELLED_LOCKED:
-                    st.warning(f"🟡 **{s.start_time}** (Trống <24h)")

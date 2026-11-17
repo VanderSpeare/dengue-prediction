@@ -101,6 +101,47 @@ _EMERGENCY_MSG = (
     "Gọi ngay **115** nếu người bệnh li bì, trụy mạch hoặc chân tay lạnh."
 )
 
+# ---------------------------------------------------------------------------
+# Off-topic Confirmation Guard (Dengue / Sốt xuất huyết)
+# ---------------------------------------------------------------------------
+CONFIRMATION_PROMPT = (
+    "⚠️ Câu hỏi này không liên quan đến **dịch sốt xuất huyết (Dengue)**, "
+    "bạn có muốn tôi trả lời không? (**Yes / No**)"
+)
+DECLINE_RESPONSE = (
+    "Đã hủy. Bạn có thể đặt câu hỏi khác liên quan đến **Sốt xuất huyết (Dengue)** nhé!"
+)
+
+_DENGUE_KEYWORDS = [
+    "sốt xuất huyết", "sot xuat huyet", "sxh", "dengue",
+    "muỗi", "muoi", "aedes", "lăng quăng", "lang quang", "bọ gậy", "bo gay",
+    "tiểu cầu", "tieu cau", "hematocrit", "ns1", "igg", "igm",
+    "xuất huyết", "xuat huyet", "sốt cao", "sot cao", "hạ sốt", "ha sot",
+    "paracetamol", "ibuprofen", "aspirin", "oresol", "truyền dịch", "truyen dich",
+    "dịch tễ", "dich te", "ổ dịch", "o dich", "ca bệnh", "ca benh", "dịch bệnh", "dich benh",
+    "triệu chứng", "trieu chung", "phòng ngừa", "phong ngua", "điều trị", "dieu tri",
+    "phát ban", "phat ban", "đau hốc mắt", "dau hoc mat", "vắc xin", "vac xin", "vaccine",
+    "qdenga", "dengvaxia", "bệnh viện", "benh vien", "cấp cứu", "cap cuu", "khám bệnh", "kham benh",
+]
+
+_YES_REPLIES = {
+    "yes", "y", "có", "co", "ok", "okay", "đồng ý", "dong y",
+    "ừ", "uh", "được", "duoc", "tiếp tục", "tiep tuc", "trả lời", "tra loi",
+}
+_NO_REPLIES = {
+    "no", "n", "không", "khong", "hủy", "huy", "thôi", "thoi", "bỏ qua", "bo qua", "cancel",
+}
+
+
+def is_confirmation_reply(text: str) -> str | None:
+    """Return 'yes', 'no', or None if text is not a yes/no confirmation reply."""
+    cleaned = (text or "").strip().lower().rstrip(".!?,")
+    if cleaned in _YES_REPLIES:
+        return "yes"
+    if cleaned in _NO_REPLIES:
+        return "no"
+    return None
+
 
 # ---------------------------------------------------------------------------
 # Offline keyword fallback
@@ -199,17 +240,83 @@ class GeminiChatEngine:
             except Exception as exc:
                 logger.warning(f"Custom key init failed: {exc}")
 
+    def is_dengue_related(
+        self,
+        query: str,
+        chat_history: list | None = None,
+    ) -> bool:
+        """
+        Check whether the user's query is related to dengue fever (sốt xuất huyết)
+        or relevant medical/epidemiological context.
+        """
+        q_lower = (query or "").strip().lower()
+        if not q_lower:
+            return True
+
+        # Fast-path keyword check (never delay emergency or obvious dengue queries)
+        if any(kw in q_lower for kw in _SEVERE_PATIENT_SIGNS) or any(
+            kw in q_lower for kw in _DENGUE_KEYWORDS
+        ):
+            return True
+
+        if _genai_client is None:
+            return False
+
+        try:
+            from google.genai import types as _gt
+
+            recent_context = ""
+            if chat_history:
+                tail = chat_history[-2:]
+                lines = [
+                    f"{m.get('role', 'user')}: {str(m.get('content', ''))[:200]}"
+                    for m in tail
+                    if m.get("content")
+                ]
+                if lines:
+                    recent_context = "Ngữ cảnh hội thoại gần đây:\n" + "\n".join(lines) + "\n\n"
+
+            classifier_prompt = (
+                f"{recent_context}"
+                f"Câu hỏi hiện tại: \"{query}\"\n\n"
+                "Hãy phân loại xem câu hỏi hiện tại có liên quan đến bệnh sốt xuất huyết (Dengue), "
+                "muỗi vằn, dịch tễ sốt xuất huyết, triệu chứng/điều trị/phòng ngừa sốt xuất huyết, "
+                "hoặc tiếp nối chủ đề y tế liên quan từ ngữ cảnh trên hay không.\n"
+                "Chỉ trả lời đúng 1 từ: RELATED hoặc UNRELATED."
+            )
+            resp = _genai_client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=classifier_prompt,
+                config=_gt.GenerateContentConfig(
+                    thinking_config=_gt.ThinkingConfig(thinking_level="low"),
+                    max_output_tokens=16,
+                ),
+            )
+            verdict = (resp.text or "").strip().upper()
+            if "UNRELATED" in verdict:
+                return False
+            return True
+        except Exception as exc:
+            logger.warning(f"Topic classification failed, allowing query: {exc}")
+            return True
+
     def process_query_stream(
         self,
         query: str,
         role: str = "Nguoi dan",
         chat_history: list | None = None,
+        confirmed: bool = False,
     ) -> Generator[str, None, None]:
         """
         Streaming generator — yields text chunks from Gemini with live Google Search.
         Compatible with Streamlit st.write_stream().
         """
         chat_history = chat_history or []
+
+        if not confirmed and not self.is_dengue_related(query, chat_history):
+            yield CONFIRMATION_PROMPT
+            return
+
         system_prompt = _get_system_prompt(role)
 
         if _genai_client is None:
@@ -253,12 +360,24 @@ class GeminiChatEngine:
         role: str = "Nguoi dan",
         chat_history: list | None = None,
         session_id: str = "default",
+        confirmed: bool = False,
     ) -> dict:
         """
         Non-streaming method returning response dictionary.
         """
-        chunks = list(self.process_query_stream(query, role, chat_history))
+        chunks = list(self.process_query_stream(query, role, chat_history, confirmed=confirmed))
         answer = "".join(chunks)
+
+        if answer == CONFIRMATION_PROMPT:
+            return {
+                "answer":                answer,
+                "intent":                "CONFIRMATION_REQUIRED",
+                "requires_confirmation": True,
+                "sources":               [],
+                "tokens_used":           len(answer) // 4,
+                "is_emergency":          False,
+                "web_searched":          False,
+            }
 
         q_lower = query.lower()
         is_emergency = any(kw in q_lower for kw in _SEVERE_PATIENT_SIGNS)
@@ -266,12 +385,13 @@ class GeminiChatEngine:
             answer += _EMERGENCY_MSG
 
         return {
-            "answer":       answer,
-            "intent":       "GENERAL",
-            "sources":      [f"Google Gemini ({GEMINI_MODEL}) + Google Search"],
-            "tokens_used":  len(answer) // 4,
-            "is_emergency": is_emergency,
-            "web_searched": _genai_client is not None,
+            "answer":                answer,
+            "intent":                "GENERAL",
+            "requires_confirmation": False,
+            "sources":               [f"Google Gemini ({GEMINI_MODEL}) + Google Search"],
+            "tokens_used":           len(answer) // 4,
+            "is_emergency":          is_emergency,
+            "web_searched":          _genai_client is not None,
         }
 
 

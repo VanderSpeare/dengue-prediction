@@ -279,23 +279,6 @@ def _qa(c: dict) -> None:
     )
 
 
-def _profile(c: dict) -> None:
-    p = c.get("profile", {})
-    bio = "".join(f"<div>{_ESC(t)}</div>" for t in p.get("bio", []))
-    links = "".join(f'<a href="{_ESC(h)}">{_ESC(t)}</a>' for t, h in p.get("links", []))
-    _md(
-        _h(
-            "profile.html",
-            icon=p.get("icon", ""),
-            name_en=p.get("name_en", ""),
-            name_vi=p.get("name_vi", ""),
-            tagline=p.get("tagline", ""),
-            bio_html=bio,
-            links_html=links,
-        )
-    )
-
-
 def _partners(c: dict) -> None:
     pt = c.get("partners", {})
     items = "".join(
@@ -322,7 +305,7 @@ def _footer(c: dict) -> None:
 # Dựng toàn trang
 # ---------------------------------------------------------------------------
 def build_kaf_page() -> dict:
-    """Vẽ toàn bộ khung trang. Trả về {'surveillance','forecast','assistant','booking','lookup','doctor'} là các st.container."""
+    """Vẽ toàn bộ khung trang. Trả về {'surveillance','forecast','assistant'} là các st.container."""
     c = _content()
     sec: dict = {}
     _model_css()
@@ -359,22 +342,7 @@ def build_kaf_page() -> dict:
         )
         sec["assistant"] = st.container(key="body-ai")
 
-    # 4. STREAMING TICKET  ->  Đặt lịch + Tra cứu
-    b = c.get("booking", {})
-    with st.container(key="sec-booking"):
-        _md(_head("booking", b.get("label", ""), b.get("en", ""), b.get("ja", "")) + _cards(b.get("cards", [])))
-        sec["booking"] = st.container(key="body-booking")
-        _md(
-            '<div class="kaf-subhead"><span>'
-            + _ESC(b.get("lookup_en", ""))
-            + "</span><em>"
-            + _ESC(b.get("lookup_ja", ""))
-            + "</em></div>"
-        )
-        sec["lookup"] = st.container(key="body-lookup")
-        _md(_note(b.get("foot", "")))
-
-    # 5. STREAMING BONUS ITEM  ->  Cẩm nang nhanh
+    # 4. STREAMING BONUS ITEM  ->  Cẩm nang nhanh
     g = c.get("guide", {})
     with st.container(key="sec-guide"):
         _md(
@@ -394,13 +362,6 @@ def build_kaf_page() -> dict:
     # 8. Q&A
     with st.container(key="sec-qa"):
         _qa(c)
-
-    # 9. PROFILE  ->  Cổng bác sĩ
-    with st.container(key="sec-profile"):
-        _profile(c)
-        sec["doctor"] = st.container(key="body-doctor")
-        top = c.get("profile", {}).get("top", "BACK TO TOP ↑")
-        _md(f'<div class="kaf-btnrow"><a class="kaf-btn kaf-btn--ghost" href="#kaf-top">{_ESC(top)}</a></div>')
 
     # 10. PARTNERS
     with st.container(key="sec-partners"):

@@ -18,7 +18,13 @@ import paths
 from ui_theme import apply_theme, status_badge, ticket_card, style_fig, map_style as ui_map_style
 from kaf_layout import build_kaf_page
 from data_processor import load_and_process_new_data
-from chatbot.gemini_chat_engine import GeminiChatEngine, GEMINI_MODEL as _CHAT_MODEL
+from chatbot.gemini_chat_engine import (
+    CONFIRMATION_PROMPT,
+    DECLINE_RESPONSE,
+    GeminiChatEngine,
+    GEMINI_MODEL as _CHAT_MODEL,
+    is_confirmation_reply,
+)
 
 # Import MongoDB Data Layer for Dengue Datasets
 try:
@@ -922,11 +928,42 @@ with tab1:
 
 
 # ===========================================================================
-# TAB 2: TRỢ LÝ AI HỎI ĐÁP (GIỮ NGUYÊN HOÀN TOÀN)
+# TAB 2: TRỢ LÝ AI HỎI ĐÁP
 # ===========================================================================
+def _stream_and_render_answer(query_text: str, role_name: str, history: list) -> None:
+    """Stream Gemini response for a confirmed/in-scope query and append to history."""
+    with st.chat_message("assistant"):
+        stream = st.session_state.chat_engine.process_query_stream(
+            query=query_text,
+            role=role_name,
+            chat_history=history,
+            confirmed=True,
+        )
+        answer_text = st.write_stream(stream)
+
+        _SEVERE_QUERY_SIGNS = [
+            "chảy máu chân răng", "chay mau chan rang", "chảy máu cam", "chay mau cam",
+            "nôn ra máu", "non ra mau", "đi cầu phân đen", "di cau phan den",
+            "đau bụng dữ dội", "dau bung du doi", "nôn liên tục", "non lien tuc",
+            "lì bì", "li bi", "vật vã", "bứt rứt", "hôn mê", "tay chân lạnh", "chân tay lạnh",
+            "tụt huyết áp", "sốc sốt xuất huyết", "soc sot xuat huyet",
+        ]
+        q_low = query_text.lower()
+        if any(kw in q_low for kw in _SEVERE_QUERY_SIGNS):
+            st.error(
+                "🚨 **CẢNH BÁO NGUY HIỂM:** Câu hỏi có chứa dấu hiệu cảnh báo sốt xuất huyết nặng!\n\n"
+                "**Người bệnh cần đến cơ sở y tế hoặc khoa Cấp cứu NGAY LẬP TỨC.** Gọi **115** nếu người bệnh lơ mơ hoặc trụy mạch."
+            )
+
+        st.caption(f"🤖 Google Gemini · {_CHAT_MODEL} (Google Search Live)")
+
+    if answer_text:
+        st.session_state.messages.append({"role": "assistant", "content": answer_text})
+
+
 with tab2:
     st.header("💬 Trợ lý AI — Powered by Google Gemini")
-    st.markdown("Hỏi bất kỳ điều gì — y tế, dịch tễ, sốt xuất huyết, hoặc các chủ đề khác.")
+    st.markdown("Hỏi bất kỳ điều gì — y tế, dịch tễ, sốt xuất huyết, hoặc các chủ đề khác (câu hỏi ngoài chủ đề Sốt xuất huyết sẽ hỏi xác nhận trước khi trả lời).")
 
     role = st.radio(
         "Chế độ trả lời:",
@@ -943,6 +980,12 @@ with tab2:
             {"role": "assistant", "content": "Xin chào! Tôi là Trợ lý AI. Tôi có thể giúp gì cho bạn?"}
         ]
 
+    if "pending_offtopic_query" not in st.session_state:
+        st.session_state.pending_offtopic_query = None
+
+    if "confirmed_offtopic_query" not in st.session_state:
+        st.session_state.confirmed_offtopic_query = None
+
     st.markdown("**Gợi ý:**")
     sample_cols = st.columns(4)
     if sample_cols[0].button("🌡️ Triệu chứng SXH?"):
@@ -958,42 +1001,68 @@ with tab2:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
+    # Handle confirmed off-topic query triggered by clicking the Yes button
+    if st.session_state.confirmed_offtopic_query:
+        confirmed_q = st.session_state.confirmed_offtopic_query
+        st.session_state.confirmed_offtopic_query = None
+        _stream_and_render_answer(
+            query_text=confirmed_q,
+            role_name=role_name,
+            history=st.session_state.messages[:-1],
+        )
+
+    # Show Yes/No confirmation buttons when an off-topic question is awaiting confirmation
+    if st.session_state.pending_offtopic_query:
+        confirm_cols = st.columns([1, 1, 4])
+        if confirm_cols[0].button("✅ Yes — Trả lời", key="confirm_offtopic_yes"):
+            st.session_state.confirmed_offtopic_query = st.session_state.pending_offtopic_query
+            st.session_state.pending_offtopic_query = None
+            st.rerun()
+        if confirm_cols[1].button("❌ No — Không trả lời", key="confirm_offtopic_no"):
+            st.session_state.pending_offtopic_query = None
+            st.session_state.messages.append({"role": "assistant", "content": DECLINE_RESPONSE})
+            st.rerun()
+
     user_query = st.chat_input("Nhập câu hỏi của bạn...")
     if hasattr(st.session_state, "user_input_trigger") and st.session_state.user_input_trigger:
         user_query = st.session_state.user_input_trigger
         st.session_state.user_input_trigger = None
 
     if user_query:
+        pending_q = st.session_state.pending_offtopic_query
+        reply_intent = is_confirmation_reply(user_query) if pending_q else None
+
         st.session_state.messages.append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(user_query)
 
-        with st.chat_message("assistant"):
-            stream = st.session_state.chat_engine.process_query_stream(
-                query=user_query,
-                role=role_name,
-                chat_history=st.session_state.messages[:-1],
+        if pending_q and reply_intent == "yes":
+            st.session_state.pending_offtopic_query = None
+            _stream_and_render_answer(
+                query_text=pending_q,
+                role_name=role_name,
+                history=st.session_state.messages[:-2],
             )
-            answer_text = st.write_stream(stream)
-
-            _SEVERE_QUERY_SIGNS = [
-                "chảy máu chân răng", "chay mau chan rang", "chảy máu cam", "chay mau cam",
-                "nôn ra máu", "non ra mau", "đi cầu phân đen", "di cau phan den",
-                "đau bụng dữ dội", "dau bung du doi", "nôn liên tục", "non lien tuc",
-                "lì bì", "li bi", "vật vã", "bứt rứt", "hôn mê", "tay chân lạnh", "chân tay lạnh",
-                "tụt huyết áp", "sốc sốt xuất huyết", "soc sot xuat huyet",
-            ]
-            q_low = user_query.lower()
-            if any(kw in q_low for kw in _SEVERE_QUERY_SIGNS):
-                st.error(
-                    "🚨 **CẢNH BÁO NGUY HIỂM:** Câu hỏi có chứa dấu hiệu cảnh báo sốt xuất huyết nặng!\n\n"
-                    "**Người bệnh cần đến cơ sở y tế hoặc khoa Cấp cứu NGAY LẬP TỨC.** Gọi **115** nếu người bệnh lơ mơ hoặc trụy mạch."
+        elif pending_q and reply_intent == "no":
+            st.session_state.pending_offtopic_query = None
+            with st.chat_message("assistant"):
+                st.markdown(DECLINE_RESPONSE)
+            st.session_state.messages.append({"role": "assistant", "content": DECLINE_RESPONSE})
+        else:
+            st.session_state.pending_offtopic_query = None
+            if st.session_state.chat_engine.is_dengue_related(
+                user_query,
+                chat_history=st.session_state.messages[:-1],
+            ):
+                _stream_and_render_answer(
+                    query_text=user_query,
+                    role_name=role_name,
+                    history=st.session_state.messages[:-1],
                 )
-
-            st.caption(f"🤖 Google Gemini · {_CHAT_MODEL} (Google Search Live)")
-
-        if answer_text:
-            st.session_state.messages.append({"role": "assistant", "content": answer_text})
+            else:
+                st.session_state.pending_offtopic_query = user_query
+                st.session_state.messages.append({"role": "assistant", "content": CONFIRMATION_PROMPT})
+                st.rerun()
 
 
 # ===========================================================================

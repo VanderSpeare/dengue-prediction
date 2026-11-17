@@ -165,8 +165,8 @@ def mode() -> str:
 
 
 def map_style() -> str:
-    """Nền bản đồ Plotly: sáng ở chế độ Ngày, tối ở chế độ Đêm."""
-    return "carto-darkmatter" if mode() == "night" else "open-street-map"
+    """Nền bản đồ: dùng OpenStreetMap cho mọi chế độ (tránh lỗi API key của Carto)."""
+    return "open-street-map"
 
 
 def _enabled_effects(cfg: dict) -> list[str]:

@@ -30,6 +30,12 @@ sys.path.insert(0, str(_HERE))                    # chatbot_demo/
 sys.path.insert(0, str(_PROJECT_ROOT / "src"))    # src/
 
 from utils_chatbot import organize_messages
+from chatbot.gemini_chat_engine import (
+    CONFIRMATION_PROMPT,
+    DECLINE_RESPONSE,
+    GeminiChatEngine,
+    is_confirmation_reply,
+)
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -132,13 +138,43 @@ class PredictRequest(BaseModel):
     max_tokens: int = 2048
 
 
+_topic_checker = GeminiChatEngine()
+
+
 async def _stream_gemini(req: PredictRequest) -> AsyncGenerator[str, None]:
     """Async generator that yields SSE-formatted events with live Google Search."""
     history = req.history or []
+    message_to_answer = req.message
+    confirmed = False
+
+    # Check if the previous turn was waiting for Yes/No confirmation
+    if history and len(history[-1]) >= 2 and history[-1][1] == CONFIRMATION_PROMPT:
+        reply_intent = is_confirmation_reply(req.message)
+        if reply_intent == "yes":
+            message_to_answer = history[-1][0]
+            history = history[:-1]
+            confirmed = True
+        elif reply_intent == "no":
+            payload = json.dumps({"text": DECLINE_RESPONSE, "done": True})
+            yield f"data: {payload}\n\n"
+            return
+
+    if not confirmed:
+        history_dicts = []
+        for turn in history:
+            if len(turn) >= 2:
+                if turn[0]:
+                    history_dicts.append({"role": "user", "content": turn[0]})
+                if turn[1]:
+                    history_dicts.append({"role": "assistant", "content": turn[1]})
+        if not _topic_checker.is_dengue_related(message_to_answer, history_dicts):
+            payload = json.dumps({"text": CONFIRMATION_PROMPT, "done": True})
+            yield f"data: {payload}\n\n"
+            return
 
     # --- Offline path ---
     if _genai_client is None:
-        answer  = _offline_answer(req.message)
+        answer  = _offline_answer(message_to_answer)
         payload = json.dumps({"text": answer, "done": True})
         yield f"data: {payload}\n\n"
         return
@@ -180,7 +216,7 @@ async def _stream_gemini(req: PredictRequest) -> AsyncGenerator[str, None]:
             config=cfg,
             history=contents_history,
         )
-        response = chat.send_message_stream(req.message)
+        response = chat.send_message_stream(message_to_answer)
 
         full_text = ""
         for chunk in response:

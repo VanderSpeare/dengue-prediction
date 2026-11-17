@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    crossorigin=""
+  ></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: transparent;
+    }
+    #map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 850px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      background: #e2e8f0;
+    }
+    body.night .leaflet-tile-pane {
+      filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+    }
+    body.night #map-wrapper {
+      border-color: #334155;
+      background: #0f172a;
+    }
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    .map-hint {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      max-width: 480px;
+      z-index: 500;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      line-height: 1.4;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+      pointer-events: none;
+    }
+    body.night .map-hint {
+      background: rgba(15, 23, 42, 0.9);
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+    /* Google Maps style bottom-right controls */
+    .gmaps-ctrl-stack {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-right: 4px;
+      margin-bottom: 6px;
+    }
+    .gmaps-btn-single {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: none;
+      background: #ffffff;
+      color: #3c4043;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .gmaps-btn-single:hover { background: #f8f9fa; color: #202124; }
+    .gmaps-btn-single:active { background: #e8eaed; }
+    .gmaps-btn-single.active { color: #1a73e8; }
+    .gmaps-btn-single:disabled { opacity: 0.7; cursor: wait; }
+    .gmaps-zoom-group {
+      width: 40px;
+      border-radius: 8px;
+      background: #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .gmaps-zoom-btn {
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: #3c4043;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s ease;
+    }
+    .gmaps-zoom-btn:hover { background: #f8f9fa; color: #202124; }
+    .gmaps-zoom-btn:active { background: #e8eaed; }
+    .gmaps-zoom-divider {
+      width: 26px;
+      height: 1px;
+      background: #e6e6e6;
+      margin: 0 auto;
+    }
+    body.night .gmaps-btn-single,
+    body.night .gmaps-zoom-group {
+      background: #202124;
+      color: #e8eaed;
+      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.55);
+    }
+    body.night .gmaps-zoom-btn { color: #e8eaed; }
+    body.night .gmaps-btn-single:hover,
+    body.night .gmaps-zoom-btn:hover { background: #303134; color: #ffffff; }
+    body.night .gmaps-btn-single.active { color: #8ab4f8; }
+    body.night .gmaps-zoom-divider { background: #3c4043; }
+    @keyframes gmaps-spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .gmaps-spinning svg {
+      animation: gmaps-spin 1s linear infinite;
+    }
+    .pin-popup {
+      min-width: 210px;
+      max-width: 300px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .pin-popup .cat {
+      display: inline-block;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: #1d4ed8;
+    }
+    .pin-popup .area {
+      font-size: 12px;
+      color: #475569;
+      margin-bottom: 6px;
+    }
+    .pin-popup .body {
+      margin-bottom: 6px;
+      color: #0f172a;
+      white-space: pre-wrap;
+    }
+    .pin-popup .meta {
+      font-size: 11.5px;
+      color: #64748b;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+    }
+    .gmaps-link {
+      display: inline-block;
+      margin-top: 6px;
+      color: #1d4ed8;
+      font-weight: 600;
+      text-decoration: underline;
+    }
+    .custom-pin-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.35));
+    }
+    .user-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #2563eb;
+      border: 3px solid #ffffff;
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.28);
+    }
+    @media (max-width: 640px) {
+      .map-hint {
+        top: 56px;
+        left: 10px;
+        right: 10px;
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="map-wrapper">
+    <div id="map"></div>
+    <div class="map-hint">
+      📌 Chạm hoặc nhấp vào bản đồ để ghim vị trí &amp; thêm ý kiến / bình luận.
+    </div>
+  </div>
+
+  <script>
+    function sendMessageToStreamlit(type, data) {
+      window.parent.postMessage(
+        Object.assign({ isStreamlitMessage: true, type: type }, data),
+        "*"
+      );
+    }
+
+    function setFrameHeight() {
+      const wrapper = document.getElementById("map-wrapper");
+      const h = wrapper ? Math.max(wrapper.offsetHeight + 4, 900) : 900;
+      sendMessageToStreamlit("streamlit:setFrameHeight", { height: h });
+    }
+
+    function emitValue(payload) {
+      sendMessageToStreamlit("streamlit:setComponentValue", {
+        value: payload,
+        dataType: "json"
+      });
+    }
+
+    function emitPin(lat, lon) {
+      emitValue({
+        action: "pin_selected",
+        lat: Number(lat.toFixed(6)),
+        lon: Number(lon.toFixed(6)),
+        ts: Date.now()
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    let map = null;
+    let tileLayer = null;
+    let currentTheme = null;
+    let currentMapStyle = null;
+    let dataLayer = null;
+    let geoLayer = null;
+    let pinsLayer = null;
+    let userLayer = null;
+    let draftPinMarker = null;
+    let initialized = false;
+    let lastViewKey = null;
+    let lastUserTs = null;
+    let myLocBtnEl = null;
+
+    async function fallbackIpLocation() {
+      const endpoints = [
+        {
+          url: "https://ipwho.is/",
+          parse: (d) => d && d.success !== false && d.latitude && d.longitude
+            ? { lat: Number(d.latitude), lon: Number(d.longitude) }
+            : null
+        },
+        {
+          url: "https://ipapi.co/json/",
+          parse: (d) => d && d.latitude && d.longitude
+            ? { lat: Number(d.latitude), lon: Number(d.longitude) }
+            : null
+        }
+      ];
+      for (const ep of endpoints) {
+        try {
+          const resp = await fetch(ep.url, { cache: "no-store" });
+          if (!resp.ok) continue;
+          const json = await resp.json();
+          const parsed = ep.parse(json);
+          if (parsed) return parsed;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    const GMAPS_LOC_SVG = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+      </svg>`;
+    const GMAPS_PLUS_SVG = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>`;
+    const GMAPS_MINUS_SVG = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19 13H5v-2h14v2z"/>
+      </svg>`;
+
+    function triggerMyLocation() {
+      if (myLocBtnEl) {
+        myLocBtnEl.disabled = true;
+        myLocBtnEl.classList.add("gmaps-spinning");
+      }
+
+      const finishOk = (lat, lon, accuracy, source) => {
+        if (myLocBtnEl) {
+          myLocBtnEl.disabled = false;
+          myLocBtnEl.classList.remove("gmaps-spinning");
+          myLocBtnEl.classList.add("active");
+        }
+        const ts = Date.now();
+        const loc = {
+          lat: Number(lat.toFixed(6)),
+          lon: Number(lon.toFixed(6)),
+          accuracy: accuracy ? Math.round(accuracy) : 120,
+          source: source,
+          ts: ts
+        };
+        renderUserLocation(loc, true);
+        emitValue(Object.assign({ action: "user_location" }, loc));
+      };
+
+      const handleFail = async (msg) => {
+        const ipLoc = await fallbackIpLocation();
+        if (ipLoc) {
+          finishOk(ipLoc.lat, ipLoc.lon, 1500, "ip");
+        } else {
+          if (myLocBtnEl) {
+            myLocBtnEl.disabled = false;
+            myLocBtnEl.classList.remove("gmaps-spinning");
+          }
+          alert(msg);
+        }
+      };
+
+      if (!navigator.geolocation) {
+        handleFail("Trình duyệt không hỗ trợ định vị GPS.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          finishOk(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, "gps");
+        },
+        () => {
+          handleFail("Không thể lấy vị trí GPS. Vui lòng cấp quyền Vị trí (Location) trong trình duyệt.");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      );
+    }
+
+    function ensureMap(centerLat, centerLon, zoom, theme, mapStyle, viewKey) {
+      if (typeof L === "undefined") {
+        document.getElementById("map").innerHTML =
+          '<div style="padding:24px;text-align:center;color:#dc2626;">Không tải được thư viện bản đồ Leaflet (cần kết nối Internet).</div>';
+        return false;
+      }
+
+      if (!map) {
+        map = L.map("map", {
+          center: [centerLat || 10.7769, centerLon || 106.7009],
+          zoom: zoom || 11,
+          zoomControl: false,
+          tap: true
+        });
+        dataLayer = L.layerGroup().addTo(map);
+        pinsLayer = L.layerGroup().addTo(map);
+        userLayer = L.layerGroup().addTo(map);
+
+        const GoogleMapsControls = L.Control.extend({
+          options: { position: "bottomright" },
+          onAdd: function () {
+            const stack = L.DomUtil.create("div", "gmaps-ctrl-stack");
+
+            const locBtn = L.DomUtil.create("button", "gmaps-btn-single", stack);
+            locBtn.type = "button";
+            locBtn.title = "Your location";
+            locBtn.setAttribute("aria-label", "Your location");
+            locBtn.innerHTML = GMAPS_LOC_SVG;
+            myLocBtnEl = locBtn;
+            L.DomEvent.on(locBtn, "click", function (e) {
+              L.DomEvent.stopPropagation(e);
+              triggerMyLocation();
+            });
+
+            const zoomGroup = L.DomUtil.create("div", "gmaps-zoom-group", stack);
+
+            const zoomInBtn = L.DomUtil.create("button", "gmaps-zoom-btn", zoomGroup);
+            zoomInBtn.type = "button";
+            zoomInBtn.title = "Zoom in";
+            zoomInBtn.setAttribute("aria-label", "Zoom in");
+            zoomInBtn.innerHTML = GMAPS_PLUS_SVG;
+            L.DomEvent.on(zoomInBtn, "click", function (e) {
+              L.DomEvent.stopPropagation(e);
+              map.zoomIn();
+            });
+
+            L.DomUtil.create("div", "gmaps-zoom-divider", zoomGroup);
+
+            const zoomOutBtn = L.DomUtil.create("button", "gmaps-zoom-btn", zoomGroup);
+            zoomOutBtn.type = "button";
+            zoomOutBtn.title = "Zoom out";
+            zoomOutBtn.setAttribute("aria-label", "Zoom out");
+            zoomOutBtn.innerHTML = GMAPS_MINUS_SVG;
+            L.DomEvent.on(zoomOutBtn, "click", function (e) {
+              L.DomEvent.stopPropagation(e);
+              map.zoomOut();
+            });
+
+            L.DomEvent.disableClickPropagation(stack);
+            return stack;
+          }
+        });
+        map.addControl(new GoogleMapsControls());
+
+        map.on("click", function (e) {
+          const { lat, lng } = e.latlng;
+          placeDraftPin(lat, lng);
+          emitPin(lat, lng);
+        });
+      } else if (viewKey && viewKey !== lastViewKey) {
+        map.setView([centerLat || 10.7769, centerLon || 106.7009], zoom || 11);
+      }
+      lastViewKey = viewKey;
+
+      if (currentTheme !== theme) {
+        currentTheme = theme;
+        if (theme === "night") {
+          document.body.classList.add("night");
+        } else {
+          document.body.classList.remove("night");
+        }
+      }
+      if (!tileLayer) {
+        tileLayer = L.tileLayer(
+          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+          {
+            attribution: "&copy; OpenStreetMap contributors",
+            maxZoom: 19
+          }
+        ).addTo(map);
+      }
+
+      return true;
+    }
+
+    function placeDraftPin(lat, lon) {
+      if (!map) return;
+      const icon = L.divIcon({
+        className: "custom-pin-icon",
+        html: "📍",
+        iconSize: [30, 30],
+        iconAnchor: [15, 28]
+      });
+      if (draftPinMarker) {
+        draftPinMarker.setLatLng([lat, lon]);
+      } else {
+        draftPinMarker = L.marker([lat, lon], { icon: icon, draggable: true }).addTo(map);
+        draftPinMarker.on("dragend", function (ev) {
+          const pos = ev.target.getLatLng();
+          emitPin(pos.lat, pos.lng);
+        });
+      }
+      draftPinMarker
+        .bindPopup(
+          `<div class="pin-popup"><b>📌 Điểm đang chọn để ghim</b><br/>Tọa độ: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br/><i>Điền ý kiến ở biểu mẫu bên dưới bản đồ.</i></div>`
+        )
+        .openPopup();
+    }
+
+    function renderDataMarkers(markers) {
+      if (!dataLayer) return;
+      dataLayer.clearLayers();
+      (markers || []).forEach((pt) => {
+        if (pt.lat == null || pt.lon == null) return;
+        if (pt.radius_meters && pt.radius_meters > 0) {
+          L.circle([pt.lat, pt.lon], {
+            radius: pt.radius_meters,
+            color: pt.color || "#d90429",
+            fillColor: pt.color || "#d90429",
+            fillOpacity: 0.14,
+            weight: 1.5
+          }).addTo(dataLayer);
+        }
+        const m = L.circleMarker([pt.lat, pt.lon], {
+          radius: pt.radius_px || 10,
+          color: "#ffffff",
+          fillColor: pt.color || "#d90429",
+          fillOpacity: 0.85,
+          weight: 1.5
+        });
+        if (pt.title) {
+          m.bindTooltip(escapeHtml(pt.title));
+        }
+        if (pt.popup_html) {
+          m.bindPopup(`<div class="pin-popup">${pt.popup_html}</div>`);
+        }
+        m.addTo(dataLayer);
+      });
+    }
+
+    function getChoroplethColor(val, maxVal) {
+      const ratio = maxVal > 0 ? Math.min(1, val / maxVal) : 0;
+      if (ratio > 0.8) return "#800026";
+      if (ratio > 0.6) return "#bd0026";
+      if (ratio > 0.4) return "#e31a1c";
+      if (ratio > 0.2) return "#fc4e2a";
+      if (ratio > 0.05) return "#fd8d3c";
+      if (ratio > 0) return "#feb24c";
+      return "#fed976";
+    }
+
+    function renderChoropleth(geojsonData, valuesByProvince) {
+      if (geoLayer) {
+        map.removeLayer(geoLayer);
+        geoLayer = null;
+      }
+      if (!geojsonData || !geojsonData.features) return;
+      const vals = Object.values(valuesByProvince || {}).map((v) => Number(v.cases || 0));
+      const maxVal = vals.length ? Math.max(...vals) : 1;
+
+      geoLayer = L.geoJSON(geojsonData, {
+        style: function (feature) {
+          const name = feature.properties && feature.properties.adm1_name1;
+          const info = (valuesByProvince || {})[name] || {};
+          const cases = Number(info.cases || 0);
+          return {
+            fillColor: getChoroplethColor(cases, maxVal),
+            weight: 1.2,
+            opacity: 1,
+            color: "#ffffff",
+            fillOpacity: 0.72
+          };
+        },
+        onEachFeature: function (feature, layer) {
+          const name = (feature.properties && feature.properties.adm1_name1) || "Tỉnh/Thành";
+          const info = (valuesByProvince || {})[name] || {};
+          const cases = Number(info.cases || 0);
+          const inc = Number(info.incidence_rate || 0).toFixed(2);
+          layer.bindTooltip(`<b>${escapeHtml(name)}</b>: ${cases.toLocaleString()} ca`);
+          layer.on("click", function (e) {
+            L.DomEvent.stopPropagation(e);
+            const { lat, lng } = e.latlng;
+            placeDraftPin(lat, lng);
+            emitPin(lat, lng);
+          });
+        }
+      }).addTo(map);
+    }
+
+    function renderSavedPins(pins) {
+      if (!pinsLayer) return;
+      pinsLayer.clearLayers();
+      (pins || []).forEach((p) => {
+        if (p.lat == null || p.lon == null) return;
+        const icon = L.divIcon({
+          className: "custom-pin-icon",
+          html: "💬",
+          iconSize: [28, 28],
+          iconAnchor: [14, 24]
+        });
+        const marker = L.marker([p.lat, p.lon], { icon: icon });
+        const areaHtml = p.area_name
+          ? `<div class="area">📍 ${escapeHtml(p.area_name)}</div>`
+          : "";
+        const popupHtml = `
+          <div class="pin-popup">
+            <div class="cat">${escapeHtml(p.category || "💬 Ý kiến")}</div>
+            ${areaHtml}
+            <div class="body">${escapeHtml(p.comment || "")}</div>
+            <div class="meta">👤 ${escapeHtml(p.author || "Người dân")} · 🕒 ${escapeHtml(p.created_at || "")}</div>
+          </div>
+        `;
+        marker.bindPopup(popupHtml);
+        marker.addTo(pinsLayer);
+      });
+    }
+
+    function renderUserLocation(userLoc, openPopupNow) {
+      if (!userLayer) return;
+      userLayer.clearLayers();
+      if (!userLoc || userLoc.lat == null || userLoc.lon == null) return;
+
+      const lat = Number(userLoc.lat);
+      const lon = Number(userLoc.lon);
+      const gmapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+
+      const dotIcon = L.divIcon({
+        className: "",
+        html: '<div class="user-dot"></div>',
+        iconSize: [18, 18],
+        iconAnchor: [9, 9]
+      });
+      const marker = L.marker([lat, lon], { icon: dotIcon })
+        .bindTooltip("Your current location in Google Maps", { permanent: false })
+        .bindPopup(
+          `<div class="pin-popup">
+            <b>📍 Your current location in Google Maps</b><br/>
+            <span>${lat.toFixed(5)}, ${lon.toFixed(5)}</span><br/>
+            <a class="gmaps-link" href="${gmapsUrl}" target="_blank" rel="noopener noreferrer">
+              Open your current location in Google Maps ↗
+            </a>
+          </div>`
+        )
+        .addTo(userLayer);
+
+      if (userLoc.accuracy && userLoc.accuracy < 10000) {
+        L.circle([lat, lon], {
+          radius: Math.max(userLoc.accuracy, 80),
+          color: "#4285F4",
+          fillColor: "#4285F4",
+          fillOpacity: 0.14,
+          weight: 1
+        }).addTo(userLayer);
+      }
+
+      if (myLocBtnEl) {
+        myLocBtnEl.classList.add("active");
+      }
+
+      if (openPopupNow || (userLoc.ts && userLoc.ts !== lastUserTs)) {
+        lastUserTs = userLoc.ts;
+        const targetZoom = userLoc.source === "ip" ? 14 : 16;
+        map.flyTo([lat, lon], targetZoom, { duration: 0.9 });
+        marker.openPopup();
+      }
+    }
+
+    window.addEventListener("message", (event) => {
+      if (!event.data || event.data.type !== "streamlit:render") return;
+      const args = event.data.args || {};
+      const ok = ensureMap(
+        args.center_lat || 10.7769,
+        args.center_lon || 106.7009,
+        args.zoom || 11,
+        args.theme || "day",
+        args.map_style || "",
+        args.view_key || ""
+      );
+      if (!ok) {
+        setFrameHeight();
+        return;
+      }
+
+      if (!initialized) {
+        initialized = true;
+        setTimeout(() => map.invalidateSize(), 150);
+      }
+
+      renderDataMarkers(args.markers);
+      renderChoropleth(args.geojson_data, args.choropleth_values);
+      renderSavedPins(args.pins);
+      renderUserLocation(args.user_location, false);
+
+      if (args.selected_pin && args.selected_pin.lat != null && args.selected_pin.lon != null) {
+        placeDraftPin(args.selected_pin.lat, args.selected_pin.lon);
+      } else if (draftPinMarker && !args.selected_pin) {
+        map.removeLayer(draftPinMarker);
+        draftPinMarker = null;
+      }
+
+      setFrameHeight();
+    });
+
+    window.addEventListener("resize", () => {
+      if (map) map.invalidateSize();
+      setFrameHeight();
+    });
+
+    sendMessageToStreamlit("streamlit:componentReady", { apiVersion: 1 });
+    setFrameHeight();
+  </script>
+</body>
+</html>

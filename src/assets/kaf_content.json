@@ -1,14 +1,13 @@
 {
   "_ghi_chu": "Toan bo chu tren trang nam o day. Sua chu, them muc tin tuc / cau hoi / nguon tham khao ma khong can sua Python.",
 
-  "brand": { "left": "GIÁM SÁT SXH", "year": "2026", "right": "CỔNG BÁC SĨ ↗", "right_href": "#doctor" },
+  "brand": { "left": "GIÁM SÁT SXH", "year": "2026", "right": "TRỢ LÝ AI ↗", "right_href": "#ai-assistant" },
 
   "nav": [
     ["giới thiệu", "outline"],
     ["giám sát", "surveillance"],
     ["dự báo ai", "forecast"],
     ["trợ lý ai", "ai-assistant"],
-    ["đặt lịch", "booking"],
     ["cẩm nang", "guide"],
     ["tin tức", "news"],
     ["kiến thức", "special"],
@@ -19,7 +18,7 @@
 
   "hero": {
     "title_en": "GIÁM SÁT SỐT XUẤT HUYẾT",
-    "title_vi": "Hệ thống Giám sát Dịch Sốt xuất huyết & Cổng Y Tế Trực Tuyến",
+    "title_vi": "Hệ thống Giám sát & Dự báo Dịch Sốt xuất huyết",
     "marquee": "CUỘN XUỐNG",
     "marquee_repeat": 11
   },
@@ -36,16 +35,16 @@
     ],
     "intro_bold": [
       "Xem dữ liệu dịch tễ,",
+      "theo dõi dự báo AI,",
       "hỏi Trợ lý AI,",
-      "đặt lịch khám với bác sĩ,",
       "ngay trên một trang."
     ],
     "summary_label": "TỔNG QUAN",
     "summary_title": "thông tin chính",
     "rows": [
-      ["TÊN", "Hệ thống Giám sát Sốt xuất huyết 2026<br>Giám sát dịch tễ & Y tế trực tuyến"],
-      ["ĐỊA ĐIỂM", "Phòng Khám Đa Khoa Quốc Tế<br>Phòng 302, Tầng 3, 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"],
-      ["ĐẶT LỊCH", "Đặt lịch trực tuyến mọi lúc<br>Khung giờ hiển thị theo từng ngày"]
+      ["TÊN", "Hệ thống Giám sát Sốt xuất huyết 2026<br>Giám sát dịch tễ & Dự báo AI"],
+      ["PHẠM VI", "Giám sát dịch tễ đa cấp<br>Phố · Phường · Quận · Toàn quốc"],
+      ["DỰ BÁO", "Mô hình XGBoost & Google Gemini<br>Đánh giá xu hướng dịch tễ 3 tháng tới"]
     ],
     "cta": "Đọc cẩm nang sốt xuất huyết ↗",
     "cta_href": "#special"
@@ -86,20 +85,6 @@
     "item_note": "※Thông tin chỉ mang tính tham khảo, không thay thế chẩn đoán của bác sĩ."
   },
 
-  "booking": {
-    "label": "đặt lịch",
-    "en": "ĐẶT LỊCH",
-    "ja": "đặt lịch & tra cứu lịch hẹn",
-    "cards": [
-      ["Đặt lịch khám mới", "Chọn ngày, khung giờ, bác sĩ", "※Nhận phiếu hẹn và số thứ tự ngay", "01"],
-      ["Tra cứu & hủy lịch", "Nhập mã đặt lịch", "※Mã dạng DK-YYYYMMDD-XXXX", "02"]
-    ],
-    "foot": "※Một số ca có thể bị khóa nếu bác sĩ bận đột xuất. Vui lòng chọn ca còn trống.",
-    "lookup_label": "tra cứu",
-    "lookup_en": "TRA CỨU",
-    "lookup_ja": "tra cứu & quản lý lịch hẹn"
-  },
-
   "guide": {
     "label": "cẩm nang",
     "en": "CẨM NANG",
@@ -123,7 +108,6 @@
     "items": [
       ["20261107", "📚", "Bổ sung 5 bài cẩm nang sốt xuất huyết", "#special"],
       ["20261107", "💬", "Trợ lý AI sẵn sàng giải đáp 24/7", "#ai-assistant"],
-      ["20261107", "📅", "Đặt lịch khám trực tuyến đang mở", "#booking"],
       ["20261107", "📊", "Bản đồ ổ dịch và dự báo 3 tháng", "#surveillance"]
     ]
   },
@@ -150,24 +134,8 @@
       ["Có thể dùng thuốc hạ sốt nào?", "Chỉ dùng paracetamol đơn chất, đúng liều ghi trên nhãn hoặc theo bác sĩ. Không tự dùng aspirin, ibuprofen hay analgin vì có thể làm tăng nguy cơ chảy máu."]
     ],
     "contacts": [
-      ["Liên hệ phòng khám", "Phòng Khám Đa Khoa Quốc Tế — Phòng 302, Tầng 3, 123 Nguyễn Trãi, Quận 1, TP. Hồ Chí Minh"],
       ["Trường hợp khẩn cấp", "Gọi cấp cứu 115 hoặc đến cơ sở y tế gần nhất"]
     ]
-  },
-
-  "profile": {
-    "label": "bác sĩ",
-    "icon": "🩺",
-    "name_en": "BÁC SĨ",
-    "name_vi": "Cổng dành riêng cho bác sĩ",
-    "tagline": "Nơi bác sĩ theo dõi lịch khám và hồ sơ bệnh nhân.",
-    "bio": [
-      "Bác sĩ đăng nhập bằng tài khoản riêng để xem danh sách bệnh nhân theo từng ngày khám.",
-      "Cổng cho phép ghi hồ sơ bệnh án, kê toa thuốc và cập nhật tình trạng khám của từng bệnh nhân.",
-      "Khi bận đột xuất, bác sĩ có thể khóa hoặc mở lại ca khám để bệnh nhân không đặt nhầm."
-    ],
-    "links": [["giám sát", "#surveillance"], ["trợ lý ai", "#ai-assistant"], ["đặt lịch", "#booking"], ["cẩm nang", "#guide"], ["hỏi đáp", "#qa"]],
-    "top": "LÊN ĐẦU TRANG ↑"
   },
 
   "partners": {

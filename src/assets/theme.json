@@ -12,8 +12,8 @@
 
   "hero": {
     "title_en": "DENGUE WATCH",
-    "title_vi": "Hệ thống Giám sát Dịch Sốt xuất huyết & Cổng Y Tế Trực Tuyến",
-    "subtitle": "Giám sát dịch tễ, dự báo vùng nguy cơ, tư vấn AI và đặt lịch khám trực tiếp với Bác sĩ chuyên khoa."
+    "title_vi": "Hệ thống Giám sát & Dự báo Dịch Sốt xuất huyết",
+    "subtitle": "Giám sát dịch tễ, dự báo vùng nguy cơ và tư vấn hỏi đáp cùng Trợ lý AI."
   },
 
   "loader": { "line1": "ĐANG TRUY CẬP", "line2": "CONNECTING TO DENGUE_WATCH..." },
@@ -21,7 +21,7 @@
   "ticker": [
     "DENGUE WATCH 🔻 GIÁM SÁT DỊCH TỄ",
     "AI ASSISTANT 🔻 TRỢ LÝ HỎI ĐÁP",
-    "BOOK A DOCTOR 🔻 ĐẶT LỊCH KHÁM",
+    "AI FORECAST 🔻 DỰ BÁO DỊCH BỆNH",
     "SỐT CAO ĐỘT NGỘT? ĐI KHÁM SỚM 🔻"
   ],
 
