@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link id="arcgis-theme-css" rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.29/"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: transparent;
+    }
+    #arcgis-wrapper {
+      position: relative;
+      width: 100%;
+      height: 850px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid #cbd5e1;
+      background: #e2e8f0;
+    }
+    body.night #arcgis-wrapper {
+      border-color: #334155;
+      background: #0f172a;
+    }
+    #viewDiv {
+      width: 100%;
+      height: 100%;
+    }
+    .arcgis-toolbar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      z-index: 40;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.94);
+      color: #0f172a;
+      padding: 7px 11px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.16);
+      font-size: 12.5px;
+      border: 1px solid #cbd5e1;
+    }
+    body.night .arcgis-toolbar {
+      background: rgba(15, 23, 42, 0.94);
+      color: #f1f5f9;
+      border-color: #334155;
+    }
+    .arcgis-badge {
+      font-weight: 700;
+      color: #0369a1;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    body.night .arcgis-badge {
+      color: #38bdf8;
+    }
+    .arcgis-btn {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #0f172a;
+      padding: 4px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .arcgis-btn:hover {
+      background: #e0f2fe;
+      border-color: #0284c7;
+    }
+    .arcgis-btn.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+    body.night .arcgis-btn {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+    body.night .arcgis-btn.active {
+      background: #0ea5e9;
+      color: #0f172a;
+      border-color: #0ea5e9;
+    }
+    .arcgis-select {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 4px 8px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    body.night .arcgis-select {
+      background: #1e293b;
+      color: #f1f5f9;
+      border-color: #475569;
+    }
+    .arcgis-hint {
+      position: absolute;
+      bottom: 14px;
+      left: 12px;
+      z-index: 40;
+      max-width: 440px;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      padding: 7px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+      pointer-events: none;
+    }
+    body.night .arcgis-hint {
+      background: rgba(15, 23, 42, 0.9);
+      color: #f1f5f9;
+      border: 1px solid #334155;
+    }
+    .arcgis-loc-btn {
+      position: absolute;
+      bottom: 24px;
+      right: 15px;
+      z-index: 40;
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #3c4043;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .arcgis-loc-btn:hover { background: #f1f5f9; }
+    .arcgis-loc-btn.active { color: #0284c7; }
+    /* Floating Pin Comment Overlay Card inside ArcGIS map */
+    #pin-overlay-card {
+      position: absolute;
+      bottom: 24px;
+      right: 64px;
+      z-index: 60;
+      width: min(360px, calc(100% - 28px));
+      max-height: calc(100% - 84px);
+      overflow-y: auto;
+      padding: 15px 16px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 18px 40px -12px rgba(15, 23, 42, 0.35), 0 4px 14px rgba(15, 23, 42, 0.14);
+      color: #0f172a;
+      display: none;
+      animation: pinCardPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #pin-overlay-card.open { display: block; }
+    body.night #pin-overlay-card {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: #334155;
+      color: #f1f5f9;
+      box-shadow: 0 20px 44px -10px rgba(0, 0, 0, 0.72);
+    }
+    @keyframes pinCardPop {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pin-card-hdr {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .pin-card-title { font-size: 14.5px; font-weight: 700; line-height: 1.3; }
+    .pin-card-coords {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    body.night .pin-card-coords { background: #1e3a8a; color: #93c5fd; }
+    #pin-overlay-close {
+      flex: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    #pin-overlay-close:hover { background: #fee2e2; border-color: #f87171; color: #dc2626; }
+    body.night #pin-overlay-close { background: #1e293b; border-color: #475569; color: #cbd5e1; }
+    body.night #pin-overlay-close:hover { background: #7f1d1d; border-color: #ef4444; color: #fecaca; }
+    .pin-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .pin-field { margin-bottom: 8px; }
+    .pin-form-row .pin-field { margin-bottom: 0; }
+    .pin-field label { display: block; font-size: 11.5px; font-weight: 600; color: #475569; margin-bottom: 3px; }
+    body.night .pin-field label { color: #94a3b8; }
+    .pin-field input,
+    .pin-field select,
+    .pin-field textarea {
+      width: 100%;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 9px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: inherit;
+      font-size: 12.5px;
+      padding: 7px 9px;
+      outline: none;
+    }
+    .pin-field input:focus,
+    .pin-field select:focus,
+    .pin-field textarea:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+    }
+    body.night .pin-field input,
+    body.night .pin-field select,
+    body.night .pin-field textarea {
+      background: #1e293b;
+      border-color: #334155;
+      color: #f1f5f9;
+    }
+    #pin-overlay-err {
+      display: none;
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    body.night #pin-overlay-err { background: rgba(127, 29, 29, 0.45); border-color: #ef4444; color: #fecaca; }
+    #pin-overlay-submit {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      background: #1d4ed8;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 12px;
+      cursor: pointer;
+    }
+    #pin-overlay-submit:hover { background: #1e40af; }
+    #pin-toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 65;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #0f766e;
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+      display: none;
+    }
+    @media (max-width: 768px) {
+      #arcgis-wrapper { height: 760px; }
+      .arcgis-toolbar { max-width: calc(100% - 24px); }
+    }
+    @media (max-width: 640px) {
+      #pin-overlay-card { left: 12px; right: 12px; bottom: 14px; width: auto; }
+      .pin-form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div id="arcgis-wrapper">
+    <div id="viewDiv"></div>
+    <div class="arcgis-toolbar">
+      <span class="arcgis-badge">🌐 ArcGIS Maps SDK 4.29</span>
+      <button type="button" id="btn2D" class="arcgis-btn active">2D MapView</button>
+      <button type="button" id="btn3D" class="arcgis-btn">3D SceneView</button>
+      <select id="basemapSelect" class="arcgis-select" title="Chọn nền bản đồ ArcGIS">
+        <option value="streets-navigation-vector">🗺️ Đường phố (Navigation)</option>
+        <option value="satellite">🛰️ Ảnh Vệ tinh (Satellite)</option>
+        <option value="topo-vector">⛰️ Địa hình (Topographic)</option>
+        <option value="dark-gray-vector">🌙 Nền Tối (Dark Gray)</option>
+      </select>
+    </div>
+    <button type="button" id="myLocBtn" class="arcgis-loc-btn" title="Định vị vị trí hiện tại">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+      </svg>
+    </button>
+    <div class="arcgis-hint">
+      📌 Nhấp vào bản đồ ArcGIS để chọn tọa độ ghim phản ánh · Mở nút lớp (góc phải) để bật/tắt 4 tầng dữ liệu GIS.
+    </div>
+    <div id="pin-overlay-card" role="dialog" aria-label="Ghim phản ánh dịch tễ">
+      <div class="pin-card-hdr">
+        <div>
+          <div class="pin-card-title">📌 Ghim phản ánh dịch tễ</div>
+          <div class="pin-card-coords">📍 <span id="pin-coords-text">0.00000, 0.00000</span></div>
+        </div>
+        <button type="button" id="pin-overlay-close" title="Đóng thẻ ghim" aria-label="Đóng">✕</button>
+      </div>
+      <div class="pin-form-row">
+        <div class="pin-field">
+          <label for="pin-author">👤 Tên của bạn</label>
+          <input id="pin-author" type="text" value="Người dân" />
+        </div>
+        <div class="pin-field">
+          <label for="pin-category">🏷️ Phân loại</label>
+          <select id="pin-category">
+            <option value="🦟 Nhiều muỗi / Nguy cơ cao">🦟 Nhiều muỗi / Nguy cơ cao</option>
+            <option value="💧 Nước đọng / Lăng quăng">💧 Nước đọng / Lăng quăng</option>
+            <option value="🏥 Có ca nghi nhiễm">🏥 Có ca nghi nhiễm</option>
+            <option value="✅ Đã phun thuốc / An toàn">✅ Đã phun thuốc / An toàn</option>
+            <option value="💬 Ý kiến khác">💬 Ý kiến khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="pin-field">
+        <label for="pin-area">📍 Khu vực / Địa chỉ (tùy chọn)</label>
+        <input id="pin-area" type="text" placeholder="VD: Hẻm 123 Lê Văn Việt, Thủ Đức" />
+      </div>
+      <div class="pin-field">
+        <label for="pin-comment">💬 Ý kiến / Bình luận</label>
+        <textarea id="pin-comment" rows="3" placeholder="Nhập nhận xét, cảnh báo hoặc phản ánh..."></textarea>
+      </div>
+      <div id="pin-overlay-err">Vui lòng nhập nội dung ý kiến / bình luận.</div>
+      <button type="button" id="pin-overlay-submit">📌 Lưu Ghim &amp; Bình Luận</button>
+    </div>
+    <div id="pin-toast">✅ Đã lưu điểm ghim và bình luận lên bản đồ!</div>
+  </div>
+
+  <script>
+    function sendMessageToStreamlit(type, data) {
+      window.parent.postMessage(
+        Object.assign({ isStreamlitMessage: true, type: type }, data),
+        "*"
+      );
+    }
+
+    let lastSentHeight = 0;
+    function setFrameHeight() {
+      const wrapper = document.getElementById("arcgis-wrapper");
+      const h = wrapper ? wrapper.offsetHeight + 4 : 854;
+      if (h !== lastSentHeight) {
+        lastSentHeight = h;
+        sendMessageToStreamlit("streamlit:setFrameHeight", { height: h });
+      }
+    }
+
+    function emitValue(payload) {
+      sendMessageToStreamlit("streamlit:setComponentValue", {
+        value: payload,
+        dataType: "json"
+      });
+    }
+
+    function emitPin(lat, lon) {
+      emitValue({
+        action: "pin_selected",
+        lat: Number(lat.toFixed(6)),
+        lon: Number(lon.toFixed(6)),
+        ts: Date.now()
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    let arcgisReady = false;
+    let arcgisModules = null;
+    let mapObj = null;
+    let activeView = null;
+    let viewMode = "2d"; // "2d" | "3d"
+    let currentBasemap = "streets-navigation-vector";
+    let currentTheme = "day";
+    let lastViewKey = null;
+    let lastArcChoroKey = null;
+    let lastSelectedPinTs = null;
+    let lastArgs = null;
+    let draftLatLon = null;
+    let serverPins = [];
+    let pendingPins = [];
+
+    let choroplethLayer = null;
+    let bufferLayer = null;
+    let hotspotLayer = null;
+    let pinsLayer = null;
+    let userLayer = null;
+    let draftLayer = null;
+
+    function openDraftPinOverlay(lat, lon) {
+      draftLatLon = { lat: Number(lat), lon: Number(lon) };
+      placeDraftPin(draftLatLon.lat, draftLatLon.lon);
+      const coordsEl = document.getElementById("pin-coords-text");
+      if (coordsEl) {
+        coordsEl.textContent = `${draftLatLon.lat.toFixed(5)}, ${draftLatLon.lon.toFixed(5)}`;
+      }
+      const errEl = document.getElementById("pin-overlay-err");
+      if (errEl) errEl.style.display = "none";
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) cardEl.classList.add("open");
+    }
+
+    function closeDraftPinOverlay() {
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) cardEl.classList.remove("open");
+      const errEl = document.getElementById("pin-overlay-err");
+      if (errEl) errEl.style.display = "none";
+      draftLatLon = null;
+      if (draftLayer) draftLayer.removeAll();
+    }
+
+    function showPinToast(msg) {
+      const toastEl = document.getElementById("pin-toast");
+      if (!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.style.display = "block";
+      clearTimeout(toastEl._timer);
+      toastEl._timer = setTimeout(() => {
+        toastEl.style.display = "none";
+      }, 2800);
+    }
+
+    (function wireOverlayEvents() {
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) {
+        ["click", "mousedown", "pointerdown", "touchstart", "dblclick", "wheel"].forEach((evt) => {
+          cardEl.addEventListener(evt, (e) => e.stopPropagation());
+        });
+      }
+      const closeBtn = document.getElementById("pin-overlay-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          closeDraftPinOverlay();
+        });
+      }
+      const submitBtn = document.getElementById("pin-overlay-submit");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!draftLatLon) return;
+          const commentEl = document.getElementById("pin-comment");
+          const authorEl = document.getElementById("pin-author");
+          const categoryEl = document.getElementById("pin-category");
+          const areaEl = document.getElementById("pin-area");
+          const errEl = document.getElementById("pin-overlay-err");
+
+          const comment = (commentEl ? commentEl.value : "").trim();
+          if (!comment) {
+            if (errEl) errEl.style.display = "block";
+            if (commentEl) commentEl.focus();
+            return;
+          }
+
+          const payload = {
+            action: "create_pin",
+            lat: Number(draftLatLon.lat.toFixed(6)),
+            lon: Number(draftLatLon.lon.toFixed(6)),
+            author: ((authorEl ? authorEl.value : "") || "Người dân").trim() || "Người dân",
+            category: categoryEl ? categoryEl.value : "💬 Ý kiến khác",
+            area_name: (areaEl ? areaEl.value : "").trim(),
+            comment: comment,
+            ts: Date.now()
+          };
+
+          pendingPins.unshift({
+            lat: payload.lat,
+            lon: payload.lon,
+            author: payload.author,
+            category: payload.category,
+            area_name: payload.area_name,
+            comment: payload.comment,
+            status: "pending",
+            status_label: "⏳ Chờ xác minh",
+            created_at: "Vừa xong"
+          });
+          renderPinsLayer(serverPins);
+
+          if (commentEl) commentEl.value = "";
+          if (areaEl) areaEl.value = "";
+          closeDraftPinOverlay();
+          showPinToast("✅ Đã lưu điểm ghim & bình luận lên bản đồ!");
+          emitValue(payload);
+        });
+      }
+    })();
+
+    function hexToRgba(hex, alpha) {
+      const clean = String(hex || "#d90429").replace("#", "");
+      if (clean.length !== 6) return [217, 4, 41, alpha];
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return [r, g, b, alpha];
+    }
+
+    function getChoroplethRgba(val, maxVal, alpha) {
+      const ratio = maxVal > 0 ? Math.min(1, val / maxVal) : 0;
+      if (ratio > 0.8) return [128, 0, 38, alpha];
+      if (ratio > 0.6) return [189, 0, 38, alpha];
+      if (ratio > 0.4) return [227, 26, 28, alpha];
+      if (ratio > 0.2) return [252, 78, 42, alpha];
+      if (ratio > 0.05) return [253, 141, 60, alpha];
+      if (ratio > 0) return [254, 178, 76, alpha];
+      return [254, 217, 118, alpha];
+    }
+
+    function getPinStatusMeta(status) {
+      switch (status) {
+        case "verified":
+          return { label: "✅ Đã xác minh ổ dịch", color: [245, 158, 11, 0.95], badge: "Đã xác minh" };
+        case "spraying":
+          return { label: "🚒 Đang điều phối phun thuốc", color: [220, 38, 38, 0.95], badge: "Đang phun thuốc" };
+        case "resolved":
+          return { label: "🛡️ Đã xử lý / An toàn", color: [22, 163, 74, 0.95], badge: "Đã xử lý" };
+        default:
+          return { label: "⏳ Chờ xác minh", color: [37, 99, 235, 0.95], badge: "Chờ xác minh" };
+      }
+    }
+
+    function geojsonGeometryToRings(geom) {
+      if (!geom || !geom.coordinates) return [];
+      if (geom.type === "Polygon") {
+        return geom.coordinates;
+      }
+      if (geom.type === "MultiPolygon") {
+        const rings = [];
+        geom.coordinates.forEach((poly) => {
+          poly.forEach((ring) => rings.push(ring));
+        });
+        return rings;
+      }
+      return [];
+    }
+
+    function setupViewWidgets(view) {
+      if (!arcgisModules || !view) return;
+      const { LayerList, Expand, Search, ScaleBar } = arcgisModules;
+      try {
+        const layerList = new LayerList({ view: view });
+        const llExpand = new Expand({
+          view: view,
+          content: layerList,
+          expandTooltip: "Bật/Tắt các lớp dữ liệu GIS",
+          expanded: false
+        });
+        view.ui.add(llExpand, "top-right");
+      } catch (_) {}
+
+      try {
+        const searchWidget = new Search({ view: view });
+        const searchExpand = new Expand({
+          view: view,
+          content: searchWidget,
+          expandTooltip: "Tìm kiếm địa điểm TP.HCM / Việt Nam",
+          expanded: false
+        });
+        view.ui.add(searchExpand, "top-right");
+      } catch (_) {}
+
+      try {
+        if (view.type === "2d") {
+          const scaleBar = new ScaleBar({ view: view, unit: "metric" });
+          view.ui.add(scaleBar, "bottom-left");
+        }
+      } catch (_) {}
+
+      // Legend container inside Expand
+      try {
+        const legendDiv = document.createElement("div");
+        legendDiv.style.cssText = "background:#fff;color:#0f172a;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;min-width:210px;";
+        legendDiv.innerHTML = `
+          <div style="font-weight:700;margin-bottom:6px;">📊 Chú Giải GIS Dịch Tễ</div>
+          <div>🔴 Vùng Đỏ: Nguy cơ rất cao</div>
+          <div>🟠 Vùng Cam: Nguy cơ cao</div>
+          <div>🟡 Vùng Vàng: Nguy cơ trung bình</div>
+          <div>🟢 Vùng Xanh: Kiểm soát</div>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0;"/>
+          <div style="font-weight:700;margin-bottom:4px;">📌 Trạng Thái Phản Ánh / Ổ Dịch</div>
+          <div>🔵 Chờ xác minh HCDC</div>
+          <div>🟠 Đã xác minh ổ dịch</div>
+          <div>🔴 Đang điều phối phun thuốc</div>
+          <div>🟢 Đã xử lý / An toàn</div>
+        `;
+        const legendExpand = new Expand({
+          view: view,
+          content: legendDiv,
+          expandIcon: "legend",
+          expandTooltip: "Chú giải bản đồ dịch tễ",
+          expanded: false
+        });
+        view.ui.add(legendExpand, "top-right");
+      } catch (_) {}
+    }
+
+    function createOrSwitchView(mode, centerLat, centerLon, zoom) {
+      if (!arcgisModules || !mapObj) return;
+      const { MapView, SceneView } = arcgisModules;
+      lastArcChoroKey = null;
+
+      if (activeView) {
+        activeView.destroy();
+        activeView = null;
+      }
+
+      const targetCenter = [centerLon || 106.7009, centerLat || 10.7769];
+      const targetZoom = zoom || 11;
+
+      if (mode === "3d") {
+        activeView = new SceneView({
+          container: "viewDiv",
+          map: mapObj,
+          camera: {
+            position: {
+              longitude: targetCenter[0],
+              latitude: targetCenter[1] - (targetZoom <= 7 ? 3.5 : 0.08),
+              z: targetZoom <= 7 ? 750000 : (targetZoom <= 10 ? 35000 : 12000)
+            },
+            tilt: 48,
+            heading: 0
+          }
+        });
+      } else {
+        activeView = new MapView({
+          container: "viewDiv",
+          map: mapObj,
+          center: targetCenter,
+          zoom: targetZoom
+        });
+      }
+
+      setupViewWidgets(activeView);
+
+      activeView.on("click", function (event) {
+        activeView.hitTest(event).then(function (response) {
+          const hitGraphic = (response.results || []).find(
+            (r) => r.graphic && r.graphic.layer && r.graphic.layer !== choroplethLayer
+          );
+          if (hitGraphic) {
+            return; // Let popup open for marker/pin/buffer
+          }
+          const mp = event.mapPoint;
+          if (!mp) return;
+          const lat = mp.latitude;
+          const lon = mp.longitude;
+          if (lat != null && lon != null) {
+            openDraftPinOverlay(lat, lon);
+          }
+        });
+      });
+
+      document.getElementById("btn2D").classList.toggle("active", mode === "2d");
+      document.getElementById("btn3D").classList.toggle("active", mode === "3d");
+    }
+
+    function renderPinsLayer(pins) {
+      if (!arcgisReady || !arcgisModules || !pinsLayer) return;
+      const { Graphic, Point } = arcgisModules;
+      pinsLayer.removeAll();
+      serverPins = Array.isArray(pins) ? pins : [];
+      pendingPins = pendingPins.filter((pp) => !serverPins.some((sp) =>
+        Math.abs(Number(sp.lat) - pp.lat) < 1e-5 &&
+        Math.abs(Number(sp.lon) - pp.lon) < 1e-5 &&
+        String(sp.comment || "").trim() === pp.comment
+      ));
+      const allPins = [...pendingPins, ...serverPins];
+      allPins.forEach((p) => {
+        if (p.lat == null || p.lon == null) return;
+        const stMeta = getPinStatusMeta(p.status);
+        const areaLine = p.area_name ? `<p><b>Khu vực:</b> ${escapeHtml(p.area_name)}</p>` : "";
+        const teamLine = p.assigned_team ? `<p><b>Đội xử lý:</b> ${escapeHtml(p.assigned_team)}</p>` : "";
+        const verifiedLine = p.verified_by ? `<p><b>Xác minh bởi:</b> ${escapeHtml(p.verified_by)}</p>` : "";
+        const noteLine = p.action_note ? `<p><b>Chỉ đạo HCDC:</b> ${escapeHtml(p.action_note)}</p>` : "";
+
+        pinsLayer.add(new Graphic({
+          geometry: new Point({ longitude: Number(p.lon), latitude: Number(p.lat) }),
+          symbol: {
+            type: "simple-marker",
+            style: "diamond",
+            color: stMeta.color,
+            size: 13,
+            outline: { color: [255, 255, 255, 1], width: 1.5 }
+          },
+          attributes: {
+            category: p.category || "💬 Phản ánh cộng đồng",
+            status: stMeta.label
+          },
+          popupTemplate: {
+            title: "📌 {category}",
+            content:
+              `<p><b>Trạng thái xử lý:</b> ${escapeHtml(stMeta.label)}</p>` +
+              areaLine +
+              `<p><b>Nội dung:</b> ${escapeHtml(p.comment || "")}</p>` +
+              verifiedLine +
+              teamLine +
+              noteLine +
+              `<p><small>👤 ${escapeHtml(p.author || "Người dân")} · 🕒 ${escapeHtml(p.created_at || "")}</small></p>`
+          }
+        }));
+      });
+    }
+
+    function renderAllLayers(args) {
+      if (!arcgisReady || !arcgisModules || !mapObj) return;
+      const { Graphic, Polygon, Point, Circle } = arcgisModules;
+
+      // 1. Choropleth polygons (cache theo viewMode + view_key + feature count)
+      const choroKey = viewMode + "|" + (args.view_key || "") + "|" + (args.geojson_data && args.geojson_data.features ? args.geojson_data.features.length : 0) + "|" + Object.keys(args.choropleth_values || {}).length;
+      if (choroKey !== lastArcChoroKey) {
+        lastArcChoroKey = choroKey;
+        choroplethLayer.removeAll();
+        if (args.geojson_data && Array.isArray(args.geojson_data.features)) {
+          const valsMap = args.choropleth_values || {};
+          const allVals = Object.values(valsMap).map((v) => Number(v.cases || 0));
+          const maxVal = allVals.length ? Math.max(...allVals, 1) : 1;
+
+          args.geojson_data.features.forEach((feat) => {
+            const props = feat.properties || {};
+            const regionName = props.district || props.adm1_name1 || "Khu vực";
+            const info = valsMap[regionName] || {};
+            const cases = Number(info.cases || 0);
+            const inc = Number(info.incidence_rate || 0);
+            const pred = info.predicted_cases != null ? Number(info.predicted_cases) : null;
+            const rings = geojsonGeometryToRings(feat.geometry);
+            if (!rings.length) return;
+
+            const poly = new Polygon({
+              rings: rings,
+              spatialReference: { wkid: 4326 }
+            });
+
+            const rgba = getChoroplethRgba(cases, maxVal, 0.68);
+            let symbol;
+            if (viewMode === "3d") {
+              const extrudeHeight = Math.max(250, (cases / maxVal) * 6500);
+              symbol = {
+                type: "polygon-3d",
+                symbolLayers: [{
+                  type: "extrude",
+                  size: extrudeHeight,
+                  material: { color: rgba },
+                  edges: {
+                    type: "solid",
+                    color: [255, 255, 255, 0.85],
+                    size: 1
+                  }
+                }]
+              };
+            } else {
+              symbol = {
+                type: "simple-fill",
+                color: rgba,
+                outline: { color: [255, 255, 255, 0.9], width: 1.2 }
+              };
+            }
+
+            const predLine = pred !== null
+              ? `<p><b>Dự báo XGBoost tháng tới:</b> ${pred.toFixed(1)} ca</p>`
+              : "";
+
+            choroplethLayer.add(new Graphic({
+              geometry: poly,
+              symbol: symbol,
+              attributes: {
+                name: regionName,
+                cases: cases,
+                incidence_rate: inc.toFixed(2)
+              },
+              popupTemplate: {
+                title: "🗺️ {name}",
+                content: `<p><b>Số ca ghi nhận:</b> ${cases.toLocaleString()} ca</p>` +
+                         `<p><b>Suất mắc / 100k dân:</b> ${inc.toFixed(2)}</p>` +
+                         predLine +
+                         `<p><small>Nhấp vào khoảng trống hoặc khu vực để ghim phản ánh cộng đồng.</small></p>`
+              }
+            }));
+          });
+        }
+      }
+
+      // 2. Geodesic Buffers & 3. Hotspots
+      bufferLayer.removeAll();
+      hotspotLayer.removeAll();
+      (args.markers || []).forEach((pt) => {
+        if (pt.lat == null || pt.lon == null) return;
+        const lat = Number(pt.lat);
+        const lon = Number(pt.lon);
+        const radiusM = Number(pt.radius_meters || 0);
+        const colorHex = pt.color || "#d90429";
+
+        if (radiusM > 0) {
+          const circleGeom = new Circle({
+            center: new Point({ longitude: lon, latitude: lat }),
+            radius: radiusM,
+            radiusUnit: "meters",
+            geodesic: true
+          });
+          bufferLayer.add(new Graphic({
+            geometry: circleGeom,
+            symbol: {
+              type: "simple-fill",
+              color: hexToRgba(colorHex, 0.16),
+              outline: { color: hexToRgba(colorHex, 0.9), width: 1.8 }
+            }
+          }));
+        }
+
+        const markerSize = Math.max(10, Math.min(24, Number(pt.radius_px || 12)));
+        hotspotLayer.add(new Graphic({
+          geometry: new Point({ longitude: lon, latitude: lat }),
+          symbol: {
+            type: "simple-marker",
+            style: "circle",
+            color: hexToRgba(colorHex, 0.92),
+            size: markerSize,
+            outline: { color: [255, 255, 255, 1], width: 1.5 }
+          },
+          attributes: {
+            title: pt.title || "Điểm nóng dịch tễ"
+          },
+          popupTemplate: {
+            title: "🎯 {title}",
+            content: pt.popup_html || "Điểm giám sát dịch tễ"
+          }
+        }));
+      });
+
+      // 4. Community Pins with HCDC Status
+      renderPinsLayer(args.pins);
+
+      // 5. User location
+      renderUserLocation(args.user_location);
+
+      // 6. Draft pin from Python ("Ghim tại vị trí của tôi")
+      if (args.selected_pin && args.selected_pin.lat != null && args.selected_pin.lon != null) {
+        const spTs = args.selected_pin.ts || `${args.selected_pin.lat},${args.selected_pin.lon}`;
+        if (spTs !== lastSelectedPinTs) {
+          lastSelectedPinTs = spTs;
+          openDraftPinOverlay(Number(args.selected_pin.lat), Number(args.selected_pin.lon));
+        }
+      }
+    }
+
+    function placeDraftPin(lat, lon) {
+      if (!arcgisModules || !draftLayer) return;
+      const { Graphic, Point } = arcgisModules;
+      draftLayer.removeAll();
+      draftLayer.add(new Graphic({
+        geometry: new Point({ longitude: lon, latitude: lat }),
+        symbol: {
+          type: "simple-marker",
+          style: "path",
+          path: "M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z",
+          color: [220, 38, 38, 1],
+          size: 26,
+          yoffset: 10,
+          outline: { color: [255, 255, 255, 1], width: 1.5 }
+        },
+        popupTemplate: {
+          title: "📌 Điểm đang chọn để ghim",
+          content: `Tọa độ: <b>${lat.toFixed(5)}, ${lon.toFixed(5)}</b><br/><i>Nhập ý kiến ở thẻ nổi góc bản đồ.</i>`
+        }
+      }));
+    }
+
+    function renderUserLocation(userLoc) {
+      if (!arcgisModules || !userLayer) return;
+      const { Graphic, Point, Circle } = arcgisModules;
+      userLayer.removeAll();
+      if (!userLoc || userLoc.lat == null || userLoc.lon == null) return;
+      const lat = Number(userLoc.lat);
+      const lon = Number(userLoc.lon);
+
+      if (userLoc.accuracy && userLoc.accuracy < 10000) {
+        userLayer.add(new Graphic({
+          geometry: new Circle({
+            center: new Point({ longitude: lon, latitude: lat }),
+            radius: Math.max(Number(userLoc.accuracy), 80),
+            radiusUnit: "meters",
+            geodesic: true
+          }),
+          symbol: {
+            type: "simple-fill",
+            color: [66, 133, 244, 0.14],
+            outline: { color: [66, 133, 244, 0.7], width: 1.2 }
+          }
+        }));
+      }
+
+      userLayer.add(new Graphic({
+        geometry: new Point({ longitude: lon, latitude: lat }),
+        symbol: {
+          type: "simple-marker",
+          style: "circle",
+          color: [37, 99, 235, 1],
+          size: 14,
+          outline: { color: [255, 255, 255, 1], width: 2.5 }
+        },
+        popupTemplate: {
+          title: "📍 Vị trí hiện tại của bạn",
+          content: `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+        }
+      }));
+      document.getElementById("myLocBtn").classList.add("active");
+    }
+
+    async function fallbackIpLocation() {
+      const endpoints = [
+        {
+          url: "https://ipwho.is/",
+          parse: (d) => d && d.success !== false && d.latitude && d.longitude
+            ? { lat: Number(d.latitude), lon: Number(d.longitude) }
+            : null
+        },
+        {
+          url: "https://ipapi.co/json/",
+          parse: (d) => d && d.latitude && d.longitude
+            ? { lat: Number(d.latitude), lon: Number(d.longitude) }
+            : null
+        }
+      ];
+      for (const ep of endpoints) {
+        try {
+          const resp = await fetch(ep.url, { cache: "no-store" });
+          if (!resp.ok) continue;
+          const json = await resp.json();
+          const parsed = ep.parse(json);
+          if (parsed) return parsed;
+        } catch (_) {}
+      }
+      return null;
+    }
+
+    function triggerMyLocation() {
+      const finishOk = (lat, lon, accuracy, source) => {
+        const loc = {
+          lat: Number(lat.toFixed(6)),
+          lon: Number(lon.toFixed(6)),
+          accuracy: accuracy ? Math.round(accuracy) : 120,
+          source: source,
+          ts: Date.now()
+        };
+        renderUserLocation(loc);
+        if (activeView) {
+          activeView.goTo({ center: [loc.lon, loc.lat], zoom: source === "ip" ? 14 : 16 }).catch(() => {});
+        }
+        emitValue(Object.assign({ action: "user_location" }, loc));
+      };
+
+      const handleFail = async () => {
+        const ipLoc = await fallbackIpLocation();
+        if (ipLoc) {
+          finishOk(ipLoc.lat, ipLoc.lon, 1500, "ip");
+        } else {
+          alert("Không thể lấy vị trí GPS. Vui lòng cấp quyền Vị trí trong trình duyệt.");
+        }
+      };
+
+      if (!navigator.geolocation) {
+        handleFail();
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => finishOk(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy, "gps"),
+        () => handleFail(),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+      );
+    }
+
+    function applyTheme(theme) {
+      const t = theme === "night" ? "night" : "day";
+      if (currentTheme === t) return;
+      currentTheme = t;
+      document.body.classList.toggle("night", t === "night");
+      const cssEl = document.getElementById("arcgis-theme-css");
+      if (cssEl) {
+        cssEl.href = t === "night"
+          ? "https://js.arcgis.com/4.29/esri/themes/dark/main.css"
+          : "https://js.arcgis.com/4.29/esri/themes/light/main.css";
+      }
+      if (mapObj && document.getElementById("basemapSelect").value === "streets-navigation-vector" && t === "night") {
+        mapObj.basemap = "dark-gray-vector";
+      }
+    }
+
+    function initArcGIS() {
+      if (typeof require === "undefined") {
+        document.getElementById("viewDiv").innerHTML =
+          '<div style="padding:24px;text-align:center;color:#dc2626;font-weight:600;">Không tải được ArcGIS Maps SDK for JavaScript 4.29 (kiểm tra kết nối Internet tới js.arcgis.com).</div>';
+        return;
+      }
+
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/views/SceneView",
+        "esri/layers/GraphicsLayer",
+        "esri/Graphic",
+        "esri/geometry/Polygon",
+        "esri/geometry/Point",
+        "esri/geometry/Circle",
+        "esri/widgets/LayerList",
+        "esri/widgets/Expand",
+        "esri/widgets/Search",
+        "esri/widgets/ScaleBar"
+      ], function (
+        Map, MapView, SceneView, GraphicsLayer, Graphic,
+        Polygon, Point, Circle, LayerList, Expand, Search, ScaleBar
+      ) {
+        arcgisModules = {
+          Map, MapView, SceneView, GraphicsLayer, Graphic,
+          Polygon, Point, Circle, LayerList, Expand, Search, ScaleBar
+        };
+
+        choroplethLayer = new GraphicsLayer({ title: "🗺️ Ranh giới Hành chính & Mật độ Ca" });
+        bufferLayer = new GraphicsLayer({ title: "⭕ Vùng đệm Khoanh vùng Ổ dịch" });
+        hotspotLayer = new GraphicsLayer({ title: "🎯 Điểm nóng Dịch tễ & HCDC" });
+        pinsLayer = new GraphicsLayer({ title: "📌 Phản ánh Cộng đồng" });
+        userLayer = new GraphicsLayer({ title: "📍 Vị trí của bạn", listMode: "hide" });
+        draftLayer = new GraphicsLayer({ title: "📍 Ghim đang chọn", listMode: "hide" });
+
+        mapObj = new Map({
+          basemap: currentBasemap,
+          layers: [choroplethLayer, bufferLayer, hotspotLayer, pinsLayer, userLayer, draftLayer]
+        });
+
+        arcgisReady = true;
+
+        const initLat = (lastArgs && lastArgs.center_lat) || 10.7769;
+        const initLon = (lastArgs && lastArgs.center_lon) || 106.7009;
+        const initZoom = (lastArgs && lastArgs.zoom) || 11;
+        createOrSwitchView(viewMode, initLat, initLon, initZoom);
+
+        if (lastArgs) {
+          renderAllLayers(lastArgs);
+        }
+      });
+    }
+
+    document.getElementById("btn2D").addEventListener("click", () => {
+      if (viewMode === "2d") return;
+      viewMode = "2d";
+      const lat = (lastArgs && lastArgs.center_lat) || 10.7769;
+      const lon = (lastArgs && lastArgs.center_lon) || 106.7009;
+      const zoom = (lastArgs && lastArgs.zoom) || 11;
+      createOrSwitchView("2d", lat, lon, zoom);
+      if (lastArgs) renderAllLayers(lastArgs);
+    });
+
+    document.getElementById("btn3D").addEventListener("click", () => {
+      if (viewMode === "3d") return;
+      viewMode = "3d";
+      const lat = (lastArgs && lastArgs.center_lat) || 10.7769;
+      const lon = (lastArgs && lastArgs.center_lon) || 106.7009;
+      const zoom = (lastArgs && lastArgs.zoom) || 11;
+      createOrSwitchView("3d", lat, lon, zoom);
+      if (lastArgs) renderAllLayers(lastArgs);
+    });
+
+    document.getElementById("basemapSelect").addEventListener("change", (e) => {
+      currentBasemap = e.target.value;
+      if (mapObj) {
+        mapObj.basemap = currentBasemap;
+      }
+    });
+
+    document.getElementById("myLocBtn").addEventListener("click", triggerMyLocation);
+
+    window.addEventListener("message", (event) => {
+      if (!event.data || event.data.type !== "streamlit:render") return;
+      const args = event.data.args || {};
+      lastArgs = args;
+      applyTheme(args.theme || "day");
+
+      if (arcgisReady && activeView) {
+        if (args.view_key && args.view_key !== lastViewKey) {
+          lastViewKey = args.view_key;
+          const lat = args.center_lat || 10.7769;
+          const lon = args.center_lon || 106.7009;
+          const zoom = args.zoom || 11;
+          if (viewMode === "2d") {
+            activeView.goTo({ center: [lon, lat], zoom: zoom }).catch(() => {});
+          } else {
+            createOrSwitchView("3d", lat, lon, zoom);
+          }
+        }
+        renderAllLayers(args);
+      }
+
+      setFrameHeight();
+    });
+
+    window.addEventListener("resize", setFrameHeight);
+
+    initArcGIS();
+    sendMessageToStreamlit("streamlit:componentReady", { apiVersion: 1 });
+    setFrameHeight();
+  </script>
+</body>
+</html>

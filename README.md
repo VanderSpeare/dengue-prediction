@@ -20,18 +20,17 @@
 
 Dự án **Hệ Thống Giám Sát Dịch Tễ Cộng Đồng, Dự Báo Sốt Xuất Huyết Dựa Trên GIS, Dữ Liệu Khí Hậu & Trí Tuệ Nhân Tạo** là một giải pháp y tế số hiện đại được nghiên cứu và phát triển nhằm giải quyết triệt để bài toán cảnh báo sớm và giám sát véc-tơ truyền bệnh sốt xuất huyết Dengue tại các đô thị nhiệt đới (trọng tâm tại TP. Hồ Chí Minh và mở rộng 34 tỉnh/thành phố trên cả nước). Hệ thống tập trung toàn diện vào 4 trụ cột công nghệ cốt lõi:
 
-- **Hệ Thống Thông Tin Địa Lý & Phân Tích Không Gian (GIS & Spatial Analytics)**:
-  - Bản đồ nhiệt dịch tễ đa tầng (*Choropleth Map*) theo 34 tỉnh/thành phố và 24 quận/huyện, phường/xã, tuyến đường trọng điểm TP.HCM.
+- **Hệ Thống Thông Tin Địa Lý & Bản Đồ ArcGIS / Leaflet Đa Chiều (GIS & Spatial Analytics)**:
+  - Kiến trúc bản đồ kép **ArcGIS Maps SDK for JavaScript 4.29 (2D `MapView` / 3D `SceneView`) song song với Leaflet**: hỗ trợ bật/tắt 4 tầng dữ liệu qua `LayerList`, `Legend`, `Search`, chọn Basemap (đường phố, vệ tinh, địa hình, nền tối) và chế độ hiển thị **Song Song** phù hợp cả người dân lẫn cán bộ chuyên môn HCDC.
+  - Bản đồ nhiệt dịch tễ đa tầng (*Choropleth Map*) theo 34 tỉnh/thành phố (`vietnam_34_provinces_2025.geojson`) và ranh giới **Quận/Huyện TP. Hồ Chí Minh** (`hcmc_districts.geojson`, `hcmc_districts_risk.geojson`), cùng chi tiết phường/xã, tuyến đường trọng điểm TP.HCM.
   - Thuật toán khoanh vùng ổ dịch Geodesic Buffer (100m – 2000m) tự động phân tầng 4 mức độ nguy cơ (Vùng Đỏ, Cam, Vàng, Xanh) trên hệ quy chiếu chuẩn WGS84 (EPSG:4326).
-  - Bản đồ mật độ véc-tơ truyền bệnh theo chỉ số *Breteau Index* (BI) chuẩn WHO.
-- **Học Máy Dự Báo Đa Biến Môi Trường - Khí Hậu (Climate-Enhanced XGBoost Regressor)**:
-  - Dự báo chuỗi thời gian đệ quy số ca mắc sốt xuất huyết 3 tháng tương lai (Holdout Out-of-Time).
-  - Tích hợp toàn diện các biến độ trễ sinh học khí hậu: Lượng mưa trễ 1-2 tháng (`rain_lag_1`, `rain_lag_2`), nhiệt độ trễ (`temp_lag_1`, `temp_lag_2`), độ ẩm trễ (`humidity_lag_1`, `humidity_lag_2`), tương tác Nhiệt-Ẩm ($T \times H$) và nồng độ bụi mịn vi khí hậu đô thị (PM2.5).
+- **Học Máy Dự Báo Đa Cấp & Đa Biến Môi Trường - Khí Hậu (Climate-Enhanced XGBoost Regressor)**:
+  - Dự báo chuỗi thời gian đệ quy số ca mắc sốt xuất huyết 3 tháng tương lai (Holdout Out-of-Time) ở cả **2 cấp**: **34 Tỉnh/Thành phố** (`train_model` / `predict_future`) và **từng Quận/Huyện tại TP. Hồ Chí Minh** (`train_district_model` / `predict_future_districts`).
+  - Tích hợp toàn diện các biến độ trễ sinh học khí hậu: Lượng mưa trễ (`rain_lag_1`, `rain_lag_2`), nhiệt độ trễ (`temp_lag_1`, `temp_lag_2`), độ ẩm trễ (`humidity_lag_1`, `humidity_lag_2`), tương tác Nhiệt-Ẩm ($T \times H$) và nồng độ bụi mịn vi khí hậu đô thị (PM2.5).
   - Mã hóa tính tuần hoàn thời gian bằng hàm lượng giác ($\sin/\cos$).
-- **Phản Ánh Dịch Tễ Không Gian Cộng Đồng (Spatial Crowdsourcing & Participatory GIS)**:
-  - Cung cấp kênh số hóa hai chiều cho người dân trực tiếp ghim tọa độ GPS thực địa các ổ bọ gậy, điểm nước tù đọng, vật phế thải chứa nước và ca sốt nghi ngờ trong khu dân cư.
-  - Người dân có thể đính kèm bình luận, ý kiến đóng góp, hình ảnh và đánh giá mức độ nguy cơ thực tế.
-  - Cán bộ y tế dự phòng (HCDC, trạm y tế) tiếp nhận, xác minh và điều phối lực lượng dập dịch thực địa.
+- **Phản Ánh Cộng Đồng & Điều Phối Quản Lý Dịch Khép Kín (Participatory GIS & HCDC Workflow)**:
+  - **Đối tượng Người dân:** Xem bản đồ cảnh báo đa cấp, ghim tọa độ GPS thực địa ổ bọ gậy/nước tù đọng/ca nghi ngờ (`map_pins_service`), theo dõi tiến độ xử lý từng điểm phản ánh và trò chuyện với Trợ lý AI / Đặt lịch khám.
+  - **Đối tượng Cán bộ Y tế / HCDC:** Đăng nhập xác thực (`DoctorAuthService` SHA-256) để mở khóa **Trung Tâm Điều Phối HCDC**, thực hiện duyệt/xác minh điểm phản ánh cộng đồng (`pending` → `verified` → `spraying` → `resolved`), phân công đội phun thuốc cho từng ổ dịch (`cluster_actions`), và đồng bộ trạng thái trực tiếp lên bản đồ ArcGIS & Leaflet.
 - **Trí Tuệ Nhân Tạo Đánh Giá Rủi Ro Đa Chiều (Gemini Multi-modal Risk Index & Advisory)**:
   - Thiết lập công thức tính toán **Chỉ số Rủi ro Đa chiều ($RiskIndex$)**: Kết hợp có trọng số giữa dự báo XGBoost (45%) + Bất thường khí tượng (25%) + Mật độ phản ánh cộng đồng trong bán kính 500m (30%).
   - Tích hợp mô hình ngôn ngữ lớn Google Gemini 2.5 Flash để tự động xuất báo cáo đánh giá dịch tễ chuyên sâu và lịch trình hành động can thiệp dập dịch khẩn cấp.
@@ -240,7 +239,8 @@ với trọng số: $w_1 = 0.45$, $w_2 = 0.25$, $w_3 = 0.30$.
 | **Địa lý & Không gian (GIS)** | **GeoPandas** | $\ge 0.14.0$ | Quản lý GeoDataFrame ranh giới 34 tỉnh/thành phố và các lớp đa giác không gian. |
 | | **Shapely** | $\ge 2.0.0$ | Xử lý đối tượng hình học (`Point`, `Polygon`), tạo đa giác vùng đệm tròn (`buffer`), sửa lỗi hình học (`make_valid`). |
 | | **Fiona** | $\ge 1.9.0$ | Trình điều khiển đọc/ghi tệp định dạng không gian GeoJSON chuẩn EPSG:4326. |
-| | **Folium / Leaflet** | $\ge 0.15.0$ | Hiển thị bản đồ tương tác, lớp MarkerCluster ghim phản ánh bọ gậy của người dân. |
+| | **ArcGIS Maps SDK for JavaScript** | 4.29 | Hiển thị bản đồ WebGIS đa lớp (2D `MapView` & 3D `SceneView`), `LayerList`, `Legend`, `Search`, `Circle` geodesic buffer và đa giác Choropleth cấp Tỉnh & Quận TP.HCM. |
+| | **Leaflet** | 1.9.4 | Bản đồ tương tác nhẹ song song với ArcGIS phục vụ người dân ghim tọa độ GPS phản ánh thực địa. |
 | **Trí tuệ Nhân tạo (GenAI)** | **Google GenAI SDK** | $\ge 0.3.0$ | Bộ SDK chính thức kết nối Google Gemini API (hỗ trợ `gemini-2.5-flash`, `gemini-3.5-flash-lite`). |
 | | **Google Search Grounding** | — | Kỹ thuật neo tìm kiếm Google thực tế giúp Chatbot cập nhật báo cáo dịch tễ mới nhất thời gian thực. |
 | | **Structured Output (JSON)** | — | Ép kiểu đầu ra của mô hình ngôn ngữ lớn về đúng schema JSON chuẩn phục vụ hiển thị trực quan. |
@@ -1129,23 +1129,24 @@ stateDiagram-v2
 ```mermaid
 flowchart TB
     subgraph UI_Components ["Tầng Giao Diện Người Dùng (UI Components)"]
-        CMP_Dashboard["dashboard.py<br/>(Streamlit Web Main App)"]
-        CMP_Sidebar["src/sidebar/ & src/ui_theme.py<br/>(Theme & UI Widgets)"]
-        CMP_CrowdMap["src/crowdsourcing_map.py<br/>(Leaflet & MarkerCluster)"]
+        CMP_Dashboard["src/dashboard.py<br/>(Streamlit Web Main App & HCDC Dispatch)"]
+        CMP_Sidebar["src/sidebar/ & src/ui_theme.py<br/>(Theme, Role Switcher & UI Widgets)"]
+        CMP_ArcGIS["src/arcgis_component/index.html<br/>(ArcGIS Maps SDK 4.29 2D/3D)"]
+        CMP_CrowdMap["src/map_component/index.html<br/>(Leaflet Interactive Map)"]
         CMP_Chatbot["src/chatbot/gemini_chat_engine.py<br/>(Streaming Chat Interface)"]
     end
 
     subgraph Service_Components ["Tầng Dịch Vụ Nghiệp Vụ (Service Components)"]
-        CMP_CrowdSvc["src/crowdsourcing_service.py<br/>(Spatial Crowdsourcing Logic)"]
-        CMP_RiskCalc["src/spatial_risk_calculator.py<br/>(Multi-modal Risk Index)"]
+        CMP_CrowdSvc["src/map_pins_service.py<br/>(Pins Status & Cluster Actions)"]
+        CMP_AuthSvc["src/booking/doctor_auth.py<br/>(SHA-256 HCDC Officer Auth)"]
         CMP_AIPredict["src/ai_prediction_service.py<br/>(Gemini Prediction Service)"]
         CMP_WeatherSvc["src/weather_service.py<br/>(Weather Client & Scheduler)"]
     end
 
     subgraph Core_Components ["Tầng Lõi Xử Lý Dữ Liệu & Học Máy (Core Processing Components)"]
         CMP_DataProc["src/data_processor.py<br/>(NLP Parser, Dedup, Aggregation)"]
-        CMP_Model["src/model.py<br/>(XGBoost Train & Recursive Forecast)"]
-        CMP_GIS["src/gis_mapper.py<br/>(GeoPandas & Buffer Generator)"]
+        CMP_Model["src/model.py<br/>(XGBoost Province + HCMC District)"]
+        CMP_GIS["src/gis_mapper.py<br/>(GeoPandas, HCMC Districts & Buffer)"]
         CMP_MongoSvc["src/mongo_data_service.py<br/>(MongoDB Persistence Layer)"]
         CMP_Paths["src/paths.py & src/config.py<br/>(Path Management & Env Settings)"]
     end
@@ -1160,7 +1161,7 @@ flowchart TB
         LIB_APS["apscheduler"]
     end
 
-    CMP_Dashboard --> CMP_CrowdSvc & CMP_RiskCalc & CMP_AIPredict & CMP_Chatbot & CMP_WeatherSvc & CMP_GIS & CMP_Sidebar
+    CMP_Dashboard --> CMP_ArcGIS & CMP_CrowdMap & CMP_CrowdSvc & CMP_AuthSvc & CMP_AIPredict & CMP_Chatbot & CMP_WeatherSvc & CMP_GIS & CMP_Sidebar
     CMP_CrowdSvc --> CMP_MongoSvc
     CMP_AIPredict --> CMP_MongoSvc
     CMP_WeatherSvc --> CMP_MongoSvc

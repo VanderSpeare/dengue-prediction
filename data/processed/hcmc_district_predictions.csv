@@ -1,0 +1,97 @@
+province,district,year,month,step,predicted_cases,month_label
+TP. Hồ Chí Minh,Bình Chánh,2026,1,1,0.14413427,Tháng 01/2026
+TP. Hồ Chí Minh,Bình Thạnh,2026,1,1,47.87355,Tháng 01/2026
+TP. Hồ Chí Minh,Bình Tân,2026,1,1,0.20674872,Tháng 01/2026
+TP. Hồ Chí Minh,Cần Giờ,2026,1,1,0.087135695,Tháng 01/2026
+TP. Hồ Chí Minh,Củ Chi,2026,1,1,0.18359832,Tháng 01/2026
+TP. Hồ Chí Minh,Gò Vấp,2026,1,1,40.260464,Tháng 01/2026
+TP. Hồ Chí Minh,Huyện Châu Đức,2026,1,1,0.18093356,Tháng 01/2026
+TP. Hồ Chí Minh,Huyện Tân Hồng,2026,1,1,0.07078012,Tháng 01/2026
+TP. Hồ Chí Minh,Huyện Xuyên Mộc,2026,1,1,0.14237243,Tháng 01/2026
+TP. Hồ Chí Minh,Hóc Môn,2026,1,1,5.3689823,Tháng 01/2026
+TP. Hồ Chí Minh,Nhà Bè,2026,1,1,0.080500215,Tháng 01/2026
+TP. Hồ Chí Minh,Phú Nhuận,2026,1,1,14.130103,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 1,2026,1,1,0.60997224,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 10,2026,1,1,0.19142778,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 11,2026,1,1,0.236955,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 12,2026,1,1,14.406388,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 3,2026,1,1,0.39005837,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 4,2026,1,1,0.2791924,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 5,2026,1,1,0.0,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 6,2026,1,1,0.17885667,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 7,2026,1,1,0.129787,Tháng 01/2026
+TP. Hồ Chí Minh,Quận 8,2026,1,1,0.14577475,Tháng 01/2026
+TP. Hồ Chí Minh,Thành Phố Dĩ An,2026,1,1,0.1418615,Tháng 01/2026
+TP. Hồ Chí Minh,Thành Phố Thuận An,2026,1,1,0.38847128,Tháng 01/2026
+TP. Hồ Chí Minh,Thành Phố Thủ Dầu Một,2026,1,1,0.06712183,Tháng 01/2026
+TP. Hồ Chí Minh,Thành Phố Vũng Tàu,2026,1,1,0.16397409,Tháng 01/2026
+TP. Hồ Chí Minh,Thị Xã Bến Cát,2026,1,1,0.19984606,Tháng 01/2026
+TP. Hồ Chí Minh,Thị Xã Phú Mỹ,2026,1,1,0.12956002,Tháng 01/2026
+TP. Hồ Chí Minh,Thị Xã Tân Uyên,2026,1,1,0.114232205,Tháng 01/2026
+TP. Hồ Chí Minh,Thủ Đức,2026,1,1,13.979305,Tháng 01/2026
+TP. Hồ Chí Minh,Tân Bình,2026,1,1,0.21332233,Tháng 01/2026
+TP. Hồ Chí Minh,Tân Phú,2026,1,1,0.06630652,Tháng 01/2026
+TP. Hồ Chí Minh,Bình Chánh,2026,2,2,0.09278644,Tháng 02/2026
+TP. Hồ Chí Minh,Bình Thạnh,2026,2,2,37.963337,Tháng 02/2026
+TP. Hồ Chí Minh,Bình Tân,2026,2,2,0.2193243,Tháng 02/2026
+TP. Hồ Chí Minh,Cần Giờ,2026,2,2,0.028923018,Tháng 02/2026
+TP. Hồ Chí Minh,Củ Chi,2026,2,2,0.15847275,Tháng 02/2026
+TP. Hồ Chí Minh,Gò Vấp,2026,2,2,32.286446,Tháng 02/2026
+TP. Hồ Chí Minh,Huyện Châu Đức,2026,2,2,0.12303113,Tháng 02/2026
+TP. Hồ Chí Minh,Huyện Tân Hồng,2026,2,2,0.008351484,Tháng 02/2026
+TP. Hồ Chí Minh,Huyện Xuyên Mộc,2026,2,2,0.10172655,Tháng 02/2026
+TP. Hồ Chí Minh,Hóc Môn,2026,2,2,6.7152796,Tháng 02/2026
+TP. Hồ Chí Minh,Nhà Bè,2026,2,2,0.022287529,Tháng 02/2026
+TP. Hồ Chí Minh,Phú Nhuận,2026,2,2,10.174981,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 1,2026,2,2,0.5348058,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 10,2026,2,2,0.18245897,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 11,2026,2,2,0.1787424,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 12,2026,2,2,10.763513,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 3,2026,2,2,0.6227943,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 4,2026,2,2,0.19587433,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 5,2026,2,2,0.013167098,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 6,2026,2,2,0.1419373,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 7,2026,2,2,0.07157445,Tháng 02/2026
+TP. Hồ Chí Minh,Quận 8,2026,2,2,0.19334541,Tháng 02/2026
+TP. Hồ Chí Minh,Thành Phố Dĩ An,2026,2,2,0.09166814,Tháng 02/2026
+TP. Hồ Chí Minh,Thành Phố Thuận An,2026,2,2,0.3318552,Tháng 02/2026
+TP. Hồ Chí Minh,Thành Phố Thủ Dầu Một,2026,2,2,0.03730616,Tháng 02/2026
+TP. Hồ Chí Minh,Thành Phố Vũng Tàu,2026,2,2,0.1126262,Tháng 02/2026
+TP. Hồ Chí Minh,Thị Xã Bến Cát,2026,2,2,0.14163353,Tháng 02/2026
+TP. Hồ Chí Minh,Thị Xã Phú Mỹ,2026,2,2,0.07385422,Tháng 02/2026
+TP. Hồ Chí Minh,Thị Xã Tân Uyên,2026,2,2,0.05601953,Tháng 02/2026
+TP. Hồ Chí Minh,Thủ Đức,2026,2,2,10.027809,Tháng 02/2026
+TP. Hồ Chí Minh,Tân Bình,2026,2,2,0.14744091,Tháng 02/2026
+TP. Hồ Chí Minh,Tân Phú,2026,2,2,0.0,Tháng 02/2026
+TP. Hồ Chí Minh,Bình Chánh,2026,3,3,0.08252512,Tháng 03/2026
+TP. Hồ Chí Minh,Bình Thạnh,2026,3,3,35.74454,Tháng 03/2026
+TP. Hồ Chí Minh,Bình Tân,2026,3,3,0.22052172,Tháng 03/2026
+TP. Hồ Chí Minh,Cần Giờ,2026,3,3,0.01866168,Tháng 03/2026
+TP. Hồ Chí Minh,Củ Chi,2026,3,3,0.1482114,Tháng 03/2026
+TP. Hồ Chí Minh,Gò Vấp,2026,3,3,21.197802,Tháng 03/2026
+TP. Hồ Chí Minh,Huyện Châu Đức,2026,3,3,0.1127698,Tháng 03/2026
+TP. Hồ Chí Minh,Huyện Tân Hồng,2026,3,3,0.0,Tháng 03/2026
+TP. Hồ Chí Minh,Huyện Xuyên Mộc,2026,3,3,0.09146521,Tháng 03/2026
+TP. Hồ Chí Minh,Hóc Môn,2026,3,3,4.1298203,Tháng 03/2026
+TP. Hồ Chí Minh,Nhà Bè,2026,3,3,0.012026196,Tháng 03/2026
+TP. Hồ Chí Minh,Phú Nhuận,2026,3,3,9.283175,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 1,2026,3,3,0.5245445,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 10,2026,3,3,0.14422503,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 11,2026,3,3,0.16848107,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 12,2026,3,3,10.522334,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 3,2026,3,3,0.28613853,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 4,2026,3,3,0.16663572,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 5,2026,3,3,0.0,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 6,2026,3,3,0.13167597,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 7,2026,3,3,0.061313126,Tháng 03/2026
+TP. Hồ Chí Minh,Quận 8,2026,3,3,0.19015472,Tháng 03/2026
+TP. Hồ Chí Minh,Thành Phố Dĩ An,2026,3,3,0.0814068,Tháng 03/2026
+TP. Hồ Chí Minh,Thành Phố Thuận An,2026,3,3,0.32159385,Tháng 03/2026
+TP. Hồ Chí Minh,Thành Phố Thủ Dầu Một,2026,3,3,0.027044827,Tháng 03/2026
+TP. Hồ Chí Minh,Thành Phố Vũng Tàu,2026,3,3,0.10236487,Tháng 03/2026
+TP. Hồ Chí Minh,Thị Xã Bến Cát,2026,3,3,0.13137218,Tháng 03/2026
+TP. Hồ Chí Minh,Thị Xã Phú Mỹ,2026,3,3,0.06359289,Tháng 03/2026
+TP. Hồ Chí Minh,Thị Xã Tân Uyên,2026,3,3,0.045758195,Tháng 03/2026
+TP. Hồ Chí Minh,Thủ Đức,2026,3,3,8.300841,Tháng 03/2026
+TP. Hồ Chí Minh,Tân Bình,2026,3,3,0.13717957,Tháng 03/2026
+TP. Hồ Chí Minh,Tân Phú,2026,3,3,0.20956992,Tháng 03/2026

@@ -191,6 +191,187 @@
       border: 3px solid #ffffff;
       box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.28);
     }
+    /* Floating Pin Comment Overlay Card inside map */
+    #pin-overlay-card {
+      position: absolute;
+      bottom: 24px;
+      right: 64px;
+      z-index: 1000;
+      width: min(360px, calc(100% - 28px));
+      max-height: calc(100% - 84px);
+      overflow-y: auto;
+      padding: 15px 16px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 18px 40px -12px rgba(15, 23, 42, 0.35), 0 4px 14px rgba(15, 23, 42, 0.14);
+      color: #0f172a;
+      display: none;
+      animation: pinCardPop 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #pin-overlay-card.open { display: block; }
+    body.night #pin-overlay-card {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: #334155;
+      color: #f1f5f9;
+      box-shadow: 0 20px 44px -10px rgba(0, 0, 0, 0.72);
+    }
+    @keyframes pinCardPop {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .pin-card-hdr {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .pin-card-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+    .pin-card-coords {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 4px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+    body.night .pin-card-coords {
+      background: #1e3a8a;
+      color: #93c5fd;
+    }
+    #pin-overlay-close {
+      flex: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    #pin-overlay-close:hover {
+      background: #fee2e2;
+      border-color: #f87171;
+      color: #dc2626;
+    }
+    body.night #pin-overlay-close {
+      background: #1e293b;
+      border-color: #475569;
+      color: #cbd5e1;
+    }
+    body.night #pin-overlay-close:hover {
+      background: #7f1d1d;
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+    .pin-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .pin-field {
+      margin-bottom: 8px;
+    }
+    .pin-form-row .pin-field { margin-bottom: 0; }
+    .pin-field label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 3px;
+    }
+    body.night .pin-field label { color: #94a3b8; }
+    .pin-field input,
+    .pin-field select,
+    .pin-field textarea {
+      width: 100%;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 9px;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family: inherit;
+      font-size: 12.5px;
+      padding: 7px 9px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .pin-field input:focus,
+    .pin-field select:focus,
+    .pin-field textarea:focus {
+      border-color: #1d4ed8;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+    }
+    body.night .pin-field input,
+    body.night .pin-field select,
+    body.night .pin-field textarea {
+      background: #1e293b;
+      border-color: #334155;
+      color: #f1f5f9;
+    }
+    #pin-overlay-err {
+      display: none;
+      margin-bottom: 8px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    body.night #pin-overlay-err {
+      background: rgba(127, 29, 29, 0.45);
+      border-color: #ef4444;
+      color: #fecaca;
+    }
+    #pin-overlay-submit {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      background: #1d4ed8;
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+    #pin-overlay-submit:hover { background: #1e40af; }
+    #pin-overlay-submit:active { transform: scale(0.99); }
+    #pin-toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1001;
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: #0f766e;
+      color: #ffffff;
+      font-size: 12.5px;
+      font-weight: 700;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+      display: none;
+    }
     @media (max-width: 640px) {
       .map-hint {
         top: 56px;
@@ -199,6 +380,13 @@
         font-size: 12px;
         padding: 6px 10px;
       }
+      #pin-overlay-card {
+        left: 12px;
+        right: 12px;
+        bottom: 14px;
+        width: auto;
+      }
+      .pin-form-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -208,6 +396,42 @@
     <div class="map-hint">
       📌 Chạm hoặc nhấp vào bản đồ để ghim vị trí &amp; thêm ý kiến / bình luận.
     </div>
+    <div id="pin-overlay-card" role="dialog" aria-label="Ghim phản ánh dịch tễ">
+      <div class="pin-card-hdr">
+        <div>
+          <div class="pin-card-title">📌 Ghim phản ánh dịch tễ</div>
+          <div class="pin-card-coords">📍 <span id="pin-coords-text">0.00000, 0.00000</span></div>
+        </div>
+        <button type="button" id="pin-overlay-close" title="Đóng thẻ ghim" aria-label="Đóng">✕</button>
+      </div>
+      <div class="pin-form-row">
+        <div class="pin-field">
+          <label for="pin-author">👤 Tên của bạn</label>
+          <input id="pin-author" type="text" value="Người dân" />
+        </div>
+        <div class="pin-field">
+          <label for="pin-category">🏷️ Phân loại</label>
+          <select id="pin-category">
+            <option value="🦟 Nhiều muỗi / Nguy cơ cao">🦟 Nhiều muỗi / Nguy cơ cao</option>
+            <option value="💧 Nước đọng / Lăng quăng">💧 Nước đọng / Lăng quăng</option>
+            <option value="🏥 Có ca nghi nhiễm">🏥 Có ca nghi nhiễm</option>
+            <option value="✅ Đã phun thuốc / An toàn">✅ Đã phun thuốc / An toàn</option>
+            <option value="💬 Ý kiến khác">💬 Ý kiến khác</option>
+          </select>
+        </div>
+      </div>
+      <div class="pin-field">
+        <label for="pin-area">📍 Khu vực / Địa chỉ (tùy chọn)</label>
+        <input id="pin-area" type="text" placeholder="VD: Hẻm 123 Lê Văn Việt, Thủ Đức" />
+      </div>
+      <div class="pin-field">
+        <label for="pin-comment">💬 Ý kiến / Bình luận</label>
+        <textarea id="pin-comment" rows="3" placeholder="Nhập nhận xét, cảnh báo hoặc phản ánh..."></textarea>
+      </div>
+      <div id="pin-overlay-err">Vui lòng nhập nội dung ý kiến / bình luận.</div>
+      <button type="button" id="pin-overlay-submit">📌 Lưu Ghim &amp; Bình Luận</button>
+    </div>
+    <div id="pin-toast">✅ Đã lưu điểm ghim và bình luận lên bản đồ!</div>
   </div>
 
   <script>
@@ -218,10 +442,14 @@
       );
     }
 
+    let lastSentHeight = 0;
     function setFrameHeight() {
       const wrapper = document.getElementById("map-wrapper");
-      const h = wrapper ? Math.max(wrapper.offsetHeight + 4, 900) : 900;
-      sendMessageToStreamlit("streamlit:setFrameHeight", { height: h });
+      const h = wrapper ? wrapper.offsetHeight + 4 : 854;
+      if (h !== lastSentHeight) {
+        lastSentHeight = h;
+        sendMessageToStreamlit("streamlit:setFrameHeight", { height: h });
+      }
     }
 
     function emitValue(payload) {
@@ -258,10 +486,116 @@
     let pinsLayer = null;
     let userLayer = null;
     let draftPinMarker = null;
+    let draftLatLon = null;
     let initialized = false;
     let lastViewKey = null;
+    let lastChoroRenderKey = null;
+    let lastSelectedPinTs = null;
     let lastUserTs = null;
     let myLocBtnEl = null;
+    let serverPins = [];
+    let pendingPins = [];
+
+    function openDraftPinOverlay(lat, lon) {
+      draftLatLon = { lat: Number(lat), lon: Number(lon) };
+      placeDraftPin(draftLatLon.lat, draftLatLon.lon);
+      const coordsEl = document.getElementById("pin-coords-text");
+      if (coordsEl) {
+        coordsEl.textContent = `${draftLatLon.lat.toFixed(5)}, ${draftLatLon.lon.toFixed(5)}`;
+      }
+      const errEl = document.getElementById("pin-overlay-err");
+      if (errEl) errEl.style.display = "none";
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) cardEl.classList.add("open");
+    }
+
+    function closeDraftPinOverlay() {
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) cardEl.classList.remove("open");
+      const errEl = document.getElementById("pin-overlay-err");
+      if (errEl) errEl.style.display = "none";
+      draftLatLon = null;
+      if (map && draftPinMarker) {
+        map.removeLayer(draftPinMarker);
+        draftPinMarker = null;
+      }
+    }
+
+    function showPinToast(msg) {
+      const toastEl = document.getElementById("pin-toast");
+      if (!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.style.display = "block";
+      clearTimeout(toastEl._timer);
+      toastEl._timer = setTimeout(() => {
+        toastEl.style.display = "none";
+      }, 2800);
+    }
+
+    (function wireOverlayEvents() {
+      const cardEl = document.getElementById("pin-overlay-card");
+      if (cardEl) {
+        ["click", "mousedown", "pointerdown", "touchstart", "dblclick", "wheel"].forEach((evt) => {
+          cardEl.addEventListener(evt, (e) => e.stopPropagation());
+        });
+      }
+      const closeBtn = document.getElementById("pin-overlay-close");
+      if (closeBtn) {
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          closeDraftPinOverlay();
+        });
+      }
+      const submitBtn = document.getElementById("pin-overlay-submit");
+      if (submitBtn) {
+        submitBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (!draftLatLon) return;
+          const commentEl = document.getElementById("pin-comment");
+          const authorEl = document.getElementById("pin-author");
+          const categoryEl = document.getElementById("pin-category");
+          const areaEl = document.getElementById("pin-area");
+          const errEl = document.getElementById("pin-overlay-err");
+
+          const comment = (commentEl ? commentEl.value : "").trim();
+          if (!comment) {
+            if (errEl) errEl.style.display = "block";
+            if (commentEl) commentEl.focus();
+            return;
+          }
+
+          const payload = {
+            action: "create_pin",
+            lat: Number(draftLatLon.lat.toFixed(6)),
+            lon: Number(draftLatLon.lon.toFixed(6)),
+            author: ((authorEl ? authorEl.value : "") || "Người dân").trim() || "Người dân",
+            category: categoryEl ? categoryEl.value : "💬 Ý kiến khác",
+            area_name: (areaEl ? areaEl.value : "").trim(),
+            comment: comment,
+            ts: Date.now()
+          };
+
+          pendingPins.unshift({
+            lat: payload.lat,
+            lon: payload.lon,
+            author: payload.author,
+            category: payload.category,
+            area_name: payload.area_name,
+            comment: payload.comment,
+            status: "pending",
+            status_label: "⏳ Chờ xác minh",
+            created_at: "Vừa xong"
+          });
+          renderSavedPins(serverPins);
+
+          if (commentEl) commentEl.value = "";
+          if (areaEl) areaEl.value = "";
+          closeDraftPinOverlay();
+          showPinToast("✅ Đã lưu điểm ghim & bình luận lên bản đồ!");
+          emitValue(payload);
+        });
+      }
+    })();
 
     async function fallbackIpLocation() {
       const endpoints = [
@@ -422,8 +756,7 @@
 
         map.on("click", function (e) {
           const { lat, lng } = e.latlng;
-          placeDraftPin(lat, lng);
-          emitPin(lat, lng);
+          openDraftPinOverlay(lat, lng);
         });
       } else if (viewKey && viewKey !== lastViewKey) {
         map.setView([centerLat || 10.7769, centerLon || 106.7009], zoom || 11);
@@ -465,14 +798,13 @@
         draftPinMarker = L.marker([lat, lon], { icon: icon, draggable: true }).addTo(map);
         draftPinMarker.on("dragend", function (ev) {
           const pos = ev.target.getLatLng();
-          emitPin(pos.lat, pos.lng);
+          openDraftPinOverlay(pos.lat, pos.lng);
         });
       }
-      draftPinMarker
-        .bindPopup(
-          `<div class="pin-popup"><b>📌 Điểm đang chọn để ghim</b><br/>Tọa độ: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br/><i>Điền ý kiến ở biểu mẫu bên dưới bản đồ.</i></div>`
-        )
-        .openPopup();
+      draftPinMarker.bindPopup(
+        `<div class="pin-popup"><b>📌 Điểm đang chọn để ghim</b><br/>Tọa độ: ${lat.toFixed(5)}, ${lon.toFixed(5)}<br/><i>Nhập ý kiến ở thẻ nổi góc bản đồ.</i></div>`,
+        { autoPan: false }
+      );
     }
 
     function renderDataMarkers(markers) {
@@ -500,7 +832,7 @@
           m.bindTooltip(escapeHtml(pt.title));
         }
         if (pt.popup_html) {
-          m.bindPopup(`<div class="pin-popup">${pt.popup_html}</div>`);
+          m.bindPopup(`<div class="pin-popup">${pt.popup_html}</div>`, { autoPan: false });
         }
         m.addTo(dataLayer);
       });
@@ -528,7 +860,8 @@
 
       geoLayer = L.geoJSON(geojsonData, {
         style: function (feature) {
-          const name = feature.properties && feature.properties.adm1_name1;
+          const props = (feature && feature.properties) || {};
+          const name = props.district || props.adm1_name1;
           const info = (valuesByProvince || {})[name] || {};
           const cases = Number(info.cases || 0);
           return {
@@ -540,29 +873,58 @@
           };
         },
         onEachFeature: function (feature, layer) {
-          const name = (feature.properties && feature.properties.adm1_name1) || "Tỉnh/Thành";
+          const props = (feature && feature.properties) || {};
+          const name = props.district || props.adm1_name1 || "Khu vực";
           const info = (valuesByProvince || {})[name] || {};
           const cases = Number(info.cases || 0);
           const inc = Number(info.incidence_rate || 0).toFixed(2);
-          layer.bindTooltip(`<b>${escapeHtml(name)}</b>: ${cases.toLocaleString()} ca`);
+          const predLine = info.predicted_cases != null
+            ? `<br/>Dự báo XGBoost: <b>${Number(info.predicted_cases).toFixed(1)} ca</b>`
+            : "";
+          layer.bindTooltip(`<b>${escapeHtml(name)}</b>: ${cases.toLocaleString()} ca (Suất mắc: ${inc})${predLine}`);
           layer.on("click", function (e) {
             L.DomEvent.stopPropagation(e);
             const { lat, lng } = e.latlng;
-            placeDraftPin(lat, lng);
-            emitPin(lat, lng);
+            openDraftPinOverlay(lat, lng);
           });
         }
       }).addTo(map);
     }
 
+    function getPinEmojiByStatus(status) {
+      switch (status) {
+        case "verified": return "✅";
+        case "spraying": return "🚒";
+        case "resolved": return "🛡️";
+        default: return "💬";
+      }
+    }
+
+    function getPinStatusLabel(p) {
+      if (p.status_label) return p.status_label;
+      switch (p.status) {
+        case "verified": return "✅ Đã xác minh ổ dịch";
+        case "spraying": return "🚒 Đang điều phối phun thuốc";
+        case "resolved": return "🛡️ Đã xử lý / An toàn";
+        default: return "⏳ Chờ xác minh";
+      }
+    }
+
     function renderSavedPins(pins) {
       if (!pinsLayer) return;
       pinsLayer.clearLayers();
-      (pins || []).forEach((p) => {
+      serverPins = Array.isArray(pins) ? pins : [];
+      pendingPins = pendingPins.filter((pp) => !serverPins.some((sp) =>
+        Math.abs(Number(sp.lat) - pp.lat) < 1e-5 &&
+        Math.abs(Number(sp.lon) - pp.lon) < 1e-5 &&
+        String(sp.comment || "").trim() === pp.comment
+      ));
+      const allPins = [...pendingPins, ...serverPins];
+      allPins.forEach((p) => {
         if (p.lat == null || p.lon == null) return;
         const icon = L.divIcon({
           className: "custom-pin-icon",
-          html: "💬",
+          html: getPinEmojiByStatus(p.status),
           iconSize: [28, 28],
           iconAnchor: [14, 24]
         });
@@ -570,15 +932,29 @@
         const areaHtml = p.area_name
           ? `<div class="area">📍 ${escapeHtml(p.area_name)}</div>`
           : "";
+        const statusHtml = `<div style="margin:4px 0;font-size:12px;font-weight:700;color:#0369a1;">Trạng thái: ${escapeHtml(getPinStatusLabel(p))}</div>`;
+        const teamHtml = p.assigned_team
+          ? `<div style="font-size:12px;">🚑 Đội xử lý: <b>${escapeHtml(p.assigned_team)}</b></div>`
+          : "";
+        const verifiedHtml = p.verified_by
+          ? `<div style="font-size:12px;">👨‍⚕️ Xác minh: ${escapeHtml(p.verified_by)}</div>`
+          : "";
+        const noteHtml = p.action_note
+          ? `<div style="font-size:12px;color:#b45309;">📋 Chỉ đạo HCDC: ${escapeHtml(p.action_note)}</div>`
+          : "";
         const popupHtml = `
           <div class="pin-popup">
             <div class="cat">${escapeHtml(p.category || "💬 Ý kiến")}</div>
+            ${statusHtml}
             ${areaHtml}
             <div class="body">${escapeHtml(p.comment || "")}</div>
+            ${verifiedHtml}
+            ${teamHtml}
+            ${noteHtml}
             <div class="meta">👤 ${escapeHtml(p.author || "Người dân")} · 🕒 ${escapeHtml(p.created_at || "")}</div>
           </div>
         `;
-        marker.bindPopup(popupHtml);
+        marker.bindPopup(popupHtml, { autoPan: false });
         marker.addTo(pinsLayer);
       });
     }
@@ -607,7 +983,8 @@
             <a class="gmaps-link" href="${gmapsUrl}" target="_blank" rel="noopener noreferrer">
               Open your current location in Google Maps ↗
             </a>
-          </div>`
+          </div>`,
+          { autoPan: false }
         )
         .addTo(userLayer);
 
@@ -655,15 +1032,20 @@
       }
 
       renderDataMarkers(args.markers);
-      renderChoropleth(args.geojson_data, args.choropleth_values);
+      const choroKey = (args.view_key || "") + "|" + (args.geojson_data && args.geojson_data.features ? args.geojson_data.features.length : 0) + "|" + Object.keys(args.choropleth_values || {}).length;
+      if (choroKey !== lastChoroRenderKey) {
+        lastChoroRenderKey = choroKey;
+        renderChoropleth(args.geojson_data, args.choropleth_values);
+      }
       renderSavedPins(args.pins);
       renderUserLocation(args.user_location, false);
 
       if (args.selected_pin && args.selected_pin.lat != null && args.selected_pin.lon != null) {
-        placeDraftPin(args.selected_pin.lat, args.selected_pin.lon);
-      } else if (draftPinMarker && !args.selected_pin) {
-        map.removeLayer(draftPinMarker);
-        draftPinMarker = null;
+        const spTs = args.selected_pin.ts || `${args.selected_pin.lat},${args.selected_pin.lon}`;
+        if (spTs !== lastSelectedPinTs) {
+          lastSelectedPinTs = spTs;
+          openDraftPinOverlay(args.selected_pin.lat, args.selected_pin.lon);
+        }
       }
 
       setFrameHeight();

@@ -67,7 +67,11 @@ def _model_css() -> None:
 # Từng khối nhỏ
 # ---------------------------------------------------------------------------
 def _loader(c: dict) -> None:
-    if "loader" not in st.session_state.get("_ui_fx_enabled", []) or st.session_state.get("_ui_loader_done"):
+    if (
+        st.session_state.get("ui_effects", "calm") != "full"
+        or "loader" not in st.session_state.get("_ui_fx_enabled", [])
+        or st.session_state.get("_ui_loader_done")
+    ):
         return
     st.session_state["_ui_loader_done"] = True
     ld = c.get("loader", {})
@@ -227,9 +231,8 @@ def _news(c: dict) -> None:
         for date, icon, title, href in n.get("items", [])
     )
     _md(
-        f'<div id="news" class="kaf-anchor"></div><div class="kaf-h2"><span class="en">{_ESC(n.get("en", ""))}</span>'
-        f'<span class="ja">{_ESC(n.get("ja", ""))}</span><span class="echo" aria-hidden="true">{_ESC(n.get("echo", ""))}</span></div>'
-        f'<ul class="kaf-news">{rows}</ul>'
+        _head("news", n.get("label", "tin tức"), n.get("en", ""), n.get("ja", ""))
+        + f'<ul class="kaf-news">{rows}</ul>'
     )
 
 
@@ -243,14 +246,11 @@ def _open_article(page: dict) -> None:
 
 def _special(c: dict) -> None:
     sp = c.get("special", {})
-    _md(
-        f'<div id="special" class="kaf-anchor"></div><div class="kaf-h2"><span class="en">{_ESC(sp.get("en", ""))}</span>'
-        f'<span class="ja">{_ESC(sp.get("ja", ""))}</span><span class="echo" aria-hidden="true">{_ESC(sp.get("echo", ""))}</span></div>'
-    )
+    _md(_head("special", sp.get("label", "kiến thức"), sp.get("en", ""), sp.get("ja", "")))
     pages = ui.load_pages()
     per_row = 3
     for start in range(0, len(pages), per_row):
-        cols = st.columns(per_row, gap="large")
+        cols = st.columns(per_row, gap="medium")
         for j, page in enumerate(pages[start : start + per_row]):
             with cols[j]:
                 _md(
@@ -273,9 +273,8 @@ def _qa(c: dict) -> None:
         for h, v in q.get("contacts", [])
     )
     _md(
-        f'<div id="qa" class="kaf-anchor"></div><div class="kaf-h2"><span class="en">{_ESC(q.get("en", ""))}</span>'
-        f'<span class="ja">{_ESC(q.get("ja", ""))}</span><span class="echo" aria-hidden="true">{_ESC(q.get("echo", ""))}</span></div>'
-        f'<ul class="kaf-qa">{items}</ul><div class="kaf-contacts">{contacts}</div>'
+        _head("qa", q.get("label", "hỏi đáp"), q.get("en", ""), q.get("ja", ""))
+        + f'<ul class="kaf-qa">{items}</ul><div class="kaf-contacts">{contacts}</div>'
     )
 
 
@@ -302,38 +301,36 @@ def _footer(c: dict) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Dựng toàn trang
+# Dựng toàn trang (Bento Grid Analytics & Minimalist GIS Dashboard)
 # ---------------------------------------------------------------------------
 def build_kaf_page() -> dict:
-    """Vẽ toàn bộ khung trang. Trả về {'surveillance','forecast','assistant'} là các st.container."""
+    """Vẽ toàn bộ khung trang Bento Dashboard. Trả về {'surveillance','forecast','assistant'} là các st.container."""
     c = _content()
     sec: dict = {}
     _model_css()
-    _page_bg()
     _page_video()
     _loader(c)
     _header(c)
     _hero(c)
 
-    # 1. GIỚI THIỆU
+    # 1. TỔNG QUAN (Bento Header Strip)
     with st.container(key="sec-outline"):
         _outline(c)
 
-    # 2. TICKET  ->  Giám sát dịch tễ
+    # 2. GIÁM SÁT DỊCH TỄ GIS (Bản đồ + KPI + Bento Analytics)
     s = c.get("surveillance", {})
     with st.container(key="sec-surveillance"):
         _md(_head("surveillance", s.get("label", ""), s.get("en", ""), s.get("ja", "")) + _cards(s.get("cards", [])))
-        _md(f'<div class="kaf-map-note">{_ESC(s.get("map_note", ""))}</div>')
         sec["surveillance"] = st.container(key="body-surveillance")
         _md(_btn(s.get("cta", ""), s.get("cta_href", "#")))
 
-    # 2b. DỰ BÁO AI (Gemini)  -> đánh giá & dự báo dịch tễ
+    # 2b. DỰ BÁO AI (Gemini)
     f = c.get("forecast", {})
     with st.container(key="sec-forecast"):
         _md(_head("forecast", f.get("label", ""), f.get("en", ""), f.get("ja", "")) + _cards(f.get("cards", [])))
         sec["forecast"] = st.container(key="body-forecast")
 
-    # 3. VENUE BONUS ITEM  ->  Trợ lý AI
+    # 3. TRỢ LÝ AI
     a = c.get("ai", {})
     with st.container(key="sec-ai"):
         _md(
@@ -342,32 +339,36 @@ def build_kaf_page() -> dict:
         )
         sec["assistant"] = st.container(key="body-ai")
 
-    # 4. STREAMING BONUS ITEM  ->  Cẩm nang nhanh
+    # 4. BENTO ROW: CẨM NANG CẤP CỨU + TIN TỨC CẬP NHẬT
     g = c.get("guide", {})
-    with st.container(key="sec-guide"):
-        _md(
-            _head("guide", g.get("label", ""), g.get("en", ""), g.get("ja", ""))
-            + _item(g.get("item_tag", ""), g.get("item_icon", ""), g.get("item_name", ""), g.get("item_notes", []))
-            + _note(g.get("foot", ""))
-        )
+    with st.container(key="bento-row-guide-news"):
+        col_g, col_n = st.columns([1, 1], gap="medium")
+        with col_g:
+            with st.container(key="sec-guide"):
+                _md(
+                    _head("guide", g.get("label", ""), g.get("en", ""), g.get("ja", ""))
+                    + _item(g.get("item_tag", ""), g.get("item_icon", ""), g.get("item_name", ""), g.get("item_notes", []))
+                    + _note(g.get("foot", ""))
+                )
+        with col_n:
+            with st.container(key="sec-news"):
+                _news(c)
 
-    # 6. NEWS
-    with st.container(key="sec-news"):
-        _news(c)
-
-    # 7. SPECIAL (thẻ + modal)
+    # 5. KIẾN THỨC CHUYÊN ĐỀ (Thẻ + Dialog)
     with st.container(key="sec-special"):
         _special(c)
 
-    # 8. Q&A
-    with st.container(key="sec-qa"):
-        _qa(c)
+    # 6. BENTO ROW: HỎI ĐÁP NHANH + NGUỒN THAM KHẢO Y TẾ
+    with st.container(key="bento-row-qa-partners"):
+        col_q, col_p = st.columns([1, 1], gap="medium")
+        with col_q:
+            with st.container(key="sec-qa"):
+                _qa(c)
+        with col_p:
+            with st.container(key="sec-partners"):
+                _partners(c)
 
-    # 10. PARTNERS
-    with st.container(key="sec-partners"):
-        _partners(c)
-
-    # 11. FOOTER
+    # 7. FOOTER
     with st.container(key="sec-footer"):
         _footer(c)
 

@@ -656,7 +656,8 @@ Bảng 1.2 tổng hợp danh mục công nghệ, phiên bản và vai trò của
 | **Không gian địa lý (GIS)** | **GeoPandas** | $\ge 0.14.0$ | Xử lý dữ liệu bảng địa không gian GeoDataFrame. |
 | | **Shapely** | $\ge 2.0.0$ | Xử lý các phép toán hình học điểm, đa giác, tạo vùng đệm `buffer`. |
 | | **Fiona** | $\ge 1.9.0$ | Đọc và ghi tệp cấu trúc chuẩn `GeoJSON (EPSG:4326)`. |
-| | **Folium / Leaflet** | $\ge 0.15.0$ | Hiển thị bản đồ tương tác, lớp MarkerCluster ghim phản ánh cộng đồng. |
+| | **ArcGIS Maps SDK for JavaScript** | 4.29 | Hiển thị bản đồ WebGIS đa lớp (2D `MapView` / 3D `SceneView`), `LayerList`, `Legend`, `Search`, vùng đệm geodesic và Choropleth cấp Tỉnh & Quận TP.HCM. |
+| | **Leaflet** | 1.9.4 | Bản đồ tương tác nhẹ song song với ArcGIS phục vụ cộng đồng ghim vị trí thực địa. |
 | **Trí tuệ nhân tạo (GenAI)** | **Google GenAI SDK** | $\ge 0.3.0$ | Kết nối mô hình ngôn ngữ lớn `gemini-2.5-flash` và `gemini-3.5-flash-lite`. |
 | | **Search Grounding** | — | Công cụ neo tìm kiếm Google Search cập nhật dữ liệu y tế trực tuyến. |
 | **Cơ sở dữ liệu** | **MongoDB Atlas / PyMongo** | $\ge 4.6.0$ | Hệ quản trị NoSQL đám mây lưu trữ phản ánh cộng đồng, lịch sử ca bệnh, cache AI. |
@@ -672,17 +673,17 @@ Bảng 1.2 tổng hợp danh mục công nghệ, phiên bản và vai trò của
 ### 2.1. Yêu cầu kỹ thuật và phân tích yêu cầu hệ thống
 
 #### 2.1.1. Yêu cầu chức năng (Functional Requirements)
-1. **Phân hệ Giám sát Dịch tễ & Bản đồ số GIS Đa tầng:**
-   - Trực quan hóa số ca mắc SXH và tỷ suất mắc/100k dân trên bản đồ nhiệt Choropleth theo 34 tỉnh/thành.
+1. **Phân hệ Giám sát Dịch tễ & Bản đồ số ArcGIS / Leaflet Đa tầng:**
+   - Kiến trúc bản đồ kép **ArcGIS Maps SDK for JavaScript 4.29 (2D `MapView` / 3D `SceneView`) song song với Leaflet**, tích hợp bộ quản lý lớp `LayerList`, `Legend`, `Search` và chế độ xem **Song Song**.
+   - Trực quan hóa số ca mắc SXH và tỷ suất mắc/100k dân trên bản đồ nhiệt Choropleth theo 34 tỉnh/thành và ranh giới **Quận/Huyện TP.HCM** (`hcmc_districts.geojson`).
    - Hiển thị các điểm nóng dịch bệnh cấp quận/huyện, phường/xã và tuyến đường tại TP.HCM.
-   - Tự động hiển thị các vòng tròn khoanh vùng ổ dịch Geodesic Buffer (200m – 2000m) kèm mã màu rủi ro và khuyến cáo dập dịch tương ứng.
-2. **Phân hệ Dự báo Học máy XGBoost Đa biến Khí hậu:**
+   - Tự động hiển thị các vòng tròn khoanh vùng ổ dịch Geodesic Buffer (100m – 2000m) kèm mã màu rủi ro, trạng thái xử lý HCDC và khuyến cáo dập dịch tương ứng.
+2. **Phân hệ Dự báo Học máy XGBoost Đa cấp & Đa biến Khí hậu:**
    - Đọc dữ liệu lịch sử ca bệnh kết hợp các biến độ trễ khí tượng môi trường (lượng mưa lag 1-2, nhiệt độ lag 1-2, độ ẩm lag 1-2, tương tác $T \times H$, PM2.5).
-   - Dự báo tự động số ca mắc của từng tỉnh cho 3 tháng tương lai bằng thuật toán đệ quy.
-3. **Phân hệ Phản ánh Dịch tễ Không gian Cộng đồng (Spatial Crowdsourcing):**
-   - Cho phép người dân ghim trực tiếp tọa độ vị trí ổ bọ gậy, điểm nước đọng, ca sốt nghi ngờ lên bản đồ số Leaflet.
-   - Cho phép người dân gửi hình ảnh, bình luận, đánh giá mức độ nguy hiểm và thời điểm phát hiện.
-   - Cho phép cán bộ y tế dự phòng xác minh, cập nhật tiến độ xử lý và thông báo phản hồi cho cộng đồng.
+   - Dự báo tự động số ca mắc cho 3 tháng tương lai bằng thuật toán đệ quy ở cả **cấp 34 Tỉnh/Thành** và **cấp từng Quận/Huyện tại TP. Hồ Chí Minh** (`train_district_model` / `predict_future_districts`).
+3. **Phân hệ Phản ánh Dịch tễ Không gian Cộng đồng & Quản lý Dịch HCDC (Spatial Crowdsourcing & Dispatch):**
+   - Cho phép người dân ghim trực tiếp tọa độ vị trí ổ bọ gậy, điểm nước đọng, ca sốt nghi ngờ lên bản đồ ArcGIS/Leaflet và theo dõi tiến độ xử lý (`pending` → `verified` → `spraying` → `resolved`).
+   - Cho phép cán bộ y tế dự phòng HCDC đăng nhập xác thực (`DoctorAuthService` SHA-256) để duyệt/xác minh điểm phản ánh cộng đồng, phân công đội cơ động/phun thuốc cho từng ổ dịch (`cluster_actions`) và xuất nhật ký điều phối CSV.
 4. **Phân hệ Trí tuệ Nhân tạo Đánh giá Rủi ro Đa chiều & Mô phỏng Kịch bản:**
    - Tự động tổng hợp kết quả dự báo từ XGBoost + Bất thường thời tiết + Mật độ phản ánh cộng đồng trong bán kính 500m để tính toán Chỉ số Rủi ro Đa chiều ($RiskIndex$).
    - Cho phép chuyên gia nhập các giả định (Lượng mưa, Độ ẩm, Nhiệt độ, Chỉ số bọ gậy BI, Cấp độ can thiệp dập dịch) để mô phỏng kịch bản biến động ca bệnh kèm khoảng tin cậy 95%.
