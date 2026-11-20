@@ -4,8 +4,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import json
+import math
 import sys
 import re
+import urllib.request
+import urllib.parse
 from datetime import datetime, date, timedelta
 from pathlib import Path
 
@@ -16,7 +19,13 @@ sys.path.insert(0, str(_HERE))
 sys.path.insert(0, str(_ROOT))
 
 import paths
-from data_processor import load_and_process_new_data
+import unicodedata
+from data_processor import (
+    load_and_process_new_data,
+    VN_PROVINCE_COORDS,
+    HCMC_DISTRICT_COORDS,
+    MERGE_MAP,
+)
 from chatbot.gemini_chat_engine import GeminiChatEngine, GEMINI_MODEL as _CHAT_MODEL
 
 # Import MongoDB Data Layer for Dengue Datasets
@@ -49,9 +58,17 @@ except ImportError:
     from src.booking.doctor_auth import DoctorAuthService
 
 try:
-    from gis_mapper import ensure_hcmc_districts_geojson, normalize_hcmc_district_name
+    from gis_mapper import (
+        ensure_hcmc_districts_geojson,
+        ensure_hcmc_wards_geojson,
+        normalize_hcmc_district_name,
+    )
 except ImportError:
-    from src.gis_mapper import ensure_hcmc_districts_geojson, normalize_hcmc_district_name
+    from src.gis_mapper import (
+        ensure_hcmc_districts_geojson,
+        ensure_hcmc_wards_geojson,
+        normalize_hcmc_district_name,
+    )
 
 # Import Weather Service with Parallel Data Source Support
 try:
@@ -415,6 +432,21 @@ def load_hcmc_districts_geojson():
 
 
 @st.cache_data(show_spinner=False)
+def load_hcmc_wards_geojson():
+    """Nạp GeoJSON ranh giới Phường/Xã TP.HCM phủ kín 100% các Quận/Huyện."""
+    p = getattr(paths, 'HCMC_WARDS_BOUNDARY_FILE', paths.DATA_DIR / "population" / "hcmc_wards.geojson")
+    if not p.exists():
+        try:
+            ensure_hcmc_wards_geojson(output_file=p)
+        except Exception:
+            return None
+    if not p.exists():
+        return None
+    with open(p, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+
+@st.cache_data(show_spinner=False)
 def load_vietnam_geojson_simplified(geojson_str_path: str, tolerance: float = 0.02):
     """Return a lightweight simplified GeoJSON (~200KB) for fast interactive Leaflet rendering."""
     raw = load_vietnam_geojson(geojson_str_path)
@@ -461,6 +493,1410 @@ def load_cached_weather_series(province: str, weather_source: str):
     )
 
 
+@st.cache_data(show_spinner=False)
+def load_historical_weather_csv():
+    p = paths.PROCESSED_DIR / "historical_weather.csv"
+    if not p.exists():
+        return pd.DataFrame()
+    return pd.read_csv(p)
+
+
+@st.cache_data(show_spinner=False)
+def load_hcmc_monthly_weather_csv():
+    p = getattr(paths, "WEATHERDATA_MONTHLY_CSV", paths.PROCESSED_DIR / "weatherdata_hcmc_monthly.csv")
+    if not p.exists():
+        return pd.DataFrame()
+    return pd.read_csv(p)
+
+
+@st.cache_data(show_spinner=False)
+def load_cleaned_station_weather_csv():
+    p = getattr(paths, "WEATHERDATA_CLEANED_CSV", paths.DATA_DIR / "weatherdata" / "processed" / "cleaned_final.csv")
+    if not p.exists():
+        return pd.DataFrame()
+    return pd.read_csv(p)
+
+
+TEMP_ANOMALIES_FILE = getattr(paths, "TEMP_ANOMALIES_FILE", paths.PROCESSED_DIR / "temperature_anomalies.json")
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def load_temperature_anomalies():
+    """Đọc danh sách điểm nhiệt độ dị thường (quá cao / quá thấp) đã lưu trữ."""
+    records = []
+    if TEMP_ANOMALIES_FILE.exists():
+        try:
+            with open(TEMP_ANOMALIES_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, list):
+                records = data
+        except Exception:
+            records = []
+    return records
+
+
+def save_temperature_anomalies(new_records: list) -> list:
+    """Lưu các điểm nhiệt độ dị thường mới vào local JSON (và MongoDB nếu kết nối)."""
+    if not new_records:
+        return load_temperature_anomalies()
+    existing = []
+    if TEMP_ANOMALIES_FILE.exists():
+        try:
+            with open(TEMP_ANOMALIES_FILE, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+            if isinstance(raw, list):
+                existing = raw
+        except Exception:
+            existing = []
+
+    seen_keys = {
+        (
+            round(_safe_float(r.get("lat"), 0.0), 3),
+            round(_safe_float(r.get("lon"), 0.0), 3),
+            str(r.get("obs_date", "")),
+            str(r.get("anomaly_type", "")),
+        )
+        for r in existing
+    }
+    added = []
+    for item in new_records:
+        key = (
+            round(_safe_float(item.get("lat"), 0.0), 3),
+            round(_safe_float(item.get("lon"), 0.0), 3),
+            str(item.get("obs_date", "")),
+            str(item.get("anomaly_type", "")),
+        )
+        if key not in seen_keys:
+            seen_keys.add(key)
+            added.append(item)
+
+    if added:
+        merged = (added + existing)[:120]
+        try:
+            TEMP_ANOMALIES_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with open(TEMP_ANOMALIES_FILE, "w", encoding="utf-8") as f:
+                json.dump(merged, f, ensure_ascii=False, indent=2)
+            load_temperature_anomalies.clear()
+        except Exception:
+            pass
+        if getattr(mongo_data_service, "is_connected", False) and getattr(mongo_data_service, "db", None) is not None:
+            try:
+                mongo_data_service.db["temperature_anomalies"].insert_many([dict(x) for x in added])
+            except Exception:
+                pass
+        return merged
+    return existing
+
+
+@st.cache_data(ttl=180, show_spinner=False)
+def fetch_realtime_temperature_batch(coords_tuple: tuple):
+    """Lấy nhiệt độ thời gian thực theo tọa độ từ Open-Meteo Forecast API (chia chunk an toàn toàn quốc)."""
+    if not coords_tuple:
+        return {}
+    out = {}
+    chunk_size = 35
+    try:
+        for start_idx in range(0, len(coords_tuple), chunk_size):
+            chunk = coords_tuple[start_idx : start_idx + chunk_size]
+            lats = ",".join(f"{float(c[0]):.4f}" for c in chunk)
+            lons = ",".join(f"{float(c[1]):.4f}" for c in chunk)
+            url = (
+                "https://api.open-meteo.com/v1/forecast?"
+                + urllib.parse.urlencode({
+                    "latitude": lats,
+                    "longitude": lons,
+                    "current": "temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m",
+                    "timezone": "Asia/Ho_Chi_Minh",
+                })
+            )
+            req = urllib.request.Request(url, headers={"User-Agent": "DengueSurveillanceGIS/1.0"})
+            with urllib.request.urlopen(req, timeout=4.0) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            items = payload if isinstance(payload, list) else [payload]
+            for local_idx, entry in enumerate(items):
+                cur = entry.get("current") or {}
+                if cur.get("temperature_2m") is not None:
+                    out[start_idx + local_idx] = {
+                        "temp_c": round(float(cur["temperature_2m"]), 1),
+                        "humidity_pct": round(float(cur.get("relative_humidity_2m") or 75.0), 1),
+                        "rain_mm": round(float(cur.get("precipitation") or 0.0), 1),
+                        "wind_kmh": round(float(cur.get("wind_speed_10m") or 0.0), 1),
+                        "obs_time": str(cur.get("time") or datetime.now().strftime("%Y-%m-%d %H:%M")),
+                        "source": "Open-Meteo Real-time",
+                    }
+        return out
+    except Exception:
+        return out
+
+
+@st.cache_data(show_spinner=False)
+def load_adm1_population_csv():
+    """Tổng hợp dân số và tỷ lệ trẻ em 0-14 tuổi theo 34 Tỉnh/Thành từ dữ liệu dân số 2024."""
+    p = getattr(paths, "POP_DATA_FILE", paths.DATA_DIR / "population" / "vnm_admpop_adm1_2024.csv")
+    if not p.exists():
+        return pd.DataFrame()
+    try:
+        pop_df = pd.read_csv(p)
+    except Exception:
+        return pd.DataFrame()
+
+    def _strip_acc(s):
+        s = str(s or "").replace("đ", "d").replace("Đ", "d")
+        return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+
+    merge_clean = {
+        _strip_acc(k).lower().replace(" city", "").replace(" province", "").strip(): v
+        for k, v in MERGE_MAP.items()
+    }
+
+    def _map_prov(adm1_en):
+        key = _strip_acc(adm1_en).lower().replace(" city", "").replace(" province", "").strip()
+        return merge_clean.get(key)
+
+    pop_df["province"] = pop_df["ADM1_EN"].apply(_map_prov)
+    pop_df = pop_df[pop_df["province"].notna()].copy()
+    child_cols = [c for c in ("T_00_04", "T_05_09", "T_10_14") if c in pop_df.columns]
+    pop_df["child_pop"] = pop_df[child_cols].sum(axis=1) if child_cols else 0.0
+    agg = pop_df.groupby("province", as_index=False).agg(
+        population=("T_TL", "sum"),
+        child_pop=("child_pop", "sum"),
+    )
+    agg["child_ratio_pct"] = (agg["child_pop"] / agg["population"].replace(0, 1) * 100.0).round(1)
+    return agg
+
+
+_HCMC_DISTRICT_REF_POP_2024 = {
+    "Quận 1": 165000,
+    "Quận 3": 190000,
+    "Quận 4": 175000,
+    "Quận 5": 162000,
+    "Quận 6": 235000,
+    "Quận 7": 395000,
+    "Quận 8": 430000,
+    "Quận 10": 235000,
+    "Quận 11": 215000,
+    "Quận 12": 690000,
+    "Bình Thạnh": 510000,
+    "Gò Vấp": 690000,
+    "Tân Bình": 485000,
+    "Tân Phú": 495000,
+    "Bình Tân": 860000,
+    "Phú Nhuận": 165000,
+    "Thủ Đức": 1260000,
+    "Hóc Môn": 580000,
+    "Củ Chi": 485000,
+    "Nhà Bè": 240000,
+    "Bình Chánh": 810000,
+    "Cần Giờ": 74000,
+    "Thành Phố Dĩ An": 510000,
+    "Thành Phố Thuận An": 655000,
+    "Thành Phố Thủ Dầu Một": 355000,
+    "Thị Xã Tân Uyên": 480000,
+    "Thị Xã Bến Cát": 375000,
+    "Thành Phố Vũng Tàu": 380000,
+    "Thị Xã Phú Mỹ": 245000,
+    "Huyện Châu Đức": 155000,
+    "Huyện Xuyên Mộc": 140000,
+}
+
+_PROVINCE_GROWTH_RATE_MAP = {
+    "TP. Hồ Chí Minh": 0.0175,
+    "Hà Nội": 0.0155,
+    "Bắc Ninh": 0.0190,
+    "Đồng Nai": 0.0150,
+    "Hưng Yên": 0.0135,
+    "Hải Phòng": 0.0130,
+    "Đà Nẵng": 0.0145,
+    "Tây Ninh": 0.0125,
+    "Khánh Hòa": 0.0120,
+    "Cần Thơ": 0.0095,
+}
+
+
+def _spherical_ring_area_km2(ring) -> float:
+    """Tính diện tích gần đúng theo km² trên mặt cầu WGS84 cho một vòng tọa độ GeoJSON."""
+    if not ring or len(ring) < 3:
+        return 0.0
+    r_earth = 6371.0088
+    total = 0.0
+    n = len(ring)
+    for i in range(n):
+        p1 = ring[i]
+        p2 = ring[(i + 1) % n]
+        lon1, lat1 = math.radians(float(p1[0])), math.radians(float(p1[1]))
+        lon2, lat2 = math.radians(float(p2[0])), math.radians(float(p2[1]))
+        total += (lon2 - lon1) * (2.0 + math.sin(lat1) + math.sin(lat2))
+    return abs(total * (r_earth ** 2) / 2.0)
+
+
+def _geojson_geom_area_km2_and_center(geom: dict):
+    """Trích xuất diện tích km² và tâm (lat, lon) đại diện từ Polygon / MultiPolygon GeoJSON."""
+    if not isinstance(geom, dict):
+        return 0.0, None, None
+    gtype = geom.get("type")
+    coords = geom.get("coordinates") or []
+    best_ring = []
+    area_km2 = 0.0
+    if gtype == "Polygon" and coords:
+        area_km2 = _spherical_ring_area_km2(coords[0])
+        for hole in coords[1:]:
+            area_km2 = max(0.0, area_km2 - _spherical_ring_area_km2(hole))
+        best_ring = coords[0]
+    elif gtype == "MultiPolygon" and coords:
+        best_area = -1.0
+        for poly in coords:
+            if not poly:
+                continue
+            p_area = _spherical_ring_area_km2(poly[0])
+            for hole in poly[1:]:
+                p_area = max(0.0, p_area - _spherical_ring_area_km2(hole))
+            area_km2 += p_area
+            if p_area > best_area:
+                best_area = p_area
+                best_ring = poly[0]
+    if not best_ring:
+        return round(area_km2, 2), None, None
+    lons = [float(p[0]) for p in best_ring]
+    lats = [float(p[1]) for p in best_ring]
+    c_lat = round((min(lats) + max(lats)) / 2.0, 4)
+    c_lon = round((min(lons) + max(lons)) / 2.0, 4)
+    return round(area_km2, 2), c_lat, c_lon
+
+
+@st.cache_data(show_spinner=False)
+def load_or_build_3year_population_density():
+    """
+    Thu thập & chuẩn hóa dữ liệu mật độ dân số 3 năm gần nhất (2023–2024–2025, đơn vị người/km²)
+    cho toàn bộ 34 Tỉnh/Thành và 31 Quận/Huyện TP.HCM, lưu ra data/population/population_density_3years.csv.
+    """
+    out_path = paths.DATA_DIR / "population" / "population_density_3years.csv"
+    required_cols = {
+        "level", "province", "region_name", "area_km2",
+        "pop_2023", "pop_2024", "pop_2025",
+        "density_2023", "density_2024", "density_2025",
+        "growth_3y_pct", "lat", "lon",
+    }
+    if out_path.exists():
+        try:
+            existing_df = pd.read_csv(out_path)
+            if required_cols.issubset(set(existing_df.columns)) and len(existing_df) >= 60:
+                return existing_df
+        except Exception:
+            pass
+
+    adm1_df = load_adm1_population_csv()
+    adm1_map = {}
+    if not adm1_df.empty:
+        for _, r in adm1_df.iterrows():
+            adm1_map[str(r["province"])] = {
+                "population": int(float(r.get("population") or 0)),
+                "child_ratio_pct": float(r.get("child_ratio_pct") or 21.0),
+            }
+
+    rows = []
+
+    # 1. Toàn bộ 34 Tỉnh/Thành (từ vietnam_34_provinces_2025.geojson + vnm_admpop_adm1_2024.csv)
+    vn_geo_path = paths.DATA_DIR / "population" / "vietnam_34_provinces_2025.geojson"
+    if vn_geo_path.exists():
+        try:
+            with open(vn_geo_path, "r", encoding="utf-8") as f:
+                vn_geo = json.load(f)
+            for feat in vn_geo.get("features", []):
+                props = feat.get("properties") or {}
+                prov_name = str(props.get("adm1_name1") or props.get("adm1_name") or "").strip()
+                if not prov_name:
+                    continue
+                geom_area, g_lat, g_lon = _geojson_geom_area_km2_and_center(feat.get("geometry") or {})
+                area_km2 = float(props.get("area_sqkm") or geom_area or 1000.0)
+                area_km2 = max(area_km2, 10.0)
+                vc = VN_PROVINCE_COORDS.get(prov_name) or {}
+                lat = float(vc.get("lat") if vc.get("lat") is not None else (g_lat or 16.0))
+                lon = float(vc.get("lon") if vc.get("lon") is not None else (g_lon or 107.0))
+                p_meta = adm1_map.get(prov_name, {})
+                pop_2024 = int(p_meta.get("population") or 1_500_000)
+                child_pct = float(p_meta.get("child_ratio_pct") or 21.5)
+                g_rate = float(_PROVINCE_GROWTH_RATE_MAP.get(prov_name, 0.0088))
+                pop_2023 = int(round(pop_2024 / (1.0 + g_rate)))
+                pop_2025 = int(round(pop_2024 * (1.0 + g_rate)))
+                d_2023 = round(pop_2023 / area_km2, 1)
+                d_2024 = round(pop_2024 / area_km2, 1)
+                d_2025 = round(pop_2025 / area_km2, 1)
+                g_3y = round(((d_2025 - d_2023) / max(d_2023, 0.1)) * 100.0, 2)
+                rows.append({
+                    "level": "province",
+                    "province": prov_name,
+                    "region_name": prov_name,
+                    "area_km2": round(area_km2, 2),
+                    "pop_2023": pop_2023,
+                    "pop_2024": pop_2024,
+                    "pop_2025": pop_2025,
+                    "density_2023": d_2023,
+                    "density_2024": d_2024,
+                    "density_2025": d_2025,
+                    "growth_3y_pct": g_3y,
+                    "child_ratio_pct": round(child_pct, 1),
+                    "lat": round(lat, 4),
+                    "lon": round(lon, 4),
+                })
+        except Exception:
+            pass
+
+    # 2. Toàn bộ Quận/Huyện TP.HCM (từ hcmc_districts.geojson, chuẩn hóa tổng theo ADM1 TP.HCM 2024)
+    hcmc_geo_path = paths.DATA_DIR / "population" / "hcmc_districts.geojson"
+    if not hcmc_geo_path.exists():
+        try:
+            ensure_hcmc_districts_geojson(output_file=hcmc_geo_path)
+        except Exception:
+            pass
+    if hcmc_geo_path.exists():
+        try:
+            with open(hcmc_geo_path, "r", encoding="utf-8") as f:
+                hc_geo = json.load(f)
+            hcmc_total_2024 = int((adm1_map.get("TP. Hồ Chí Minh") or {}).get("population") or 14_092_602)
+            hcmc_child_pct = float((adm1_map.get("TP. Hồ Chí Minh") or {}).get("child_ratio_pct") or 19.8)
+            raw_items = []
+            for feat in hc_geo.get("features", []):
+                props = feat.get("properties") or {}
+                d_name = str(props.get("district") or props.get("adm1_name1") or "").strip()
+                if not d_name:
+                    continue
+                area_km2, g_lat, g_lon = _geojson_geom_area_km2_and_center(feat.get("geometry") or {})
+                area_km2 = max(area_km2, 4.0)
+                c_lat = float(props.get("center_lat") if props.get("center_lat") is not None else (g_lat or 10.7769))
+                c_lon = float(props.get("center_lon") if props.get("center_lon") is not None else (g_lon or 106.7009))
+                ref_pop = int(_HCMC_DISTRICT_REF_POP_2024.get(d_name, 320000))
+                raw_items.append({
+                    "district": d_name,
+                    "area_km2": area_km2,
+                    "ref_pop": ref_pop,
+                    "lat": c_lat,
+                    "lon": c_lon,
+                })
+            ref_sum = sum(x["ref_pop"] for x in raw_items) or 1
+            scale_factor = hcmc_total_2024 / float(ref_sum)
+            fast_urban_keys = (
+                "Thủ Đức", "Bình Tân", "Quận 12", "Bình Chánh", "Nhà Bè", "Hóc Môn",
+                "Dĩ An", "Thuận An", "Tân Uyên", "Bến Cát", "Phú Mỹ",
+            )
+            for x in raw_items:
+                d_name = x["district"]
+                area_km2 = x["area_km2"]
+                pop_2024 = int(round(x["ref_pop"] * scale_factor))
+                g_rate = 0.022 if any(k in d_name for k in fast_urban_keys) else 0.0085
+                pop_2023 = int(round(pop_2024 / (1.0 + g_rate)))
+                pop_2025 = int(round(pop_2024 * (1.0 + g_rate)))
+                d_2023 = round(pop_2023 / area_km2, 1)
+                d_2024 = round(pop_2024 / area_km2, 1)
+                d_2025 = round(pop_2025 / area_km2, 1)
+                g_3y = round(((d_2025 - d_2023) / max(d_2023, 0.1)) * 100.0, 2)
+                rows.append({
+                    "level": "district",
+                    "province": "TP. Hồ Chí Minh",
+                    "region_name": d_name,
+                    "area_km2": round(area_km2, 2),
+                    "pop_2023": pop_2023,
+                    "pop_2024": pop_2024,
+                    "pop_2025": pop_2025,
+                    "density_2023": d_2023,
+                    "density_2024": d_2024,
+                    "density_2025": d_2025,
+                    "growth_3y_pct": g_3y,
+                    "child_ratio_pct": round(hcmc_child_pct, 1),
+                    "lat": round(x["lat"], 4),
+                    "lon": round(x["lon"], 4),
+                })
+        except Exception:
+            pass
+
+    df_out = pd.DataFrame(rows)
+    if not df_out.empty:
+        try:
+            out_path.parent.mkdir(parents=True, exist_ok=True)
+            df_out.to_csv(out_path, index=False, encoding="utf-8-sig")
+        except Exception:
+            pass
+    return df_out
+
+
+def _classify_risk_tier(pred_val: float, scope: str = "district") -> dict:
+    """Phân loại 4 mức nguy cơ chuẩn quy hoạch: Thấp (#22c55e) – TB (#eab308) – Cao (#f97316) – Rất cao (#dc2626)."""
+    val = float(pred_val or 0.0)
+    if scope == "province":
+        if val >= 25.0:
+            return {"tier_key": "very_high", "tier_label": "Rất cao", "color": "#dc2626",
+                    "recommendation": "Phun hóa chất diện rộng & kích hoạt đội phản ứng nhanh"}
+        if val >= 5.0:
+            return {"tier_key": "high", "tier_label": "Cao", "color": "#f97316",
+                    "recommendation": "Diệt bọ gậy tăng cường & khoanh vùng ổ dịch nguy cơ"}
+        if val >= 2.0:
+            return {"tier_key": "medium", "tier_label": "Trung bình", "color": "#eab308",
+                    "recommendation": "Kiểm tra điểm nguy cơ hàng tuần & truyền thông cộng đồng"}
+        return {"tier_key": "low", "tier_label": "Thấp", "color": "#22c55e",
+                "recommendation": "Giám sát dịch tễ định kỳ & duy trì vệ sinh môi trường"}
+    if scope == "local":
+        if val >= 8.0:
+            return {"tier_key": "very_high", "tier_label": "Rất cao", "color": "#dc2626",
+                    "recommendation": "Phun ULV khẩn cấp & khoanh vùng bán kính 300–500m"}
+        if val >= 4.0:
+            return {"tier_key": "high", "tier_label": "Cao", "color": "#f97316",
+                    "recommendation": "Tổng vệ sinh diệt lăng quăng & giám sát ca bệnh hằng ngày"}
+        if val >= 1.5:
+            return {"tier_key": "medium", "tier_label": "Trung bình", "color": "#eab308",
+                    "recommendation": "Giám sát lăng quăng tuần & cảnh báo hộ dân lân cận"}
+        return {"tier_key": "low", "tier_label": "Thấp", "color": "#22c55e",
+                "recommendation": "Theo dõi định kỳ & phòng muỗi đốt"}
+    # scope == "district"
+    if val >= 25.0:
+        return {"tier_key": "very_high", "tier_label": "Rất cao", "color": "#dc2626",
+                "recommendation": "Phun hóa chất khẩn cấp toàn địa bàn trọng điểm"}
+    if val >= 8.0:
+        return {"tier_key": "high", "tier_label": "Cao", "color": "#f97316",
+                "recommendation": "Diệt lăng quăng quy mô quận/huyện & kiểm tra ổ dịch mới"}
+    if val >= 0.5:
+        return {"tier_key": "medium", "tier_label": "Trung bình", "color": "#eab308",
+                "recommendation": "Tăng cường giám sát véc-tơ & điểm nước đọng"}
+    return {"tier_key": "low", "tier_label": "Thấp", "color": "#22c55e",
+            "recommendation": "Giám sát định kỳ & duy trì mức kiểm soát"}
+
+
+def _safe_int(val, default: int = 0) -> int:
+    try:
+        if val is None or pd.isna(val):
+            return default
+        return int(float(val))
+    except Exception:
+        return default
+
+
+def _safe_float(val, default: float = 0.0) -> float:
+    try:
+        if val is None or pd.isna(val):
+            return default
+        return float(val)
+    except Exception:
+        return default
+
+
+def _lookup_province_coords(province: str):
+    c = VN_PROVINCE_COORDS.get(province)
+    if c:
+        return float(c["lat"]), float(c["lon"])
+    info = weather_service._get_province_info(province)
+    if info:
+        return float(info["lat"]), float(info["lon"])
+    return None, None
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def get_province_weather_lookup(sel_year: int, sel_month: int):
+    """Tra cứu nhiệt độ, độ ẩm, lượng mưa theo tỉnh/tháng cho Popup bản đồ Choropleth."""
+    hw_df = load_historical_weather_csv()
+    hcmc_w_df = load_hcmc_monthly_weather_csv()
+    res = {}
+
+    hcmc_row = None
+    if not hcmc_w_df.empty:
+        sub_hw = hcmc_w_df[(hcmc_w_df["year"] == sel_year) & (hcmc_w_df["month"] == sel_month)]
+        if sub_hw.empty:
+            sub_hw = hcmc_w_df[hcmc_w_df["month"] == sel_month]
+        if sub_hw.empty:
+            sub_hw = hcmc_w_df.sort_values(["year", "month"], ascending=False)
+        if not sub_hw.empty:
+            hcmc_row = sub_hw.iloc[0]
+
+    if hcmc_row is not None:
+        res["TP. Hồ Chí Minh"] = {
+            "temp_mean": round(_safe_float(hcmc_row.get("temp_mean"), 27.5), 1),
+            "humidity_mean": round(_safe_float(hcmc_row.get("humidity_mean"), 78.0), 1),
+            "rain_mm": round(_safe_float(hcmc_row.get("precipitation_sum"), 0.0), 1),
+        }
+
+    if not hw_df.empty:
+        for prov, grp in hw_df.groupby("province"):
+            prov_str = str(prov)
+            if prov_str in res:
+                continue
+            exact = grp[(grp["year"] == sel_year) & (grp["month"] == sel_month)]
+            pick = exact if not exact.empty else grp[grp["month"] == sel_month]
+            if pick.empty:
+                pick = grp.sort_values(["year", "month"], ascending=False)
+            r0 = pick.iloc[0]
+            t_val = _safe_float(r0.get("temp_lag_1"), 0.0)
+            h_val = _safe_float(r0.get("humidity_lag_1"), 0.0)
+            if t_val > 0 or h_val > 0:
+                res[prov_str] = {
+                    "temp_mean": round(t_val, 1),
+                    "humidity_mean": round(h_val, 1),
+                    "rain_mm": round(_safe_float(r0.get("rain_lag_1"), 0.0), 1),
+                }
+    return res
+
+
+def _get_geojson_region_key(feat: dict) -> str:
+    props = (feat or {}).get("properties") or {}
+    if props.get("ward"):
+        return str(props.get("adm1_name1") or props.get("ward") or "")
+    return str(props.get("district") or props.get("adm1_name1") or "Khu vực")
+
+
+def _filter_geojson_for_province_or_dist(geojson_data: dict, sel_prov: str, sel_dist: str = "Tất cả Quận/Huyện"):
+    """Lọc GeoJSON phường/quận theo Quận được chọn hoặc lấy ranh giới tỉnh nếu ngoài TP.HCM."""
+    if not geojson_data or not isinstance(geojson_data.get("features"), list):
+        return geojson_data
+    feats = geojson_data["features"]
+    if sel_prov and "Hồ Chí Minh" in sel_prov:
+        if sel_dist and sel_dist != "Tất cả Quận/Huyện":
+            norm_t = normalize_hcmc_district_name(sel_dist)
+            filtered = [
+                f for f in feats
+                if normalize_hcmc_district_name((f.get("properties") or {}).get("district", "")) == norm_t
+            ]
+            if filtered:
+                return {"type": "FeatureCollection", "features": filtered}
+        return geojson_data
+    # Tỉnh khác ngoài TP.HCM -> trả về ranh giới tỉnh từ GeoJSON 34 tỉnh
+    gp = getattr(paths, "BOUNDARY_FILE", paths.DATA_DIR / "population" / "vietnam_34_provinces_2025.geojson")
+    if gp.exists() and sel_prov:
+        vn_gj = load_vietnam_geojson_simplified(str(gp))
+        if vn_gj and isinstance(vn_gj.get("features"), list):
+            p_feats = [f for f in vn_gj["features"] if (f.get("properties") or {}).get("adm1_name1") == sel_prov]
+            if p_feats:
+                return {"type": "FeatureCollection", "features": p_feats}
+    return None
+
+
+def build_choropleth_region_values(
+    geojson_data: dict,
+    cases_map: dict,
+    pred_map: dict,
+    inc_map: dict,
+    weather_lookup: dict,
+    default_weather: dict = None,
+    scope: str = "district",
+) -> dict:
+    """Chuẩn bị thuộc tính phân tầng 4 mức nguy cơ + dự báo + thời tiết cho mọi đa giác Choropleth."""
+    if not geojson_data or not isinstance(geojson_data.get("features"), list):
+        return {}
+    out = {}
+    def_w = default_weather or {"temp_mean": 27.5, "humidity_mean": 78.0, "rain_mm": 0.0}
+    for feat in geojson_data["features"]:
+        props = feat.get("properties") or {}
+        r_key = _get_geojson_region_key(feat)
+        if not r_key:
+            continue
+        dist_key = normalize_hcmc_district_name(props.get("district", ""))
+        cases_val = _safe_int(cases_map.get(r_key, cases_map.get(dist_key, 0)), 0)
+        pred_val = _safe_float(pred_map.get(r_key, pred_map.get(dist_key, cases_val)), float(cases_val))
+        inc_val = _safe_float(inc_map.get(r_key, inc_map.get(dist_key, 0.0)), 0.0)
+        w_info = weather_lookup.get(r_key) or weather_lookup.get(str(props.get("province", ""))) or def_w
+        score = max(float(pred_val), float(cases_val))
+        tier = _classify_risk_tier(score, scope=scope)
+        out[r_key] = {
+            "cases": cases_val,
+            "predicted_cases": round(pred_val, 1),
+            "incidence_rate": round(inc_val, 2),
+            "risk_tier": tier["tier_key"],
+            "risk_label": tier["tier_label"],
+            "risk_color": tier["color"],
+            "recommendation": tier["recommendation"],
+            "temp_mean": _safe_float(w_info.get("temp_mean"), def_w.get("temp_mean", 27.5)),
+            "humidity_mean": _safe_float(w_info.get("humidity_mean"), def_w.get("humidity_mean", 78.0)),
+            "rain_mm": _safe_float(w_info.get("rain_mm"), def_w.get("rain_mm", 0.0)),
+        }
+    return out
+
+
+@st.cache_data(ttl=180, show_spinner=False)
+def build_realtime_temperature_layer(
+    sel_year: int,
+    sel_month: int,
+    level_code: str,
+    sel_prov: str,
+    sel_dist: str = "Tất cả Quận/Huyện",
+):
+    """
+    Lấy nhiệt độ thời gian thực (Open-Meteo Live API, fallback dữ liệu quan trắc giờ/tháng)
+    và phát hiện + lưu trữ các điểm nhiệt độ dị thường (quá cao / quá thấp).
+    """
+    hw_df = load_historical_weather_csv()
+    hcmc_w_df = load_hcmc_monthly_weather_csv()
+    cleaned_df = load_cleaned_station_weather_csv()
+
+    # Nhiệt độ nền theo mùa / trạm
+    seasonal_baseline = 27.5
+    if not hcmc_w_df.empty:
+        sub_b = hcmc_w_df[hcmc_w_df["month"] == sel_month]
+        if not sub_b.empty and "temp_mean" in sub_b.columns:
+            seasonal_baseline = _safe_float(sub_b["temp_mean"].mean(), 27.5)
+
+    station_targets = []
+    # Luôn thu thập toàn bộ 34 Tỉnh/Thành toàn quốc để hiển thị nhiệt độ °C theo từng khu vực khi thu phóng toàn quốc
+    for prov, coords in list(VN_PROVINCE_COORDS.items()):
+        station_targets.append({
+            "name": prov,
+            "province": prov,
+            "scope": "national",
+            "lat": float(coords["lat"]),
+            "lon": float(coords["lon"]),
+        })
+
+    if level_code != "L4" and sel_prov and "Hồ Chí Minh" in sel_prov:
+        seen_c = set()
+        for dn, c in HCMC_DISTRICT_COORDS.items():
+            norm_dn = normalize_hcmc_district_name(dn)
+            if sel_dist and sel_dist != "Tất cả Quận/Huyện" and normalize_hcmc_district_name(sel_dist) != norm_dn:
+                continue
+            kpt = (round(float(c["lat"]), 4), round(float(c["lon"]), 4))
+            if kpt in seen_c:
+                continue
+            seen_c.add(kpt)
+            station_targets.append({
+                "name": norm_dn,
+                "province": "TP. Hồ Chí Minh",
+                "scope": "district",
+                "lat": float(c["lat"]),
+                "lon": float(c["lon"]),
+            })
+    elif level_code != "L4" and sel_prov and sel_prov not in VN_PROVINCE_COORDS:
+        lat, lon = _lookup_province_coords(sel_prov)
+        if lat is not None and lon is not None:
+            station_targets.append({
+                "name": sel_prov or "Trạm quan trắc",
+                "province": sel_prov or "",
+                "scope": "national",
+                "lat": lat,
+                "lon": lon,
+            })
+
+    coords_tuple = tuple((s["lat"], s["lon"]) for s in station_targets)
+    live_batch = fetch_realtime_temperature_batch(coords_tuple)
+
+    # Fallback local readings từ cleaned_final.csv & historical_weather.csv
+    local_latest = {"temp_c": seasonal_baseline, "humidity_pct": 78.0, "rain_mm": 0.0, "obs_time": f"T{sel_month:02d}/{sel_year}", "source": "Quan trắc trạm"}
+    if not cleaned_df.empty and "temperature" in cleaned_df.columns:
+        valid_c = cleaned_df.dropna(subset=["temperature"])
+        if not valid_c.empty:
+            r_last = valid_c.iloc[-1]
+            local_latest = {
+                "temp_c": round(_safe_float(r_last.get("temperature"), seasonal_baseline), 1),
+                "humidity_pct": round(_safe_float(r_last.get("humidity"), 78.0), 1),
+                "rain_mm": round(_safe_float(r_last.get("precipitation"), 0.0), 1),
+                "obs_time": str(r_last.get("time") or f"T{sel_month:02d}/{sel_year}"),
+                "source": "Trạm TP.HCM (cleaned_final)",
+            }
+
+    prov_baseline = {}
+    if not hw_df.empty:
+        for prov, grp in hw_df.groupby("province"):
+            sub = grp[grp["month"] == sel_month]
+            if sub.empty:
+                sub = grp
+            b_t = _safe_float(sub["temp_lag_1"].mean(), seasonal_baseline)
+            r_last = grp.sort_values(["year", "month"], ascending=False).iloc[0]
+            prov_baseline[str(prov)] = {
+                "base_temp": round(b_t, 1) if b_t > 0 else seasonal_baseline,
+                "fallback_temp": round(_safe_float(r_last.get("temp_lag_1"), seasonal_baseline), 1),
+                "fallback_hum": round(_safe_float(r_last.get("humidity_lag_1"), 78.0), 1),
+                "fallback_rain": round(_safe_float(r_last.get("rain_lag_1"), 0.0), 1),
+            }
+
+    stations = []
+    detected_anomalies = []
+
+    for idx, st_info in enumerate(station_targets):
+        live = live_batch.get(idx)
+        p_key = st_info["province"]
+        pb = prov_baseline.get(p_key, {"base_temp": seasonal_baseline, "fallback_temp": local_latest["temp_c"], "fallback_hum": 78.0, "fallback_rain": 0.0})
+        base_t = pb["base_temp"] or seasonal_baseline
+        if live:
+            t_c = live["temp_c"]
+            hum_p = live["humidity_pct"]
+            rain_m = live["rain_mm"]
+            obs_t = live["obs_time"]
+            src_lbl = live["source"]
+        elif p_key == "TP. Hồ Chí Minh":
+            t_c = local_latest["temp_c"]
+            hum_p = local_latest["humidity_pct"]
+            rain_m = local_latest["rain_mm"]
+            obs_t = local_latest["obs_time"]
+            src_lbl = local_latest["source"]
+        else:
+            t_c = pb["fallback_temp"] if pb["fallback_temp"] > 0 else seasonal_baseline
+            hum_p = pb["fallback_hum"]
+            rain_m = pb["fallback_rain"]
+            obs_t = f"T{sel_month:02d}/{sel_year}"
+            src_lbl = "Khí tượng địa phương"
+
+        delta_t = round(t_c - base_t, 1)
+        anomaly_type = "normal"
+        anomaly_label = "Bình thường"
+        if t_c >= 33.5 or delta_t >= 2.2:
+            anomaly_type = "high_anomaly"
+            anomaly_label = "🔥 Nhiệt độ quá cao"
+        elif t_c <= 23.0 or delta_t <= -2.2:
+            anomaly_type = "low_anomaly"
+            anomaly_label = "❄️ Nhiệt độ quá thấp"
+
+        row_item = {
+            "lat": st_info["lat"],
+            "lon": st_info["lon"],
+            "name": st_info["name"],
+            "province": p_key,
+            "scope": st_info.get("scope", "national"),
+            "temp_c": round(t_c, 1),
+            "temp_label": f"{round(t_c, 1):.1f}°C",
+            "baseline_temp": round(base_t, 1),
+            "delta_temp": delta_t,
+            "humidity_pct": round(hum_p, 1),
+            "rain_mm": round(rain_m, 1),
+            "anomaly_type": anomaly_type,
+            "anomaly_label": anomaly_label,
+            "obs_time": obs_t,
+            "obs_date": str(obs_t)[:13],
+            "source": src_lbl,
+        }
+        stations.append(row_item)
+        if anomaly_type != "normal":
+            detected_anomalies.append(row_item)
+
+    # Quét thêm các mốc dị thường thực tế trong chuỗi quan trắc gần nhất để luôn có dữ liệu lịch sử lưu trữ
+    if not cleaned_df.empty and "temperature" in cleaned_df.columns and (not sel_prov or "Hồ Chí Minh" in sel_prov):
+        c_valid = cleaned_df.dropna(subset=["temperature"]).copy()
+        extremes = c_valid[(c_valid["temperature"] >= 34.2) | (c_valid["temperature"] <= 22.8)].tail(4)
+        for idx_e, (_, er) in enumerate(extremes.iterrows()):
+            t_val = round(_safe_float(er.get("temperature"), 27.5), 1)
+            a_type = "high_anomaly" if t_val >= 33.5 else "low_anomaly"
+            a_lbl = "🔥 Nhiệt độ quá cao" if a_type == "high_anomaly" else "❄️ Nhiệt độ quá thấp"
+            anchor = HCMC_DISTRICT_COORDS.get(["Quận 1", "Bình Thạnh", "Thủ Đức", "Củ Chi"][idx_e % 4], {"lat": 10.7769, "lon": 106.7009})
+            detected_anomalies.append({
+                "lat": float(anchor["lat"]),
+                "lon": float(anchor["lon"]),
+                "name": "Trạm quan trắc TP.HCM",
+                "province": "TP. Hồ Chí Minh",
+                "temp_c": t_val,
+                "baseline_temp": round(seasonal_baseline, 1),
+                "delta_temp": round(t_val - seasonal_baseline, 1),
+                "humidity_pct": round(_safe_float(er.get("humidity"), 75.0), 1),
+                "rain_mm": round(_safe_float(er.get("precipitation"), 0.0), 1),
+                "anomaly_type": a_type,
+                "anomaly_label": a_lbl,
+                "obs_time": str(er.get("time") or ""),
+                "obs_date": str(er.get("time") or "")[:13],
+                "source": "Quan trắc trạm TP.HCM",
+            })
+
+    saved_anomalies = save_temperature_anomalies(detected_anomalies) if detected_anomalies else load_temperature_anomalies()
+    temps = [s["temp_c"] for s in stations if s.get("temp_c") is not None]
+    mean_t = round(sum(temps) / len(temps), 1) if temps else seasonal_baseline
+    src_summary = "Open-Meteo Thời gian thực" if live_batch else "Quan trắc trạm TP.HCM & Khí tượng địa phương"
+
+    return {
+        "stations": stations,
+        "anomalies": saved_anomalies[:35],
+        "summary": {
+            "mean_temp": mean_t,
+            "baseline_temp": round(seasonal_baseline, 1),
+            "anomaly_count": len(saved_anomalies),
+            "source_label": src_summary,
+            "is_live": bool(live_batch),
+        },
+    }
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def build_arcgis_extended_layers(
+    sel_year: int,
+    sel_month: int,
+    level_code: str,
+    sel_prov: str,
+    sel_dist: str = "Tất cả Quận/Huyện",
+):
+    """Chuẩn bị dữ liệu cho Heatmap thời gian, Risk Map 4 mức & 3 lớp chồng GIS trên ArcGIS."""
+    hist_df = load_historical()
+    dist_df = load_district_breakdown()
+    ward_data = load_ward_breakdown()
+    clust_df = load_epidemic_clusters()
+    preds_prov = load_predictions()
+    preds_dist = load_hcmc_district_predictions()
+    hw_df = load_historical_weather_csv()
+    hcmc_w_df = load_hcmc_monthly_weather_csv()
+    adm1_pop = load_adm1_population_csv()
+
+    # 1. HEATMAP TIMELINE (Ca thực tế theo tháng trong sel_year)
+    heatmap_timeline = {}
+    avail_months = []
+    src_hm = pd.DataFrame()
+    if level_code == "L1" and not clust_df.empty:
+        src_hm = clust_df[clust_df["year"] == sel_year]
+        if sel_prov:
+            src_hm = src_hm[src_hm["province"] == sel_prov]
+        if sel_dist and sel_dist != "Tất cả Quận/Huyện" and "district" in src_hm.columns:
+            src_hm = src_hm[src_hm["district"] == sel_dist]
+    elif level_code == "L2" and not ward_data.empty:
+        src_hm = ward_data[ward_data["year"] == sel_year]
+        if sel_prov:
+            src_hm = src_hm[src_hm["province"] == sel_prov]
+        if sel_dist and sel_dist != "Tất cả Quận/Huyện" and "district" in src_hm.columns:
+            src_hm = src_hm[src_hm["district"] == sel_dist]
+    elif level_code == "L3" and not dist_df.empty:
+        src_hm = dist_df[dist_df["year"] == sel_year]
+        if sel_prov:
+            src_hm = src_hm[src_hm["province"] == sel_prov]
+    elif not hist_df.empty:
+        src_hm = hist_df[hist_df["year"] == sel_year]
+
+    if not src_hm.empty and "month" in src_hm.columns:
+        avail_months = sorted({int(m) for m in src_hm["month"].dropna().unique()})
+    if not avail_months and not hist_df.empty:
+        y_df = hist_df[hist_df["year"] == sel_year]
+        avail_months = sorted({int(m) for m in y_df["month"].dropna().unique()})
+    if int(sel_month) not in avail_months:
+        avail_months = sorted(set(avail_months + [int(sel_month)]))
+
+    for m in avail_months:
+        pts = []
+        if not src_hm.empty:
+            m_df = src_hm[src_hm["month"] == m]
+            if not m_df.empty:
+                if level_code == "L4":
+                    for _, r in m_df.iterrows():
+                        prov = str(r.get("province", ""))
+                        lat, lon = _lookup_province_coords(prov)
+                        if lat is None or lon is None:
+                            continue
+                        pts.append({
+                            "lat": round(lat, 5),
+                            "lon": round(lon, 5),
+                            "cases": int(r.get("cases", 0) or 0),
+                            "name": prov,
+                        })
+                else:
+                    label_col = "district" if level_code == "L3" else ("ward" if level_code == "L2" else "name")
+                    if "lat" in m_df.columns and "lon" in m_df.columns:
+                        valid = m_df.dropna(subset=["lat", "lon"]).copy()
+                        if not valid.empty:
+                            valid["_rlat"] = valid["lat"].astype(float).round(5)
+                            valid["_rlon"] = valid["lon"].astype(float).round(5)
+                            valid["_lname"] = valid[label_col].fillna("Điểm giám sát").astype(str)
+                            grouped = valid.groupby(["_lname", "_rlat", "_rlon"], as_index=False)["cases"].sum()
+                            grouped = grouped.sort_values("cases", ascending=False).head(250)
+                            for _, r in grouped.iterrows():
+                                pts.append({
+                                    "lat": float(r["_rlat"]),
+                                    "lon": float(r["_rlon"]),
+                                    "cases": int(r["cases"] or 0),
+                                    "name": str(r["_lname"]),
+                                })
+        heatmap_timeline[str(int(m))] = pts
+
+    # 2. RISK MAP (Dự báo nguy cơ 4 mức: Thấp – Trung bình – Cao – Rất cao, các bước +1/+2/+3 tháng)
+    risk_steps = {}
+    is_hcmc_scope = bool(sel_prov and "Hồ Chí Minh" in sel_prov)
+
+    # Lấy số ca tháng hiện tại để so sánh tăng/giảm
+    cur_prov_cases = {}
+    if not hist_df.empty:
+        cur_p_df = hist_df[(hist_df["year"] == sel_year) & (hist_df["month"] == sel_month)]
+        for _, r in cur_p_df.iterrows():
+            cur_prov_cases[str(r.get("province", ""))] = int(r.get("cases", 0) or 0)
+
+    cur_dist_cases = {}
+    if not dist_df.empty and sel_prov:
+        cur_d_df = dist_df[(dist_df["province"] == sel_prov) & (dist_df["year"] == sel_year) & (dist_df["month"] == sel_month)]
+        for _, r in cur_d_df.iterrows():
+            dn = normalize_hcmc_district_name(r.get("district", ""))
+            cur_dist_cases[dn] = cur_dist_cases.get(dn, 0) + int(r.get("cases", 0) or 0)
+
+    for step_num in (1, 2, 3):
+        regions_map = {}
+        points_list = []
+        step_label = f"Tháng dự báo +{step_num}"
+
+        # Province predictions lookup (step_num)
+        prov_pred_lookup = {}
+        if not preds_prov.empty and "step" in preds_prov.columns:
+            sp_df = preds_prov[preds_prov["step"] == step_num]
+            if not sp_df.empty:
+                if "month_label" in sp_df.columns and sp_df["month_label"].notna().any():
+                    step_label = str(sp_df["month_label"].dropna().iloc[0])
+                for _, pr in sp_df.iterrows():
+                    p_name = str(pr.get("province", ""))
+                    prov_pred_lookup[p_name] = float(pr.get("predicted_cases", 0) or 0)
+
+        if level_code == "L4":
+            all_provs = sorted(set(VN_PROVINCE_COORDS.keys()) | set(prov_pred_lookup.keys()) | set(cur_prov_cases.keys()))
+            for prov in all_provs:
+                cur_v = float(cur_prov_cases.get(prov, 0))
+                pred_v = float(prov_pred_lookup.get(prov, max(0.0, cur_v)))
+                tier = _classify_risk_tier(pred_v, scope="province")
+                chg_pct = round(((pred_v - cur_v) / max(cur_v, 1.0)) * 100.0, 1) if (cur_v > 0 or pred_v > 0) else 0.0
+                regions_map[prov] = {
+                    "predicted_cases": round(pred_v, 1),
+                    "current_cases": int(cur_v),
+                    "change_pct": chg_pct,
+                    **tier,
+                }
+                lat, lon = _lookup_province_coords(prov)
+                if lat is not None and (pred_v > 0 or cur_v > 0):
+                    points_list.append({
+                        "lat": round(lat, 5),
+                        "lon": round(lon, 5),
+                        "name": prov,
+                        "predicted_cases": round(pred_v, 1),
+                        "current_cases": int(cur_v),
+                        "change_pct": chg_pct,
+                        "radius_meters": 0,
+                        **tier,
+                    })
+        elif is_hcmc_scope and level_code == "L3" and not preds_dist.empty:
+            sd_df = preds_dist[preds_dist["step"] == step_num] if "step" in preds_dist.columns else preds_dist
+            if not sd_df.empty and "month_label" in sd_df.columns and sd_df["month_label"].notna().any():
+                step_label = str(sd_df["month_label"].dropna().iloc[0])
+            dist_pred_acc = {}
+            for _, dr in sd_df.iterrows():
+                dn = normalize_hcmc_district_name(dr.get("district", ""))
+                dist_pred_acc[dn] = dist_pred_acc.get(dn, 0.0) + float(dr.get("predicted_cases", 0) or 0)
+
+            for dn, pred_v in dist_pred_acc.items():
+                cur_v = float(cur_dist_cases.get(dn, 0))
+                tier = _classify_risk_tier(pred_v, scope="district")
+                chg_pct = round(((pred_v - cur_v) / max(cur_v, 1.0)) * 100.0, 1) if (cur_v > 0 or pred_v > 0) else 0.0
+                regions_map[dn] = {
+                    "predicted_cases": round(pred_v, 1),
+                    "current_cases": int(cur_v),
+                    "change_pct": chg_pct,
+                    **tier,
+                }
+                c_info = HCMC_DISTRICT_COORDS.get(dn) or HCMC_DISTRICT_COORDS.get(f"Thành Phố {dn}")
+                if not c_info and not dist_df.empty:
+                    sub = dist_df[dist_df["district"] == dn].dropna(subset=["lat", "lon"])
+                    if not sub.empty:
+                        c_info = {"lat": float(sub["lat"].iloc[0]), "lon": float(sub["lon"].iloc[0])}
+                if c_info:
+                    points_list.append({
+                        "lat": float(c_info["lat"]),
+                        "lon": float(c_info["lon"]),
+                        "name": dn,
+                        "predicted_cases": round(pred_v, 1),
+                        "current_cases": int(cur_v),
+                        "change_pct": chg_pct,
+                        "radius_meters": 1600 if tier["tier_key"] in ("very_high", "high") else 900,
+                        **tier,
+                    })
+        else:
+            # L1, L2 hoặc các tỉnh ngoài TP.HCM ở L3: suy diễn từ dự báo tỉnh + phân bố hiện tại
+            prov_cur_tot = max(float(cur_prov_cases.get(sel_prov, 0)), 1.0)
+            prov_pred_tot = float(prov_pred_lookup.get(sel_prov, prov_cur_tot))
+            # Nếu là TP.HCM ở L1/L2, ưu tiên tỷ lệ dự báo từ từng quận HCMC
+            hcmc_dist_ratio = {}
+            if is_hcmc_scope and not preds_dist.empty:
+                sd_df = preds_dist[preds_dist["step"] == step_num] if "step" in preds_dist.columns else preds_dist
+                if not sd_df.empty and "month_label" in sd_df.columns and sd_df["month_label"].notna().any():
+                    step_label = str(sd_df["month_label"].dropna().iloc[0])
+                for _, dr in sd_df.iterrows():
+                    dn = normalize_hcmc_district_name(dr.get("district", ""))
+                    d_cur = max(float(cur_dist_cases.get(dn, 0)), 1.0)
+                    hcmc_dist_ratio[dn] = float(dr.get("predicted_cases", 0) or 0) / d_cur
+            prov_ratio = max(0.25, min(3.5, prov_pred_tot / prov_cur_tot))
+
+            local_src = pd.DataFrame()
+            name_col = "name"
+            if level_code == "L1" and not clust_df.empty:
+                local_src = clust_df[(clust_df["year"] == sel_year) & (clust_df["month"] == sel_month) & (clust_df["province"] == sel_prov)]
+                if sel_dist and sel_dist != "Tất cả Quận/Huyện":
+                    local_src = local_src[local_src["district"] == sel_dist]
+                name_col = "name"
+            elif level_code == "L2" and not ward_data.empty:
+                local_src = ward_data[(ward_data["year"] == sel_year) & (ward_data["month"] == sel_month) & (ward_data["province"] == sel_prov)]
+                if sel_dist and sel_dist != "Tất cả Quận/Huyện":
+                    local_src = local_src[local_src["district"] == sel_dist]
+                name_col = "ward"
+            elif level_code == "L3" and not dist_df.empty:
+                local_src = dist_df[(dist_df["year"] == sel_year) & (dist_df["month"] == sel_month) & (dist_df["province"] == sel_prov)]
+                name_col = "district"
+
+            if not local_src.empty and "lat" in local_src.columns and "lon" in local_src.columns:
+                local_valid = local_src.dropna(subset=["lat", "lon"]).head(120)
+                for _, r in local_valid.iterrows():
+                    cur_v = _safe_float(r.get("cases"), 0.0)
+                    dn = normalize_hcmc_district_name(r.get("district", ""))
+                    ratio = hcmc_dist_ratio.get(dn, prov_ratio)
+                    # Giữ trọng số hợp lý khi chuyển từ tỷ lệ quận sang điểm/phường
+                    pred_v = round(cur_v * max(0.35, min(2.5, ratio if ratio > 0 else prov_ratio)), 1)
+                    tier = _classify_risk_tier(pred_v, scope="local" if level_code in ("L1", "L2") else "district")
+                    chg_pct = round(((pred_v - cur_v) / max(cur_v, 1.0)) * 100.0, 1)
+                    points_list.append({
+                        "lat": float(r["lat"]),
+                        "lon": float(r["lon"]),
+                        "name": str(r.get(name_col) or "Khu vực"),
+                        "predicted_cases": pred_v,
+                        "current_cases": int(cur_v),
+                        "change_pct": chg_pct,
+                        "radius_meters": _safe_int(r.get("radius_meters"), 350) if level_code == "L1" else 650,
+                        **tier,
+                    })
+
+        risk_steps[str(step_num)] = {
+            "step": step_num,
+            "month_label": step_label,
+            "regions": regions_map,
+            "points": points_list,
+        }
+
+    # 3. WEATHER OVERLAY (Lớp chồng Khí tượng: Mưa, Nhiệt, Ẩm, PM2.5)
+    weather_overlay = []
+
+    def _weather_tier(rain_mm, temp_c, hum_pct):
+        if hum_pct >= 80 and rain_mm >= 140:
+            return "high", "Thuận lợi cao cho muỗi Aedes", "#0284c7"
+        if hum_pct >= 72 or rain_mm >= 60 or (25.0 <= temp_c <= 30.0):
+            return "medium", "Thuận lợi trung bình", "#0ea5e9"
+        return "low", "Ít thuận lợi (khô / mát)", "#64748b"
+
+    # Tra cứu dữ liệu trạm HCMC theo (sel_year, sel_month) hoặc tháng gần nhất
+    hcmc_row = None
+    if not hcmc_w_df.empty:
+        sub_hw = hcmc_w_df[(hcmc_w_df["year"] == sel_year) & (hcmc_w_df["month"] == sel_month)]
+        if sub_hw.empty:
+            sub_hw = hcmc_w_df[hcmc_w_df["month"] == sel_month]
+        if not sub_hw.empty:
+            hcmc_row = sub_hw.iloc[0]
+
+    if level_code == "L4":
+        for prov, coords in VN_PROVINCE_COORDS.items():
+            rain_mm, temp_c, hum_pct, pm25, wind_kmh = None, None, None, None, None
+            source_note = f"T{sel_month:02d}/{sel_year}"
+            if "Hồ Chí Minh" in prov and hcmc_row is not None:
+                rain_mm = float(hcmc_row.get("precipitation_sum", 0) or 0)
+                temp_c = float(hcmc_row.get("temp_mean", 0) or 0)
+                hum_pct = float(hcmc_row.get("humidity_mean", 0) or 0)
+                pm25 = float(hcmc_row["pm25_mean"]) if pd.notna(hcmc_row.get("pm25_mean")) else None
+                wind_kmh = float(hcmc_row["wind_speed_mean"]) if pd.notna(hcmc_row.get("wind_speed_mean")) else None
+            if (rain_mm is None or temp_c is None) and not hw_df.empty:
+                pw = hw_df[hw_df["province"] == prov]
+                exact = pw[(pw["year"] == sel_year) & (pw["month"] == sel_month)]
+                pick = exact if not exact.empty else pw[pw["month"] == sel_month]
+                if pick.empty and not pw.empty:
+                    pick = pw.sort_values(["year", "month"], ascending=False)
+                if not pick.empty:
+                    r0 = pick.iloc[0]
+                    if exact.empty:
+                        source_note = f"T{int(r0['month']):02d}/{int(r0['year'])} (gần nhất)"
+                    rain_mm = _safe_float(r0.get("rain_lag_1"), 0.0)
+                    temp_c = _safe_float(r0.get("temp_lag_1"), 0.0)
+                    hum_pct = _safe_float(r0.get("humidity_lag_1"), 0.0)
+            if rain_mm is not None and (temp_c or hum_pct):
+                a_idx, a_lbl, w_col = _weather_tier(rain_mm, temp_c or 0.0, hum_pct or 0.0)
+                weather_overlay.append({
+                    "lat": float(coords["lat"]),
+                    "lon": float(coords["lon"]),
+                    "name": prov,
+                    "rain_mm": round(rain_mm, 1),
+                    "temp_c": round(temp_c or 0.0, 1),
+                    "humidity_pct": round(hum_pct or 0.0, 1),
+                    "pm25": round(pm25, 1) if pm25 is not None else None,
+                    "wind_kmh": round(wind_kmh, 1) if wind_kmh is not None else None,
+                    "aedes_index": a_idx,
+                    "aedes_label": a_lbl,
+                    "period": source_note,
+                    "color": w_col,
+                })
+    else:
+        # Khí tượng cho địa phương đang chọn (TP.HCM dùng trạmWeatherData HCMC gắn tại các quận)
+        rain_mm, temp_c, hum_pct, pm25, wind_kmh = 0.0, 27.0, 75.0, None, None
+        source_note = f"T{sel_month:02d}/{sel_year}"
+        has_weather = False
+        if is_hcmc_scope and hcmc_row is not None:
+            rain_mm = float(hcmc_row.get("precipitation_sum", 0) or 0)
+            temp_c = float(hcmc_row.get("temp_mean", 0) or 0)
+            hum_pct = float(hcmc_row.get("humidity_mean", 0) or 0)
+            pm25 = float(hcmc_row["pm25_mean"]) if pd.notna(hcmc_row.get("pm25_mean")) else None
+            wind_kmh = float(hcmc_row["wind_speed_mean"]) if pd.notna(hcmc_row.get("wind_speed_mean")) else None
+            source_note = f"T{int(hcmc_row['month']):02d}/{int(hcmc_row['year'])}"
+            has_weather = True
+        elif not hw_df.empty and sel_prov:
+            pw = hw_df[hw_df["province"] == sel_prov]
+            exact = pw[(pw["year"] == sel_year) & (pw["month"] == sel_month)]
+            pick = exact if not exact.empty else pw[pw["month"] == sel_month]
+            if pick.empty and not pw.empty:
+                pick = pw.sort_values(["year", "month"], ascending=False)
+            if not pick.empty:
+                r0 = pick.iloc[0]
+                rain_mm = _safe_float(r0.get("rain_lag_1"), 0.0)
+                temp_c = _safe_float(r0.get("temp_lag_1"), 0.0)
+                hum_pct = _safe_float(r0.get("humidity_lag_1"), 0.0)
+                source_note = f"T{int(r0['month']):02d}/{int(r0['year'])}"
+                has_weather = True
+
+        if has_weather:
+            a_idx, a_lbl, w_col = _weather_tier(rain_mm, temp_c, hum_pct)
+            if is_hcmc_scope:
+                seen_coords = set()
+                for dn, c in HCMC_DISTRICT_COORDS.items():
+                    norm_dn = normalize_hcmc_district_name(dn)
+                    if sel_dist and sel_dist != "Tất cả Quận/Huyện" and normalize_hcmc_district_name(sel_dist) != norm_dn:
+                        continue
+                    key_pt = (round(float(c["lat"]), 4), round(float(c["lon"]), 4))
+                    if key_pt in seen_coords:
+                        continue
+                    seen_coords.add(key_pt)
+                    weather_overlay.append({
+                        "lat": float(c["lat"]),
+                        "lon": float(c["lon"]),
+                        "name": f"Trạm Khí tượng {norm_dn}",
+                        "rain_mm": round(rain_mm, 1),
+                        "temp_c": round(temp_c, 1),
+                        "humidity_pct": round(hum_pct, 1),
+                        "pm25": round(pm25, 1) if pm25 is not None else None,
+                        "wind_kmh": round(wind_kmh, 1) if wind_kmh is not None else None,
+                        "aedes_index": a_idx,
+                        "aedes_label": a_lbl,
+                        "period": source_note,
+                        "color": w_col,
+                    })
+            else:
+                lat, lon = _lookup_province_coords(sel_prov)
+                if lat is not None:
+                    weather_overlay.append({
+                        "lat": lat,
+                        "lon": lon,
+                        "name": f"Trạm Khí tượng {sel_prov}",
+                        "rain_mm": round(rain_mm, 1),
+                        "temp_c": round(temp_c, 1),
+                        "humidity_pct": round(hum_pct, 1),
+                        "pm25": None,
+                        "wind_kmh": None,
+                        "aedes_index": a_idx,
+                        "aedes_label": a_lbl,
+                        "period": source_note,
+                        "color": w_col,
+                    })
+
+    # 4. POPULATION OVERLAY (Lớp chồng Mật độ Dân số 3 năm 2023–2024–2025: Hatch + Biểu đồ cột trên Map)
+    population_overlay = []
+    population_regions = {}
+    pop_lookup = {}
+    if not adm1_pop.empty:
+        for _, pr in adm1_pop.iterrows():
+            pop_lookup[str(pr["province"])] = {
+                "population": int(pr["population"] or 0),
+                "child_ratio_pct": float(pr["child_ratio_pct"] or 0.0),
+            }
+
+    pop3_df = load_or_build_3year_population_density()
+    pop3_prov_map = {}
+    pop3_dist_map = {}
+    if not pop3_df.empty:
+        for _, r3 in pop3_df.iterrows():
+            rec3 = {
+                "area_km2": round(_safe_float(r3.get("area_km2"), 100.0), 2),
+                "pop_2023": _safe_int(r3.get("pop_2023"), 0),
+                "pop_2024": _safe_int(r3.get("pop_2024"), 0),
+                "pop_2025": _safe_int(r3.get("pop_2025"), 0),
+                "density_2023": round(_safe_float(r3.get("density_2023"), 0.0), 1),
+                "density_2024": round(_safe_float(r3.get("density_2024"), 0.0), 1),
+                "density_2025": round(_safe_float(r3.get("density_2025"), 0.0), 1),
+                "growth_3y_pct": round(_safe_float(r3.get("growth_3y_pct"), 0.0), 2),
+                "child_ratio_pct": round(_safe_float(r3.get("child_ratio_pct"), 0.0), 1),
+                "lat": _safe_float(r3.get("lat"), None),
+                "lon": _safe_float(r3.get("lon"), None),
+            }
+            lvl = str(r3.get("level") or "")
+            r_name = str(r3.get("region_name") or "")
+            if lvl == "province" and r_name:
+                pop3_prov_map[r_name] = rec3
+            elif lvl == "district" and r_name:
+                pop3_dist_map[normalize_hcmc_district_name(r_name)] = rec3
+
+    if level_code == "L4":
+        inc_lookup = {}
+        if not hist_df.empty:
+            m_df = hist_df[(hist_df["year"] == sel_year) & (hist_df["month"] == sel_month)]
+            for _, r in m_df.iterrows():
+                p = str(r.get("province", ""))
+                inc_lookup[p] = {
+                    "cases": int(r.get("cases", 0) or 0),
+                    "incidence_rate": float(r.get("incidence_rate", 0) or 0.0),
+                    "population": int(r.get("population", 0) or 0),
+                }
+        for prov, coords in VN_PROVINCE_COORDS.items():
+            p_info = pop_lookup.get(prov, {})
+            h_info = inc_lookup.get(prov, {})
+            p3 = pop3_prov_map.get(prov, {})
+            pop_val = p3.get("pop_2025") or p3.get("pop_2024") or h_info.get("population") or p_info.get("population", 0)
+            if pop_val <= 0:
+                continue
+            d25 = _safe_float(p3.get("density_2025"), 0.0)
+            tier_txt = (
+                "Rất cao (>=1.000 người/km²)" if d25 >= 1000
+                else ("Cao (400–999 người/km²)" if d25 >= 400
+                      else ("Trung bình (150–399 người/km²)" if d25 >= 150 else "Thấp (<150 người/km²)"))
+            )
+            hatch_style = "diagonal-cross" if (d25 >= 400 or pop_val >= 2_000_000) else "vertical"
+            item_p = {
+                "lat": float(p3.get("lat") if p3.get("lat") is not None else coords["lat"]),
+                "lon": float(p3.get("lon") if p3.get("lon") is not None else coords["lon"]),
+                "name": prov,
+                "population": int(pop_val),
+                "area_km2": float(p3.get("area_km2") or 1000.0),
+                "pop_2023": int(p3.get("pop_2023") or round(pop_val * 0.98)),
+                "pop_2024": int(p3.get("pop_2024") or pop_val),
+                "pop_2025": int(p3.get("pop_2025") or round(pop_val * 1.01)),
+                "density_2023": float(p3.get("density_2023") or 0.0),
+                "density_2024": float(p3.get("density_2024") or 0.0),
+                "density_2025": d25,
+                "growth_3y_pct": float(p3.get("growth_3y_pct") or 0.0),
+                "child_ratio_pct": float(p3.get("child_ratio_pct") or p_info.get("child_ratio_pct", 0.0)),
+                "cases": int(h_info.get("cases", 0)),
+                "incidence_rate": round(float(h_info.get("incidence_rate", 0.0)), 3),
+                "density_tier": tier_txt,
+                "hatch_style": hatch_style,
+                "color": "#475569",
+            }
+            population_overlay.append(item_p)
+            population_regions[prov] = item_p
+    else:
+        p_info = pop_lookup.get(sel_prov, {})
+        if is_hcmc_scope and pop3_dist_map:
+            inc_dist_map = {}
+            if not dist_df.empty and sel_prov:
+                d_sub = dist_df[(dist_df["province"] == sel_prov) & (dist_df["year"] == sel_year) & (dist_df["month"] == sel_month)]
+                if d_sub.empty:
+                    d_sub = dist_df[dist_df["province"] == sel_prov]
+                if not d_sub.empty:
+                    for _, rr in d_sub.groupby("district", as_index=False).agg(cases=("cases", "sum"), incidence_rate=("incidence_rate", "mean")).iterrows():
+                        inc_dist_map[normalize_hcmc_district_name(str(rr["district"]))] = {
+                            "cases": _safe_int(rr["cases"], 0),
+                            "incidence_rate": _safe_float(rr["incidence_rate"], 0.0),
+                        }
+            for norm_dn, p3 in pop3_dist_map.items():
+                if sel_dist and sel_dist != "Tất cả Quận/Huyện" and norm_dn != normalize_hcmc_district_name(sel_dist):
+                    continue
+                d_stat = inc_dist_map.get(norm_dn, {})
+                inc_val = _safe_float(d_stat.get("incidence_rate"), 0.0)
+                d25 = _safe_float(p3.get("density_2025"), 0.0)
+                tier_txt = (
+                    "Siêu đông (>=15.000 người/km²)" if d25 >= 15000
+                    else ("Đông (5.000–14.999 người/km²)" if d25 >= 5000
+                          else ("Trung bình (1.500–4.999 người/km²)" if d25 >= 1500 else "Thấp (<1.500 người/km²)"))
+                )
+                hatch_style = "diagonal-cross" if d25 >= 5000 else "vertical"
+                item_p = {
+                    "lat": float(p3["lat"]),
+                    "lon": float(p3["lon"]),
+                    "name": norm_dn,
+                    "population": int(p3["pop_2025"] or p3["pop_2024"]),
+                    "area_km2": float(p3["area_km2"]),
+                    "pop_2023": int(p3["pop_2023"]),
+                    "pop_2024": int(p3["pop_2024"]),
+                    "pop_2025": int(p3["pop_2025"]),
+                    "density_2023": float(p3["density_2023"]),
+                    "density_2024": float(p3["density_2024"]),
+                    "density_2025": d25,
+                    "growth_3y_pct": float(p3["growth_3y_pct"]),
+                    "child_ratio_pct": float(p3.get("child_ratio_pct") or _safe_float(p_info.get("child_ratio_pct"), 0.0)),
+                    "cases": _safe_int(d_stat.get("cases"), 0),
+                    "incidence_rate": round(inc_val, 3),
+                    "density_tier": tier_txt,
+                    "hatch_style": hatch_style,
+                    "color": "#475569",
+                }
+                population_overlay.append(item_p)
+                population_regions[norm_dn] = item_p
+        elif sel_prov and sel_prov in pop3_prov_map:
+            p3 = pop3_prov_map[sel_prov]
+            d25 = _safe_float(p3.get("density_2025"), 0.0)
+            hatch_style = "diagonal-cross" if d25 >= 400 else "vertical"
+            item_p = {
+                "lat": float(p3["lat"]),
+                "lon": float(p3["lon"]),
+                "name": sel_prov,
+                "population": int(p3["pop_2025"] or p3["pop_2024"]),
+                "area_km2": float(p3["area_km2"]),
+                "pop_2023": int(p3["pop_2023"]),
+                "pop_2024": int(p3["pop_2024"]),
+                "pop_2025": int(p3["pop_2025"]),
+                "density_2023": float(p3["density_2023"]),
+                "density_2024": float(p3["density_2024"]),
+                "density_2025": d25,
+                "growth_3y_pct": float(p3["growth_3y_pct"]),
+                "child_ratio_pct": float(p3.get("child_ratio_pct") or 0.0),
+                "cases": 0,
+                "incidence_rate": 0.0,
+                "density_tier": f"{d25:,.0f} người/km²",
+                "hatch_style": hatch_style,
+                "color": "#475569",
+            }
+            population_overlay.append(item_p)
+            population_regions[sel_prov] = item_p
+
+    population_max_density = max(
+        [float(x.get("density_2025") or x.get("density_2024") or 1.0) for x in population_overlay] or [1.0]
+    )
+
+    # 5. HISTORICAL OUTBREAKS OVERLAY (Lớp chồng Ổ dịch Lịch sử tích lũy)
+    historical_outbreaks = []
+    if not clust_df.empty and "lat" in clust_df.columns and "lon" in clust_df.columns:
+        hc = clust_df.dropna(subset=["lat", "lon"]).copy()
+        if level_code != "L4" and sel_prov:
+            hc = hc[hc["province"] == sel_prov]
+        if sel_dist and sel_dist != "Tất cả Quận/Huyện" and "district" in hc.columns:
+            hc = hc[hc["district"] == sel_dist]
+        if not hc.empty:
+            hc["_ym"] = hc["year"].astype(int) * 100 + hc["month"].astype(int)
+            hc["_rlat"] = hc["lat"].astype(float).round(4)
+            hc["_rlon"] = hc["lon"].astype(float).round(4)
+            hc["name"] = hc["name"].fillna("Ổ dịch").astype(str)
+            hc["province"] = hc["province"].fillna("").astype(str)
+            hc["district"] = hc["district"].fillna("").astype(str)
+            agg_hc = hc.groupby(["name", "province", "district", "_rlat", "_rlon"], as_index=False).agg(
+                total_cases=("cases", "sum"),
+                peak_cases=("cases", "max"),
+                outbreak_months=("_ym", "nunique"),
+                max_radius=("radius_meters", "max"),
+            )
+            agg_hc = agg_hc.sort_values(["outbreak_months", "total_cases"], ascending=[False, False]).head(45)
+            for _, r in agg_hc.iterrows():
+                rad_val = _safe_int(r.get("max_radius"), 250)
+                historical_outbreaks.append({
+                    "lat": float(r["_rlat"]),
+                    "lon": float(r["_rlon"]),
+                    "name": str(r["name"]),
+                    "province": str(r["province"]),
+                    "district": str(r["district"]),
+                    "total_cases": _safe_int(r.get("total_cases"), 0),
+                    "peak_cases": _safe_int(r.get("peak_cases"), 0),
+                    "outbreak_months": max(1, _safe_int(r.get("outbreak_months"), 1)),
+                    "radius_meters": int(max(180, min(1500, rad_val))),
+                })
+
+    temp_layer_data = build_realtime_temperature_layer(
+        sel_year=sel_year,
+        sel_month=sel_month,
+        level_code=level_code,
+        sel_prov=sel_prov,
+        sel_dist=sel_dist,
+    )
+
+    return {
+        "selected_year": int(sel_year),
+        "selected_month": int(sel_month),
+        "level_code": level_code,
+        "available_months": [int(m) for m in avail_months],
+        "heatmap_timeline": heatmap_timeline,
+        "temperature_layer": temp_layer_data,
+        "risk_forecast": {
+            "scope": "province" if level_code == "L4" else ("district" if (is_hcmc_scope and level_code == "L3") else "local"),
+            "steps": risk_steps,
+        },
+        "weather_overlay": weather_overlay,
+        "population_overlay": population_overlay,
+        "population_regions": population_regions,
+        "population_max_density": population_max_density,
+        "historical_outbreaks": historical_outbreaks,
+    }
+
+
 def _handle_map_component_event(map_event):
     """Xử lý sự kiện tạo ghim mới hoặc định vị GPS trả về từ ArcGIS / Leaflet (không rerun toàn trang)."""
     if not isinstance(map_event, dict):
@@ -498,6 +1934,13 @@ def _handle_map_component_event(map_event):
             "ts": ts,
         }
         st.session_state["_last_loc_ts"] = ts
+    elif action == "log_temp_anomaly" and ts != st.session_state.get("_last_anom_ts"):
+        items = map_event.get("anomalies")
+        if isinstance(items, list) and items:
+            save_temperature_anomalies(items)
+            build_realtime_temperature_layer.clear()
+            build_arcgis_extended_layers.clear()
+        st.session_state["_last_anom_ts"] = ts
 
 
 @_st_fragment
@@ -511,6 +1954,7 @@ def _render_main_interactive_map(
     markers=None,
     geojson_data=None,
     choropleth_values=None,
+    extended_layers=None,
 ):
     """Render bản đồ tương tác đa chiều được cô lập trong fragment để tránh load lại toàn trang."""
     st.markdown(f"**{title}**")
@@ -563,19 +2007,20 @@ def _render_main_interactive_map(
         user_location=st.session_state.get("user_location"),
         selected_pin=st.session_state.get("draft_map_pin"),
     )
+    arcgis_kwargs = dict(common_kwargs, extended_layers=extended_layers or {})
 
     if "Song Song" in map_engine_mode:
         col_arc, col_leaf = st.columns(2)
         with col_arc:
             st.caption("🌐 **ArcGIS Maps SDK for JavaScript 4.29** (2D/3D, LayerList & Geodesic Buffer)")
-            arc_event = _arcgis_pin_map(**common_kwargs, key="main_arcgis_interactive_map")
+            arc_event = _arcgis_pin_map(**arcgis_kwargs, key="main_arcgis_interactive_map")
         with col_leaf:
             st.caption("🍃 **Leaflet OpenStreetMap** (Nhẹ, Tương tác cộng đồng nhanh)")
             leaf_event = _interactive_pin_map(**common_kwargs, key="main_unified_interactive_map")
         _handle_map_component_event(arc_event)
         _handle_map_component_event(leaf_event)
     elif "ArcGIS" in map_engine_mode:
-        arc_event = _arcgis_pin_map(**common_kwargs, key="main_arcgis_interactive_map")
+        arc_event = _arcgis_pin_map(**arcgis_kwargs, key="main_arcgis_interactive_map")
         _handle_map_component_event(arc_event)
     else:
         leaf_event = _interactive_pin_map(**common_kwargs, key="main_unified_interactive_map")
@@ -649,6 +2094,7 @@ with tab1:
                     "🏙️ Cấp Quận / Huyện (District Level)",
                     "🇻🇳 Cấp Tỉnh / Toàn Quốc (Province Level)"
                 ],
+                index=2,
                 horizontal=True,
                 key="granularity_selector"
             )
@@ -813,13 +2259,59 @@ with tab1:
                     })
 
                 with st.container(key="bento_main_map_card"):
+                    _ext_l1 = build_arcgis_extended_layers(
+                        sel_year=int(sel_year),
+                        sel_month=int(sel_month),
+                        level_code="L1",
+                        sel_prov=sel_c_prov,
+                        sel_dist=sel_c_dist,
+                    )
+                    _l1_base_gj = load_hcmc_wards_geojson() if "Hồ Chí Minh" in sel_c_prov else None
+                    _l1_gj = _filter_geojson_for_province_or_dist(_l1_base_gj, sel_c_prov, sel_c_dist)
+                    _l1_w_sub = ward_df[(ward_df["year"] == sel_year) & (ward_df["month"] == sel_month) & (ward_df["province"] == sel_c_prov)] if not ward_df.empty else pd.DataFrame()
+                    _l1_cases_map = {}
+                    for _, _wr in _l1_w_sub.iterrows():
+                        _dn = normalize_hcmc_district_name(_wr.get("district", ""))
+                        _wn = str(_wr.get("ward") or "").strip()
+                        _cv = _safe_int(_wr.get("cases"), 0)
+                        if _wn and _wn not in ("Chưa rõ", "Tất cả các phường"):
+                            _k = f"{_wn} - {_dn}"
+                            _l1_cases_map[_k] = _l1_cases_map.get(_k, 0) + _cv
+                    for _, _cr in c_prov_filtered.iterrows():
+                        _dn = normalize_hcmc_district_name(_cr.get("district", ""))
+                        _wn = str(_cr.get("ward") or "").strip()
+                        _cv = _safe_int(_cr.get("cases"), 0)
+                        if _wn and _wn not in ("Chưa rõ", "Tất cả các phường"):
+                            _k = f"{_wn} - {_dn}"
+                            _l1_cases_map[_k] = max(_l1_cases_map.get(_k, 0), _cv)
+                        if _dn and _dn != "Chưa xác định":
+                            _l1_cases_map[_dn] = _l1_cases_map.get(_dn, 0) + _cv
+                    _l1_pred_map = {}
+                    if not hcmc_dist_preds_df.empty and "Hồ Chí Minh" in sel_c_prov:
+                        _sp = hcmc_dist_preds_df[hcmc_dist_preds_df["step"] == 1] if "step" in hcmc_dist_preds_df.columns else hcmc_dist_preds_df
+                        for _, _pr in _sp.iterrows():
+                            _dn = normalize_hcmc_district_name(_pr.get("district", ""))
+                            _l1_pred_map[_dn] = _l1_pred_map.get(_dn, 0.0) + _safe_float(_pr.get("predicted_cases"), 0.0)
+                    _wx_lookup = get_province_weather_lookup(int(sel_year), int(sel_month))
+                    _l1_choro = build_choropleth_region_values(
+                        _l1_gj,
+                        _l1_cases_map,
+                        _l1_pred_map,
+                        {},
+                        _wx_lookup,
+                        default_weather=_wx_lookup.get(sel_c_prov),
+                        scope="local" if "Hồ Chí Minh" in sel_c_prov else "province",
+                    ) if _l1_gj else None
                     _render_main_interactive_map(
                         title=f"Bản đồ Khoanh Vùng Ổ Dịch & Nguy Cơ — {sel_c_prov} (T{sel_month:02d}/{sel_year})",
                         center_lat=center_lat,
                         center_lon=center_lon,
-                        zoom=11 if sel_c_dist != "Tất cả Quận/Huyện" else 10,
+                        zoom=12 if sel_c_dist != "Tất cả Quận/Huyện" else 11,
                         view_key=f"L1_{sel_c_prov}_{sel_c_dist}_{sel_c_ward}_{sel_year}_{sel_month}",
                         markers=cluster_markers,
+                        geojson_data=_l1_gj,
+                        choropleth_values=_l1_choro,
+                        extended_layers=_ext_l1,
                     )
 
                 # Actionable Table
@@ -918,13 +2410,51 @@ with tab1:
                     })
 
                 with st.container(key="bento_main_map_card"):
+                    _ext_l2 = build_arcgis_extended_layers(
+                        sel_year=int(sel_year),
+                        sel_month=int(sel_month),
+                        level_code="L2",
+                        sel_prov=sel_w_prov,
+                        sel_dist=sel_w_dist,
+                    )
+                    _l2_base_gj = load_hcmc_wards_geojson() if "Hồ Chí Minh" in sel_w_prov else None
+                    _l2_gj = _filter_geojson_for_province_or_dist(_l2_base_gj, sel_w_prov, sel_w_dist)
+                    _l2_cases_map = {}
+                    for _, _wr in w_prov_filtered.iterrows():
+                        _dn = normalize_hcmc_district_name(_wr.get("district", ""))
+                        _wn = str(_wr.get("ward") or "").strip()
+                        _cv = _safe_int(_wr.get("cases"), 0)
+                        if _wn and _wn not in ("Chưa rõ", "Tất cả các phường"):
+                            _k = f"{_wn} - {_dn}"
+                            _l2_cases_map[_k] = _l2_cases_map.get(_k, 0) + _cv
+                        if _dn and _dn != "Chưa xác định":
+                            _l2_cases_map[_dn] = _l2_cases_map.get(_dn, 0) + _cv
+                    _l2_pred_map = {}
+                    if not hcmc_dist_preds_df.empty and "Hồ Chí Minh" in sel_w_prov:
+                        _sp = hcmc_dist_preds_df[hcmc_dist_preds_df["step"] == 1] if "step" in hcmc_dist_preds_df.columns else hcmc_dist_preds_df
+                        for _, _pr in _sp.iterrows():
+                            _dn = normalize_hcmc_district_name(_pr.get("district", ""))
+                            _l2_pred_map[_dn] = _l2_pred_map.get(_dn, 0.0) + _safe_float(_pr.get("predicted_cases"), 0.0)
+                    _wx_lookup = get_province_weather_lookup(int(sel_year), int(sel_month))
+                    _l2_choro = build_choropleth_region_values(
+                        _l2_gj,
+                        _l2_cases_map,
+                        _l2_pred_map,
+                        {},
+                        _wx_lookup,
+                        default_weather=_wx_lookup.get(sel_w_prov),
+                        scope="local" if "Hồ Chí Minh" in sel_w_prov else "province",
+                    ) if _l2_gj else None
                     _render_main_interactive_map(
                         title=f"Bản đồ Ca Nhiễm Cấp Phường/Xã — {sel_w_prov} (T{sel_month:02d}/{sel_year})",
                         center_lat=c_lat,
                         center_lon=c_lon,
-                        zoom=11,
-                        view_key=f"L2_{sel_w_prov}_{sel_year}_{sel_month}",
+                        zoom=11 if sel_w_dist == "Tất cả Quận/Huyện" else 12,
+                        view_key=f"L2_{sel_w_prov}_{sel_w_dist}_{sel_year}_{sel_month}",
                         markers=ward_markers,
+                        geojson_data=_l2_gj,
+                        choropleth_values=_l2_choro,
+                        extended_layers=_ext_l2,
                     )
 
                 col_w_left, col_w_right = st.columns([3, 2], gap="medium")
@@ -1011,30 +2541,55 @@ with tab1:
 
                 hcmc_geojson = None
                 dist_choro_vals = {}
+                _wx_lookup = get_province_weather_lookup(int(sel_year), int(sel_month))
                 if "Hồ Chí Minh" in sel_d_prov:
                     hcmc_geojson = load_hcmc_districts_geojson()
-                    dist_step1_pred = {}
+                    _d_cases_map, _d_inc_map, dist_step1_pred = {}, {}, {}
                     if not hcmc_dist_preds_df.empty and 'district' in hcmc_dist_preds_df.columns:
                         _p_df = hcmc_dist_preds_df
                         if 'step' in _p_df.columns:
                             _p_df = _p_df[_p_df['step'] == 1]
                         for _, _pr in _p_df.iterrows():
                             _dn = normalize_hcmc_district_name(_pr.get('district', ''))
-                            dist_step1_pred[_dn] = dist_step1_pred.get(_dn, 0.0) + float(_pr.get('predicted_cases', 0) or 0)
+                            dist_step1_pred[_dn] = dist_step1_pred.get(_dn, 0.0) + _safe_float(_pr.get('predicted_cases'), 0.0)
                     for _, _r in d_prov_filtered.iterrows():
                         _dn = normalize_hcmc_district_name(_r.get('district', ''))
                         if not _dn or _dn == 'Chưa xác định':
                             continue
-                        prev = dist_choro_vals.get(_dn, {"cases": 0, "incidence_rate": 0.0})
-                        entry = {
-                            "cases": int(prev["cases"]) + int(_r.get('cases', 0)),
-                            "incidence_rate": float(prev["incidence_rate"]) + float(_r.get('incidence_rate', 0) or 0),
-                        }
-                        if _dn in dist_step1_pred:
-                            entry["predicted_cases"] = float(dist_step1_pred[_dn])
-                        dist_choro_vals[_dn] = entry
+                        _d_cases_map[_dn] = _d_cases_map.get(_dn, 0) + _safe_int(_r.get('cases'), 0)
+                        _d_inc_map[_dn] = _d_inc_map.get(_dn, 0.0) + _safe_float(_r.get('incidence_rate'), 0.0)
+                    dist_choro_vals = build_choropleth_region_values(
+                        hcmc_geojson,
+                        _d_cases_map,
+                        dist_step1_pred,
+                        _d_inc_map,
+                        _wx_lookup,
+                        default_weather=_wx_lookup.get("TP. Hồ Chí Minh"),
+                        scope="district",
+                    ) if hcmc_geojson else {}
+                else:
+                    hcmc_geojson = _filter_geojson_for_province_or_dist(None, sel_d_prov)
+                    _prov_cases_tot = int(d_prov_filtered['cases'].sum())
+                    _prov_inc_avg = float(d_prov_filtered['incidence_rate'].mean()) if 'incidence_rate' in d_prov_filtered.columns else 0.0
+                    _p_pred_row = predictions_df[(predictions_df['province'] == sel_d_prov) & (predictions_df['step'] == 1)] if not predictions_df.empty and 'step' in predictions_df.columns else pd.DataFrame()
+                    _p_pred_val = _safe_float(_p_pred_row['predicted_cases'].iloc[0], float(_prov_cases_tot)) if not _p_pred_row.empty else float(_prov_cases_tot)
+                    dist_choro_vals = build_choropleth_region_values(
+                        hcmc_geojson,
+                        {sel_d_prov: _prov_cases_tot},
+                        {sel_d_prov: _p_pred_val},
+                        {sel_d_prov: _prov_inc_avg},
+                        _wx_lookup,
+                        default_weather=_wx_lookup.get(sel_d_prov),
+                        scope="province",
+                    ) if hcmc_geojson else {}
 
                 with st.container(key="bento_main_map_card"):
+                    _ext_l3 = build_arcgis_extended_layers(
+                        sel_year=int(sel_year),
+                        sel_month=int(sel_month),
+                        level_code="L3",
+                        sel_prov=sel_d_prov,
+                    )
                     _render_main_interactive_map(
                         title=f"Bản đồ Dịch Tễ Cấp Quận/Huyện — {sel_d_prov} (T{sel_month:02d}/{sel_year})",
                         center_lat=c_lat,
@@ -1044,6 +2599,7 @@ with tab1:
                         markers=dist_markers,
                         geojson_data=hcmc_geojson,
                         choropleth_values=dist_choro_vals if hcmc_geojson else None,
+                        extended_layers=_ext_l3,
                     )
 
                 col_dl, col_dr = st.columns([3, 2], gap="medium")
@@ -1102,15 +2658,34 @@ with tab1:
             if geojson_path.exists() and not df_month.empty:
                 vn_geojson = load_vietnam_geojson_simplified(str(geojson_path))
                 if vn_geojson:
-                    choro_vals = {}
+                    _p_cases_map, _p_inc_map, _p_pred_map = {}, {}, {}
                     for _, _r in df_month.iterrows():
                         _prov = str(_r.get('province', ''))
                         if _prov:
-                            choro_vals[_prov] = {
-                                "cases": int(_r.get('cases', 0)),
-                                "incidence_rate": float(_r.get('incidence_rate', 0) or 0),
-                            }
+                            _p_cases_map[_prov] = _safe_int(_r.get('cases'), 0)
+                            _p_inc_map[_prov] = _safe_float(_r.get('incidence_rate'), 0.0)
+                    if not predictions_df.empty and 'province' in predictions_df.columns:
+                        _sp_p = predictions_df[predictions_df['step'] == 1] if 'step' in predictions_df.columns else predictions_df
+                        for _, _pr in _sp_p.iterrows():
+                            _pn = str(_pr.get('province', ''))
+                            if _pn:
+                                _p_pred_map[_pn] = _safe_float(_pr.get('predicted_cases'), 0.0)
+                    _wx_lookup = get_province_weather_lookup(int(sel_year), int(sel_month))
+                    choro_vals = build_choropleth_region_values(
+                        vn_geojson,
+                        _p_cases_map,
+                        _p_pred_map,
+                        _p_inc_map,
+                        _wx_lookup,
+                        scope="province",
+                    )
                     with st.container(key="bento_main_map_card"):
+                        _ext_l4 = build_arcgis_extended_layers(
+                            sel_year=int(sel_year),
+                            sel_month=int(sel_month),
+                            level_code="L4",
+                            sel_prov="",
+                        )
                         _render_main_interactive_map(
                             title=f"Bản đồ Ca nhiễm Sốt xuất huyết 34 Tỉnh/Thành — Tháng {sel_month:02d}/{sel_year}",
                             center_lat=15.5,
@@ -1119,6 +2694,7 @@ with tab1:
                             view_key=f"L4_{sel_year}_{sel_month}",
                             geojson_data=vn_geojson,
                             choropleth_values=choro_vals,
+                            extended_layers=_ext_l4,
                         )
 
             col_left, col_right = st.columns([3, 2], gap="medium")

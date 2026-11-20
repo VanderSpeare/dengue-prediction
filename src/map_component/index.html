@@ -861,20 +861,20 @@
       geoLayer = L.geoJSON(geojsonData, {
         style: function (feature) {
           const props = (feature && feature.properties) || {};
-          const name = props.district || props.adm1_name1;
+          const name = props.ward ? (props.adm1_name1 || props.ward) : (props.district || props.adm1_name1);
           const info = (valuesByProvince || {})[name] || {};
           const cases = Number(info.cases || 0);
           return {
-            fillColor: getChoroplethColor(cases, maxVal),
+            fillColor: info.risk_color || getChoroplethColor(cases, maxVal),
             weight: 1.2,
             opacity: 1,
             color: "#ffffff",
-            fillOpacity: 0.72
+            fillOpacity: 0.65
           };
         },
         onEachFeature: function (feature, layer) {
           const props = (feature && feature.properties) || {};
-          const name = props.district || props.adm1_name1 || "Khu vực";
+          const name = (props.ward ? (props.adm1_name1 || props.ward) : (props.district || props.adm1_name1)) || "Khu vực";
           const info = (valuesByProvince || {})[name] || {};
           const cases = Number(info.cases || 0);
           const inc = Number(info.incidence_rate || 0).toFixed(2);

@@ -293,3 +293,127 @@ def create_hcmc_district_map_data(district_df: pd.DataFrame, boundary_file=None,
     merged.to_file(output_file, driver='GeoJSON')
     logger.info(f"✅ HCMC Districts Risk GeoJSON saved at: {output_file}")
     return merged
+
+
+def ensure_hcmc_wards_geojson(output_file=None, district_boundary_file=None, ward_csv_file=None):
+    """
+    Sinh file GeoJSON ranh giới hành chính các Phường/Xã TP. Hồ Chí Minh
+    bằng thuật toán phân hoạch Voronoi bên trong từng đa giác Quận/Huyện
+    của `hcmc_districts.geojson` để phủ kín 100% diện tích TP.HCM không có khe hở.
+    """
+    if output_file is None:
+        output_file = getattr(paths, 'HCMC_WARDS_BOUNDARY_FILE', paths.DATA_DIR / "population" / "hcmc_wards.geojson")
+    if district_boundary_file is None:
+        district_boundary_file = getattr(paths, 'HCMC_BOUNDARY_FILE', paths.DATA_DIR / "population" / "hcmc_districts.geojson")
+    if ward_csv_file is None:
+        ward_csv_file = getattr(paths, 'WARD_CSV', paths.PROCESSED_DIR / "ward_breakdown.csv")
+
+    if not os.path.exists(district_boundary_file):
+        dist_gdf = ensure_hcmc_districts_geojson(output_file=district_boundary_file)
+    else:
+        dist_gdf = gpd.read_file(district_boundary_file)
+        if dist_gdf.crs is not None and str(dist_gdf.crs).lower() != "epsg:4326":
+            dist_gdf = dist_gdf.to_crs(epsg=4326)
+
+    wards_by_dist = {}
+    if ward_csv_file and os.path.exists(ward_csv_file):
+        try:
+            wdf = pd.read_csv(ward_csv_file)
+            wdf = wdf[wdf['province'].astype(str).str.contains('Hồ Chí Minh', case=False, na=False)].copy()
+            wdf['ward_clean'] = wdf['ward'].fillna('').astype(str).str.strip()
+            wdf = wdf[~wdf['ward_clean'].isin(['', 'Chưa rõ', 'Tất cả các phường'])]
+            wdf = wdf.dropna(subset=['lat', 'lon'])
+            if not wdf.empty:
+                wdf['dist_norm'] = wdf['district'].apply(normalize_hcmc_district_name)
+                agg_w = wdf.groupby(['dist_norm', 'ward_clean'], as_index=False).agg(
+                    lat=('lat', 'mean'),
+                    lon=('lon', 'mean'),
+                )
+                for _, wr in agg_w.iterrows():
+                    dn = str(wr['dist_norm'])
+                    wards_by_dist.setdefault(dn, []).append({
+                        'ward': str(wr['ward_clean']),
+                        'lat': float(wr['lat']),
+                        'lon': float(wr['lon']),
+                    })
+        except Exception as exc:
+            logger.warning(f"Không đọc được ward_breakdown.csv để tách phường: {exc}")
+
+    records = []
+    for _, drow in dist_gdf.iterrows():
+        dist_name = normalize_hcmc_district_name(drow.get('district') or drow.get('adm1_name1') or '')
+        dist_geom = drow.geometry
+        if dist_geom is None or dist_geom.is_empty:
+            continue
+        dist_poly = dist_geom.buffer(0)
+        ward_list = wards_by_dist.get(dist_name, [])
+
+        if len(ward_list) >= 2:
+            pts = []
+            used_coords = set()
+            for idx, w in enumerate(ward_list):
+                w_lat = float(w['lat'])
+                w_lon = float(w['lon'])
+                key = (round(w_lat, 5), round(w_lon, 5))
+                if key in used_coords:
+                    angle = idx * 1.1
+                    w_lat += 0.0018 * math.sin(angle)
+                    w_lon += 0.0018 * math.cos(angle)
+                used_coords.add((round(w_lat, 5), round(w_lon, 5)))
+                pts.append(Point(w_lon, w_lat))
+
+            mp = MultiPoint(pts)
+            vor_geom = voronoi_diagram(mp, envelope=dist_poly.envelope.buffer(0.25))
+            vor_polys = [g for g in getattr(vor_geom, 'geoms', []) if not g.is_empty]
+
+            used_vp = set()
+            for w, pt in zip(ward_list, pts):
+                matched_idx = None
+                for i, vp in enumerate(vor_polys):
+                    if i in used_vp:
+                        continue
+                    if vp.contains(pt) or vp.distance(pt) < 1e-6:
+                        matched_idx = i
+                        break
+                if matched_idx is None:
+                    avail = [(i, vp) for i, vp in enumerate(vor_polys) if i not in used_vp]
+                    if avail:
+                        matched_idx = min(avail, key=lambda pair: pair[1].distance(pt))[0]
+
+                if matched_idx is not None:
+                    used_vp.add(matched_idx)
+                    clipped = vor_polys[matched_idx].intersection(dist_poly).buffer(0)
+                    if not clipped.is_empty:
+                        w_name = w['ward']
+                        records.append({
+                            'ward': w_name,
+                            'district': dist_name,
+                            'adm1_name1': f"{w_name} - {dist_name}",
+                            'province': 'TP. Hồ Chí Minh',
+                            'is_ward_split': True,
+                            'center_lat': round(pt.y, 6),
+                            'center_lon': round(pt.x, 6),
+                            'geometry': clipped,
+                        })
+        else:
+            c_pt = dist_poly.representative_point()
+            w_name = ward_list[0]['ward'] if len(ward_list) == 1 else dist_name
+            records.append({
+                'ward': w_name,
+                'district': dist_name,
+                'adm1_name1': f"{w_name} - {dist_name}" if len(ward_list) == 1 else dist_name,
+                'province': 'TP. Hồ Chí Minh',
+                'is_ward_split': bool(len(ward_list) == 1),
+                'center_lat': round(float(drow.get('center_lat') or c_pt.y), 6),
+                'center_lon': round(float(drow.get('center_lon') or c_pt.x), 6),
+                'geometry': dist_poly,
+            })
+
+    try:
+        gdf = gpd.GeoDataFrame(records, crs="EPSG:4326")
+    except Exception:
+        gdf = gpd.GeoDataFrame(records)
+    os.makedirs(os.path.dirname(str(output_file)), exist_ok=True)
+    gdf.to_file(output_file, driver='GeoJSON')
+    logger.info(f"✅ HCMC Wards GeoJSON saved ({len(gdf)} polygons) at: {output_file}")
+    return gdf

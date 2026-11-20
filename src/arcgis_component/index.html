@@ -29,11 +29,20 @@
       width: 100%;
       height: 100%;
     }
-    .arcgis-toolbar {
+    .arcgis-top-stack {
       position: absolute;
       top: 12px;
       left: 12px;
+      right: 68px;
       z-index: 40;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 7px;
+      pointer-events: none;
+    }
+    .arcgis-toolbar {
+      pointer-events: auto;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -45,12 +54,133 @@
       box-shadow: 0 2px 12px rgba(15, 23, 42, 0.16);
       font-size: 12.5px;
       border: 1px solid #cbd5e1;
+      backdrop-filter: blur(8px);
     }
     body.night .arcgis-toolbar {
       background: rgba(15, 23, 42, 0.94);
       color: #f1f5f9;
       border-color: #334155;
     }
+    #arcgis-layer-bar {
+      pointer-events: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      color: #0f172a;
+      padding: 7px 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 12px rgba(15, 23, 42, 0.14);
+      border: 1px solid #cbd5e1;
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+    }
+    body.night #arcgis-layer-bar {
+      background: rgba(15, 23, 42, 0.92);
+      color: #f1f5f9;
+      border-color: #334155;
+    }
+    .layer-bar-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+    .layer-bar-label {
+      font-weight: 700;
+      font-size: 11.5px;
+      color: #475569;
+      margin-right: 2px;
+    }
+    body.night .layer-bar-label { color: #94a3b8; }
+    .layer-chip {
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: inherit;
+    }
+    .layer-chip:hover { border-color: #0284c7; background: #e0f2fe; }
+    .layer-chip.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0284c7;
+    }
+    .layer-chip[data-layer="heatmap"].active { background: #dc2626; border-color: #dc2626; }
+    .layer-chip[data-layer="risk"].active { background: #d97706; border-color: #d97706; }
+    .layer-chip[data-layer="weather"].active { background: #0284c7; border-color: #0284c7; }
+    .layer-chip[data-layer="pop"].active { background: #475569; border-color: #475569; }
+    .layer-chip[data-layer="hist"].active { background: #b91c1c; border-color: #b91c1c; }
+    .layer-chip[data-layer="hotspot"].active { background: #dc2626; border-color: #dc2626; }
+    .layer-chip[data-layer="pins"].active { background: #312e81; border-color: #312e81; }
+    .layer-chip[data-layer="boundary"].active { background: #0f766e; border-color: #0f766e; }
+    body.night .layer-chip {
+      background: #1e293b;
+      color: #cbd5e1;
+      border-color: #475569;
+    }
+    body.night .layer-chip.active { color: #ffffff; }
+    .sub-ctrl-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 7px;
+      padding-top: 5px;
+      border-top: 1px dashed #cbd5e1;
+      font-size: 11.5px;
+    }
+    body.night .sub-ctrl-bar { border-top-color: #334155; }
+    .sub-ctrl-bar.hidden { display: none; }
+    #heatmapMonthSlider {
+      width: 130px;
+      accent-color: #dc2626;
+      cursor: pointer;
+    }
+    .time-badge {
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #fef2f2;
+      color: #b91c1c;
+      font-weight: 700;
+      font-size: 11px;
+      border: 1px solid #fecaca;
+    }
+    body.night .time-badge {
+      background: rgba(127, 29, 29, 0.45);
+      color: #fecaca;
+      border-color: #ef4444;
+    }
+    .mini-ctrl-btn {
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #0f172a;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .mini-ctrl-btn:hover { background: #f1f5f9; border-color: #0284c7; }
+    body.night .mini-ctrl-btn { background: #1e293b; color: #e2e8f0; border-color: #475569; }
+    .risk-pill {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    .risk-low { background: #2a9d8f; }
+    .risk-med { background: #eab308; color: #0f172a; }
+    .risk-high { background: #f77f00; }
+    .risk-vhigh { background: #d90429; }
     .arcgis-badge {
       font-weight: 700;
       color: #0369a1;
@@ -105,6 +235,23 @@
       background: #1e293b;
       color: #f1f5f9;
       border-color: #475569;
+    }
+    #arcgis-hover-pill {
+      position: absolute;
+      bottom: 52px;
+      left: 12px;
+      z-index: 42;
+      display: none;
+      max-width: 480px;
+      background: rgba(15, 23, 42, 0.92);
+      color: #f8fafc;
+      padding: 6px 11px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      pointer-events: none;
     }
     .arcgis-hint {
       position: absolute;
@@ -288,7 +435,7 @@
     }
     @media (max-width: 768px) {
       #arcgis-wrapper { height: 760px; }
-      .arcgis-toolbar { max-width: calc(100% - 24px); }
+      .arcgis-top-stack { right: 12px; }
     }
     @media (max-width: 640px) {
       #pin-overlay-card { left: 12px; right: 12px; bottom: 14px; width: auto; }
@@ -299,24 +446,65 @@
 <body>
   <div id="arcgis-wrapper">
     <div id="viewDiv"></div>
-    <div class="arcgis-toolbar">
-      <span class="arcgis-badge">🌐 ArcGIS Maps SDK 4.29</span>
-      <button type="button" id="btn2D" class="arcgis-btn active">2D MapView</button>
-      <button type="button" id="btn3D" class="arcgis-btn">3D SceneView</button>
-      <select id="basemapSelect" class="arcgis-select" title="Chọn nền bản đồ ArcGIS">
-        <option value="streets-navigation-vector">🗺️ Đường phố (Navigation)</option>
-        <option value="satellite">🛰️ Ảnh Vệ tinh (Satellite)</option>
-        <option value="topo-vector">⛰️ Địa hình (Topographic)</option>
-        <option value="dark-gray-vector">🌙 Nền Tối (Dark Gray)</option>
-      </select>
+    <div class="arcgis-top-stack">
+      <div class="arcgis-toolbar">
+        <span class="arcgis-badge">🌐 ArcGIS Maps SDK 4.29</span>
+        <button type="button" id="btn2D" class="arcgis-btn active">2D MapView</button>
+        <button type="button" id="btn3D" class="arcgis-btn">3D SceneView</button>
+        <select id="basemapSelect" class="arcgis-select" title="Chọn nền bản đồ ArcGIS">
+          <option value="streets-navigation-vector">🗺️ Đường phố (Navigation)</option>
+          <option value="satellite">🛰️ Ảnh Vệ tinh (Satellite)</option>
+          <option value="topo-vector">⛰️ Địa hình (Topographic)</option>
+          <option value="dark-gray-vector">🌙 Nền Tối (Dark Gray)</option>
+        </select>
+        <button type="button" id="toggleLayerBarBtn" class="mini-ctrl-btn" title="Thu gọn / Mở thanh lớp GIS">🗂️ Lớp bản đồ ▾</button>
+      </div>
+      <div id="arcgis-layer-bar">
+        <div class="layer-bar-row">
+          <span class="layer-bar-label">🗂️ Tầng GIS:</span>
+          <button type="button" id="chipChoro" class="layer-chip active" data-layer="choro">🗺️ Nguy cơ (4 mức)</button>
+          <button type="button" id="chipPop" class="layer-chip" data-layer="pop">👥 Mật độ dân (3 năm)</button>
+          <button type="button" id="chipHeatmap" class="layer-chip" data-layer="heatmap">🌡️ Nhiệt độ (°C)</button>
+          <button type="button" id="chipBoundary" class="layer-chip active" data-layer="boundary">🗾 Ranh giới</button>
+          <button type="button" id="chipWeather" class="layer-chip" data-layer="weather">🌦️ Khí tượng (KT)</button>
+          <button type="button" id="chipHistOutbreak" class="layer-chip" data-layer="hist">🕓 Ổ dịch lịch sử</button>
+          <button type="button" id="chipHotspot" class="layer-chip" data-layer="hotspot">🏥 Điểm nóng HCDC</button>
+          <button type="button" id="chipPins" class="layer-chip active" data-layer="pins">📌 Phản ánh</button>
+          <button type="button" id="chipRiskMap" class="layer-chip" data-layer="risk">🔮 Dự báo +1/+2/+3</button>
+          <button type="button" id="btnParallelAll" class="mini-ctrl-btn" title="Bật song song tất cả các tầng ở mọi mức zoom">👁️ Bật song song</button>
+        </div>
+        <div id="tempControlBar" class="sub-ctrl-bar hidden">
+          <span class="layer-bar-label">🌡️ Nhiệt độ (°C) &amp; Dị thường:</span>
+          <span id="tempSummaryBadge" class="time-badge">TB: --°C · Dị thường: 0 điểm</span>
+          <select id="tempFilterMode" class="arcgis-select">
+            <option value="all">Nhiệt độ (°C) toàn quốc + Dị thường</option>
+            <option value="anomalies">Chỉ điểm nhiệt độ dị thường (Cao/Thấp)</option>
+          </select>
+          <button type="button" id="btnFetchLiveTemp" class="mini-ctrl-btn" title="Cập nhật nhiệt độ thời gian thực từ Open-Meteo">🔄 Cập nhật Thực tế (Live)</button>
+        </div>
+        <div id="riskControlBar" class="sub-ctrl-bar hidden">
+          <span class="layer-bar-label">🔮 Dự báo Nguy cơ (Đa giác):</span>
+          <select id="riskStepSelect" class="arcgis-select">
+            <option value="1">Dự báo +1 tháng</option>
+            <option value="2">Dự báo +2 tháng</option>
+            <option value="3">Dự báo +3 tháng</option>
+          </select>
+          <span id="riskStepLabel" class="time-badge">--</span>
+          <span class="risk-pill" style="background:#22c55e;">Thấp</span>
+          <span class="risk-pill" style="background:#eab308;color:#0f172a;">Trung bình</span>
+          <span class="risk-pill" style="background:#f97316;">Cao</span>
+          <span class="risk-pill" style="background:#dc2626;">Rất cao</span>
+        </div>
+      </div>
     </div>
     <button type="button" id="myLocBtn" class="arcgis-loc-btn" title="Định vị vị trí hiện tại">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3A8.994 8.994 0 0 0 13 3.06V1h-2v2.06A8.994 8.994 0 0 0 3.06 11H1v2h2.06A8.994 8.994 0 0 0 11 20.94V23h2v-2.06A8.994 8.994 0 0 0 20.94 13H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
       </svg>
     </button>
-    <div class="arcgis-hint">
-      📌 Nhấp vào bản đồ ArcGIS để chọn tọa độ ghim phản ánh · Mở nút lớp (góc phải) để bật/tắt 4 tầng dữ liệu GIS.
+    <div id="arcgis-hover-pill"></div>
+    <div id="arcgis-hint" class="arcgis-hint">
+      📌 Nhấp vào bản đồ ArcGIS để chọn tọa độ ghim phản ánh &amp; bình luận · Di chuột để xem thông tin vùng &amp; bật các tầng GIS ở góc trái.
     </div>
     <div id="pin-overlay-card" role="dialog" aria-label="Ghim phản ánh dịch tễ">
       <div class="pin-card-hdr">
@@ -415,11 +603,243 @@
     let pendingPins = [];
 
     let choroplethLayer = null;
-    let bufferLayer = null;
+    let geoChoroplethLayer = null;
+    let geoChoroplethLayerView = null;
+    let adminBoundaryLayer = null;
+    let hoverHighlightLayer = null;
+    let hoverHighlightHandle = null;
+    let lastGeoBlobUrl = null;
+    let lastHoveredKey = null;
+    let riskMapLayer = null;
+    let heatmapLayer = null;
+    let historicalOutbreakLayer = null;
+    let populationOverlayLayer = null;
+    let weatherOverlayLayer = null;
     let hotspotLayer = null;
     let pinsLayer = null;
     let userLayer = null;
     let draftLayer = null;
+
+    const layerVisibleState = {
+      choro: true,
+      boundary: true,
+      pop: false,
+      heatmap: false,
+      weather: false,
+      hist: false,
+      hotspot: false,
+      pins: true,
+      risk: false
+    };
+    let liveTempOverride = null;
+    let tempFilterMode = "all";
+    let activeRiskStep = "1";
+    let lastExtSyncKey = null;
+    let lastRiskRenderKey = null;
+    let lastWeatherRenderKey = null;
+    let lastPopRenderKey = null;
+
+    function svgDataUri(svgStr) {
+      return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgStr);
+    }
+
+    const PLANNING_ICONS = {
+      weatherKT: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">' +
+        '<circle cx="11" cy="11" r="9.5" fill="#ffffff" stroke="#0284c7" stroke-width="1.8"/>' +
+        '<text x="11" y="14" text-anchor="middle" font-family="Arial,sans-serif" font-size="8.2" font-weight="800" fill="#0284c7">KT</text>' +
+        '</svg>'
+      ),
+      outbreakTriangle: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">' +
+        '<circle cx="11" cy="11" r="9.5" fill="#ffffff" stroke="#b91c1c" stroke-width="1.8"/>' +
+        '<polygon points="11,5.3 16.5,15.3 5.5,15.3" fill="#b91c1c"/>' +
+        '</svg>'
+      ),
+      hcdcCross: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">' +
+        '<circle cx="11" cy="11" r="9.5" fill="#ffffff" stroke="#dc2626" stroke-width="1.8"/>' +
+        '<path d="M9.4,5.4 H12.6 V9.4 H16.6 V12.6 H12.6 V16.6 H9.4 V12.6 H5.4 V9.4 H9.4 Z" fill="#dc2626"/>' +
+        '</svg>'
+      ),
+      communityPin: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">' +
+        '<circle cx="9" cy="9" r="7.8" fill="#ffffff" stroke="#312e81" stroke-width="1.6"/>' +
+        '<path d="M9,4 C7.3,4 6,5.3 6,6.9 C6,9.1 9,13.6 9,13.6 C9,13.6 12,9.1 12,6.9 C12,5.3 10.7,4 9,4 Z M9,8 A1.1,1.1 0 1,1 9,5.8 A1.1,1.1 0 1,1 9,8 Z" fill="#312e81"/>' +
+        '</svg>'
+      ),
+      tempHigh: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">' +
+        '<circle cx="11" cy="11" r="9.5" fill="#ffffff" stroke="#dc2626" stroke-width="2"/>' +
+        '<polygon points="11,4.8 16.2,11 11,17.2 5.8,11" fill="#dc2626"/>' +
+        '</svg>'
+      ),
+      tempLow: svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22">' +
+        '<circle cx="11" cy="11" r="9.5" fill="#ffffff" stroke="#0284c7" stroke-width="2"/>' +
+        '<rect x="6.8" y="6.8" width="8.4" height="8.4" rx="1.5" fill="#0284c7"/>' +
+        '</svg>'
+      )
+    };
+
+    function escapeXml(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    }
+
+    function shortRegionLabel(name) {
+      let s = String(name || "")
+        .replace(/^Thành Phố\s+/i, "TP.")
+        .replace(/^Thị Xã\s+/i, "TX.")
+        .replace(/^Huyện\s+/i, "H.")
+        .replace(/^Quận\s+/i, "Q.")
+        .replace(/TP\.\s*Hồ Chí Minh/i, "TP.HCM")
+        .trim();
+      if (s.length > 11) s = s.slice(0, 10) + "..";
+      return s;
+    }
+
+    function formatCompactDensity(v) {
+      const n = Number(v || 0);
+      if (n >= 10000) return (n / 1000).toFixed(1).replace(/\.0$/, "") + "k";
+      if (n >= 1000) return (n / 1000).toFixed(2).replace(/0$/, "").replace(/\.$/, "") + "k";
+      return String(Math.round(n));
+    }
+
+    function createPop3YearBarChartSvg(info, maxDensity) {
+      const d23 = Number(info.density_2023 || 0);
+      const d24 = Number(info.density_2024 || 0);
+      const d25 = Number(info.density_2025 || d24 || 0);
+      const maxRef = Math.max(Number(maxDensity || 1), d23, d24, d25, 1);
+      const baseH = 7 + 16 * Math.sqrt(Math.max(0, d25) / maxRef);
+      const spanRatio = Math.max(0.01, (d25 - d23) / Math.max(d24, 1));
+      const h23 = Math.max(4, Math.min(26, baseH - Math.min(5.5, spanRatio * 85)));
+      const h24 = Math.max(4.5, Math.min(26, (baseH + h23) / 2 + 0.8));
+      const h25 = Math.max(5.5, Math.min(26, baseH + 1.5));
+      const labelTxt = escapeXml(shortRegionLabel(info.name || ""));
+      const valTxt = escapeXml(formatCompactDensity(d25) + "/km²");
+      const yAxis = 48;
+      return svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="72" height="60" viewBox="0 0 72 60">' +
+        '<rect x="1" y="1" width="70" height="58" rx="6" fill="rgba(255,255,255,0.95)" stroke="#475569" stroke-width="1.2"/>' +
+        `<text x="36" y="10" text-anchor="middle" font-family="Arial,sans-serif" font-size="7.2" font-weight="700" fill="#0f172a">${labelTxt}</text>` +
+        `<text x="36" y="18.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.8" font-weight="600" fill="#334155">${valTxt}</text>` +
+        `<line x1="9" y1="${yAxis}" x2="63" y2="${yAxis}" stroke="#cbd5e1" stroke-width="1"/>` +
+        `<rect x="13" y="${(yAxis - h23).toFixed(1)}" width="11" height="${h23.toFixed(1)}" rx="1.5" fill="#6366f1"/>` +
+        `<rect x="30.5" y="${(yAxis - h24).toFixed(1)}" width="11" height="${h24.toFixed(1)}" rx="1.5" fill="#0284c7"/>` +
+        `<rect x="48" y="${(yAxis - h25).toFixed(1)}" width="11" height="${h25.toFixed(1)}" rx="1.5" fill="#f97316"/>` +
+        '<text x="18.5" y="56.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.6" font-weight="700" fill="#4f46e5">23</text>' +
+        '<text x="36" y="56.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.6" font-weight="700" fill="#0369a1">24</text>' +
+        '<text x="53.5" y="56.2" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.6" font-weight="700" fill="#ea580c">25</text>' +
+        '</svg>'
+      );
+    }
+
+    function createTempCelsiusBadgeSvg(s) {
+      const tC = Number(s.temp_c != null ? s.temp_c : 27.5);
+      let bg = "#ecfdf5";
+      let stroke = "#059669";
+      let fg = "#047857";
+      if (tC >= 33.5) {
+        bg = "#fef2f2"; stroke = "#dc2626"; fg = "#b91c1c";
+      } else if (tC >= 30.5) {
+        bg = "#fff7ed"; stroke = "#ea580c"; fg = "#c2410c";
+      } else if (tC >= 26.5) {
+        bg = "#fefce8"; stroke = "#ca8a04"; fg = "#854d0e";
+      } else if (tC < 23.0) {
+        bg = "#eff6ff"; stroke = "#0284c7"; fg = "#0369a1";
+      }
+      const tempTxt = escapeXml(tC.toFixed(1) + "°C");
+      const locTxt = escapeXml(shortRegionLabel(s.name || s.province || ""));
+      return svgDataUri(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="28" viewBox="0 0 64 28">' +
+        `<rect x="1" y="1" width="62" height="26" rx="7" fill="${bg}" stroke="${stroke}" stroke-width="1.35"/>` +
+        `<text x="32" y="12.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="9.2" font-weight="800" fill="${fg}">${tempTxt}</text>` +
+        `<text x="32" y="22.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="6.5" font-weight="600" fill="#334155">${locTxt}</text>` +
+        '</svg>'
+      );
+    }
+
+    function enforceLayerZOrder() {
+      if (!mapObj) return;
+      const ordered = [
+        geoChoroplethLayer,
+        choroplethLayer,
+        riskMapLayer,
+        populationOverlayLayer,
+        heatmapLayer,
+        adminBoundaryLayer,
+        hoverHighlightLayer,
+        weatherOverlayLayer,
+        historicalOutbreakLayer,
+        hotspotLayer,
+        pinsLayer,
+        userLayer,
+        draftLayer
+      ].filter((lyr) => lyr && mapObj.layers.includes(lyr));
+      ordered.forEach((lyr, idx) => {
+        try { mapObj.reorder(lyr, idx); } catch (_) {}
+      });
+    }
+
+    function getLayerByKey(key) {
+      switch (key) {
+        case "choro": return geoChoroplethLayer || choroplethLayer;
+        case "pop": return populationOverlayLayer;
+        case "heatmap": return heatmapLayer;
+        case "boundary": return adminBoundaryLayer;
+        case "weather": return weatherOverlayLayer;
+        case "hist": return historicalOutbreakLayer;
+        case "hotspot": return hotspotLayer;
+        case "pins": return pinsLayer;
+        case "risk": return riskMapLayer;
+        default: return null;
+      }
+    }
+
+    function syncLayerChipUI() {
+      document.querySelectorAll(".layer-chip[data-layer]").forEach((btn) => {
+        const key = btn.getAttribute("data-layer");
+        btn.classList.toggle("active", Boolean(layerVisibleState[key]));
+      });
+      const tmpBar = document.getElementById("tempControlBar");
+      if (tmpBar) tmpBar.classList.toggle("hidden", !layerVisibleState.heatmap);
+      const rkBar = document.getElementById("riskControlBar");
+      if (rkBar) rkBar.classList.toggle("hidden", !layerVisibleState.risk);
+      const parallelBtn = document.getElementById("btnParallelAll");
+      if (parallelBtn) {
+        const allOn = ["choro", "pop", "heatmap", "boundary", "weather", "hist", "hotspot", "pins"].every((k) => layerVisibleState[k]);
+        parallelBtn.textContent = allOn ? "🧹 Chỉ nền Nguy cơ" : "👁️ Bật song song";
+      }
+    }
+
+    function toggleLayerVisibility(key, forceVal) {
+      const next = typeof forceVal === "boolean" ? forceVal : !layerVisibleState[key];
+      layerVisibleState[key] = next;
+      if (key === "choro") {
+        if (geoChoroplethLayer) geoChoroplethLayer.visible = next && viewMode === "2d";
+        if (choroplethLayer) choroplethLayer.visible = next && (viewMode === "3d" || !geoChoroplethLayer);
+      } else {
+        const lyr = getLayerByKey(key);
+        if (lyr) lyr.visible = next;
+      }
+      syncLayerChipUI();
+    }
+
+    function clearHoverHighlight() {
+      if (hoverHighlightHandle) {
+        try { hoverHighlightHandle.remove(); } catch (_) {}
+        hoverHighlightHandle = null;
+      }
+      if (hoverHighlightLayer) hoverHighlightLayer.removeAll();
+      lastHoveredKey = null;
+      const pill = document.getElementById("arcgis-hover-pill");
+      if (pill) pill.style.display = "none";
+    }
 
     function openDraftPinOverlay(lat, lon) {
       draftLatLon = { lat: Number(lat), lon: Number(lon) };
@@ -513,8 +933,167 @@
           if (commentEl) commentEl.value = "";
           if (areaEl) areaEl.value = "";
           closeDraftPinOverlay();
+          if (!layerVisibleState.pins) toggleLayerVisibility("pins", true);
           showPinToast("✅ Đã lưu điểm ghim & bình luận lên bản đồ!");
           emitValue(payload);
+        });
+      }
+    })();
+
+    (function wireLayerBarEvents() {
+      const layerBar = document.getElementById("arcgis-layer-bar");
+      if (layerBar) {
+        ["click", "mousedown", "pointerdown", "touchstart", "dblclick"].forEach((evt) => {
+          layerBar.addEventListener(evt, (e) => e.stopPropagation());
+        });
+      }
+
+      const collapseBtn = document.getElementById("toggleLayerBarBtn");
+      if (collapseBtn && layerBar) {
+        collapseBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const isHidden = layerBar.style.display === "none";
+          layerBar.style.display = isHidden ? "flex" : "none";
+          collapseBtn.textContent = isHidden ? "🗂️ Lớp bản đồ ▾" : "🗂️ Lớp bản đồ ▸";
+        });
+      }
+
+      document.querySelectorAll(".layer-chip[data-layer]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const key = btn.getAttribute("data-layer");
+          toggleLayerVisibility(key);
+        });
+      });
+
+      const parallelBtn = document.getElementById("btnParallelAll");
+      if (parallelBtn) {
+        parallelBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const allOn = ["choro", "pop", "heatmap", "boundary", "weather", "hist", "hotspot", "pins"].every((k) => layerVisibleState[k]);
+          if (allOn) {
+            ["pop", "heatmap", "weather", "hist", "hotspot", "pins", "risk"].forEach((k) => toggleLayerVisibility(k, false));
+            ["choro", "boundary"].forEach((k) => toggleLayerVisibility(k, true));
+          } else {
+            ["choro", "pop", "heatmap", "boundary", "weather", "hist", "hotspot", "pins"].forEach((k) => toggleLayerVisibility(k, true));
+          }
+        });
+      }
+
+      const tempModeSel = document.getElementById("tempFilterMode");
+      if (tempModeSel) {
+        tempModeSel.addEventListener("change", (e) => {
+          tempFilterMode = String(e.target.value || "all");
+          renderHeatmapLayer((lastArgs && lastArgs.extended_layers) || {}, lastArgs ? lastArgs.zoom : 10);
+        });
+      }
+
+      const fetchLiveBtn = document.getElementById("btnFetchLiveTemp");
+      if (fetchLiveBtn) {
+        fetchLiveBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const ext = (lastArgs && lastArgs.extended_layers) || {};
+          const tmpObj = ext.temperature_layer || {};
+          const stations = Array.isArray(tmpObj.stations) ? tmpObj.stations : [];
+          if (!stations.length) return;
+          fetchLiveBtn.textContent = "⏳ Đang đồng bộ...";
+          fetchLiveBtn.disabled = true;
+          try {
+            const chunkSize = 35;
+            const mergedResults = new Array(stations.length).fill(null);
+            const fetchPromises = [];
+            for (let start = 0; start < stations.length; start += chunkSize) {
+              const slice = stations.slice(start, start + chunkSize);
+              const lats = slice.map((s) => Number(s.lat).toFixed(4)).join(",");
+              const lons = slice.map((s) => Number(s.lon).toFixed(4)).join(",");
+              const url = `https://api.open-meteo.com/v1/forecast?latitude=${lats}&longitude=${lons}&current=temperature_2m,relative_humidity_2m,precipitation,wind_speed_10m&timezone=Asia%2FHo_Chi_Minh`;
+              fetchPromises.push(
+                fetch(url, { cache: "no-store" })
+                  .then((r) => (r.ok ? r.json() : null))
+                  .then((j) => {
+                    if (!j) return;
+                    const arr = Array.isArray(j) ? j : [j];
+                    arr.forEach((entry, localIdx) => {
+                      mergedResults[start + localIdx] = entry;
+                    });
+                  })
+              );
+            }
+            await Promise.all(fetchPromises);
+            const hasAny = mergedResults.some((item) => item && item.current && item.current.temperature_2m != null);
+            if (hasAny) {
+              const updatedStations = [];
+              const newAnomalies = [];
+              stations.forEach((st, idx) => {
+                const cur = (mergedResults[idx] && mergedResults[idx].current) || null;
+                if (!cur || cur.temperature_2m == null) {
+                  updatedStations.push(st);
+                  return;
+                }
+                const tC = Number(Number(cur.temperature_2m).toFixed(1));
+                const baseT = Number(st.baseline_temp != null ? st.baseline_temp : 27.5);
+                const dT = Number((tC - baseT).toFixed(1));
+                let aType = "normal";
+                let aLbl = "Bình thường";
+                if (tC >= 33.5 || dT >= 2.2) {
+                  aType = "high_anomaly";
+                  aLbl = "🔥 Nhiệt độ quá cao";
+                } else if (tC <= 23.0 || dT <= -2.2) {
+                  aType = "low_anomaly";
+                  aLbl = "❄️ Nhiệt độ quá thấp";
+                }
+                const row = Object.assign({}, st, {
+                  temp_c: tC,
+                  temp_label: tC.toFixed(1) + "°C",
+                  delta_temp: dT,
+                  humidity_pct: Number(Number(cur.relative_humidity_2m || st.humidity_pct || 75).toFixed(1)),
+                  rain_mm: Number(Number(cur.precipitation || 0).toFixed(1)),
+                  obs_time: String(cur.time || new Date().toISOString().slice(0, 16)),
+                  obs_date: String(cur.time || new Date().toISOString()).slice(0, 13),
+                  anomaly_type: aType,
+                  anomaly_label: aLbl,
+                  source: "Open-Meteo Real-time (Browser)"
+                });
+                updatedStations.push(row);
+                if (aType !== "normal") newAnomalies.push(row);
+              });
+
+              const existingAnoms = Array.isArray(tmpObj.anomalies) ? tmpObj.anomalies : [];
+              liveTempOverride = {
+                stations: updatedStations,
+                anomalies: newAnomalies.concat(existingAnoms).slice(0, 35),
+                is_live: true
+              };
+              if (!layerVisibleState.heatmap) toggleLayerVisibility("heatmap", true);
+              renderHeatmapLayer(ext, activeView && activeView.zoom != null ? activeView.zoom : (lastArgs ? lastArgs.zoom : 10));
+              if (newAnomalies.length) {
+                emitValue({
+                  action: "log_temp_anomaly",
+                  anomalies: newAnomalies,
+                  ts: Date.now()
+                });
+                showPinToast(`🌡️ Đã cập nhật Live (°C toàn quốc) & lưu ${newAnomalies.length} điểm dị thường!`);
+              } else {
+                showPinToast("✅ Đã cập nhật nhiệt độ (°C) thời gian thực toàn quốc!");
+              }
+            }
+          } catch (_) {
+            showPinToast("⚠️ Đang dùng dữ liệu quan trắc nhiệt độ tại trạm (Offline).");
+          } finally {
+            fetchLiveBtn.textContent = "🔄 Cập nhật Thực tế (Live)";
+            fetchLiveBtn.disabled = false;
+          }
+        });
+      }
+
+      const riskSel = document.getElementById("riskStepSelect");
+      if (riskSel) {
+        riskSel.addEventListener("change", (e) => {
+          activeRiskStep = String(e.target.value || "1");
+          lastRiskRenderKey = null;
+          if (lastArgs) {
+            renderRiskForecastLayer(lastArgs, lastArgs.extended_layers || {});
+          }
         });
       }
     })();
@@ -604,17 +1183,22 @@
         const legendDiv = document.createElement("div");
         legendDiv.style.cssText = "background:#fff;color:#0f172a;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.5;min-width:210px;";
         legendDiv.innerHTML = `
-          <div style="font-weight:700;margin-bottom:6px;">📊 Chú Giải GIS Dịch Tễ</div>
-          <div>🔴 Vùng Đỏ: Nguy cơ rất cao</div>
-          <div>🟠 Vùng Cam: Nguy cơ cao</div>
-          <div>🟡 Vùng Vàng: Nguy cơ trung bình</div>
-          <div>🟢 Vùng Xanh: Kiểm soát</div>
+          <div style="font-weight:700;margin-bottom:6px;">🗂️ Kiến Trúc Phân Tầng 3 Lớp</div>
+          <div style="font-weight:600;margin-top:4px;">1. Tầng Đa Giác (Độ mờ 55%)</div>
+          <div><span style="color:#22c55e;">■</span> Thấp &nbsp;·&nbsp; <span style="color:#eab308;">■</span> Trung bình</div>
+          <div><span style="color:#f97316;">■</span> Cao &nbsp;·&nbsp; <span style="color:#dc2626;">■</span> Rất cao</div>
+          <div>▤ Hoa văn gạch (#475569) + <b>Biểu đồ cột 2023–2024–2025</b>: Mật độ dân số (người/km²)</div>
           <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0;"/>
-          <div style="font-weight:700;margin-bottom:4px;">📌 Trạng Thái Phản Ánh / Ổ Dịch</div>
-          <div>🔵 Chờ xác minh HCDC</div>
-          <div>🟠 Đã xác minh ổ dịch</div>
-          <div>🔴 Đang điều phối phun thuốc</div>
-          <div>🟢 Đã xử lý / An toàn</div>
+          <div style="font-weight:600;margin-bottom:3px;">2. Tầng Nhiệt Độ (°C Toàn quốc &amp; Khu vực)</div>
+          <div>🏷️ Thẻ <b>XX.X°C</b>: Nhiệt độ thực tế từng khu vực</div>
+          <div>🔥 Điểm dị thường Quá cao (&ge;33.5°C / +2.2°C)</div>
+          <div>❄️ Điểm dị thường Quá thấp (&le;23°C / -2.2°C)</div>
+          <hr style="margin:6px 0;border:none;border-top:1px solid #e2e8f0;"/>
+          <div style="font-weight:600;margin-bottom:3px;">3. Tầng Điểm Quy Hoạch (Trên cùng)</div>
+          <div>🔵 <b>KT</b>: Trạm khí tượng (nhiệt độ · mưa)</div>
+          <div>🔺 Tam giác đỏ sẫm: Ổ dịch lịch sử</div>
+          <div>✚ Chữ thập đỏ: Điểm nóng HCDC</div>
+          <div>🟣 Ghim tím than: Phản ánh cộng đồng</div>
         `;
         const legendExpand = new Expand({
           view: view,
@@ -629,8 +1213,11 @@
 
     function createOrSwitchView(mode, centerLat, centerLon, zoom) {
       if (!arcgisModules || !mapObj) return;
-      const { MapView, SceneView } = arcgisModules;
+      const { MapView, SceneView, Graphic } = arcgisModules;
       lastArcChoroKey = null;
+      lastRiskRenderKey = null;
+      geoChoroplethLayerView = null;
+      clearHoverHighlight();
 
       if (activeView) {
         activeView.destroy();
@@ -639,11 +1226,18 @@
 
       const targetCenter = [centerLon || 106.7009, centerLat || 10.7769];
       const targetZoom = zoom || 11;
+      const highlightOpts = {
+        color: [15, 23, 42, 1],
+        haloColor: [255, 255, 255, 1],
+        haloOpacity: 0.95,
+        fillOpacity: 0.18
+      };
 
       if (mode === "3d") {
         activeView = new SceneView({
           container: "viewDiv",
           map: mapObj,
+          highlightOptions: highlightOpts,
           camera: {
             position: {
               longitude: targetCenter[0],
@@ -659,19 +1253,109 @@
           container: "viewDiv",
           map: mapObj,
           center: targetCenter,
-          zoom: targetZoom
+          zoom: targetZoom,
+          highlightOptions: highlightOpts
         });
       }
 
       setupViewWidgets(activeView);
 
+      if (geoChoroplethLayer) {
+        activeView.whenLayerView(geoChoroplethLayer).then((lv) => {
+          geoChoroplethLayerView = lv;
+        }).catch(() => {});
+      }
+
+      let hoverRafPending = false;
+      activeView.on("pointer-move", function (event) {
+        if (hoverRafPending || !activeView) return;
+        hoverRafPending = true;
+        requestAnimationFrame(() => {
+          hoverRafPending = false;
+          if (!activeView) return;
+          const incLayers = [riskMapLayer, geoChoroplethLayer, choroplethLayer].filter((l) => l && l.visible);
+          if (!incLayers.length) {
+            clearHoverHighlight();
+            return;
+          }
+          activeView.hitTest(event, { include: incLayers }).then((response) => {
+            const hit = (response.results || []).find((r) => r && r.graphic && r.graphic.geometry);
+            if (!hit) {
+              clearHoverHighlight();
+              return;
+            }
+            const g = hit.graphic;
+            const attrs = g.attributes || {};
+            const rName = attrs.region_name || attrs.name || "Khu vực";
+            if (rName === lastHoveredKey) return;
+            clearHoverHighlight();
+            lastHoveredKey = rName;
+
+            if (g.layer === geoChoroplethLayer && geoChoroplethLayerView) {
+              try {
+                hoverHighlightHandle = geoChoroplethLayerView.highlight(g);
+              } catch (_) {}
+            }
+            if (hoverHighlightLayer && g.geometry) {
+              hoverHighlightLayer.add(new Graphic({
+                geometry: g.geometry,
+                symbol: {
+                  type: "simple-fill",
+                  color: [255, 255, 255, 0.08],
+                  outline: { color: [15, 23, 42, 0.98], width: 2.8 }
+                }
+              }));
+            }
+            const pill = document.getElementById("arcgis-hover-pill");
+            if (pill) {
+              const riskLbl = attrs.risk_label || "Thấp";
+              const predVal = attrs.predicted_cases != null ? Number(attrs.predicted_cases).toFixed(1) : "0.0";
+              const tempVal = attrs.temp_mean != null ? Number(attrs.temp_mean).toFixed(1) : "--";
+              const humVal = attrs.humidity_mean != null ? Number(attrs.humidity_mean).toFixed(0) : "--";
+              pill.textContent = `📍 ${rName} · Nguy cơ: ${riskLbl} · Dự báo: ${predVal} ca · ${tempVal}°C / ${humVal}%`;
+              pill.style.display = "block";
+            }
+          }).catch(() => {});
+        });
+      });
+
+      const viewDivEl = document.getElementById("viewDiv");
+      if (viewDivEl && !viewDivEl._hoverOutBound) {
+        viewDivEl._hoverOutBound = true;
+        viewDivEl.addEventListener("mouseleave", clearHoverHighlight);
+      }
+
+      let lastZoomBand = targetZoom < 9.0 ? 0 : (targetZoom < 11.4 ? 1 : 2);
+      activeView.watch("zoom", function (zVal) {
+        if (zVal == null || !lastArgs) return;
+        const band = zVal < 9.0 ? 0 : (zVal < 11.4 ? 1 : 2);
+        if (band !== lastZoomBand) {
+          lastZoomBand = band;
+          const ext = lastArgs.extended_layers || {};
+          renderHeatmapLayer(ext, zVal);
+          lastPopRenderKey = null;
+          renderPopulationOverlayLayer(lastArgs, ext);
+        }
+      });
+
       activeView.on("click", function (event) {
         activeView.hitTest(event).then(function (response) {
-          const hitGraphic = (response.results || []).find(
-            (r) => r.graphic && r.graphic.layer && r.graphic.layer !== choroplethLayer
-          );
-          if (hitGraphic) {
-            return; // Let popup open for marker/pin/buffer
+          const polygonBgLayers = [
+            geoChoroplethLayer,
+            choroplethLayer,
+            riskMapLayer,
+            adminBoundaryLayer,
+            hoverHighlightLayer
+          ];
+          const hitMarker = (response.results || []).find((r) => {
+            const g = r && r.graphic;
+            if (!g || !g.layer) return false;
+            if (g.attributes && g.attributes._bgGraphic) return false;
+            if (polygonBgLayers.includes(g.layer) && !(g.attributes && g.attributes._isInteractiveSymbol)) return false;
+            return true;
+          });
+          if (hitMarker) {
+            return; // Nhấp trúng điểm marker / biểu đồ / nhãn °C / ghim đã lưu -> mở Popup của điểm đó
           }
           const mp = event.mapPoint;
           if (!mp) return;
@@ -734,48 +1418,223 @@
       });
     }
 
+    function getGeoFeatureKey(props) {
+      const p = props || {};
+      if (p.ward) return p.adm1_name1 || p.ward || "Khu vực";
+      return p.district || p.adm1_name1 || "Khu vực";
+    }
+
+    function getRegionRiskStyle(info, maxCases) {
+      const t = info && info.risk_tier;
+      if (t === "very_high") return { tier: "very_high", label: info.risk_label || "Rất cao", hex: "#dc2626", rgba: [220, 38, 38, 0.55] };
+      if (t === "high") return { tier: "high", label: info.risk_label || "Cao", hex: "#f97316", rgba: [249, 115, 22, 0.55] };
+      if (t === "medium") return { tier: "medium", label: info.risk_label || "Trung bình", hex: "#eab308", rgba: [234, 179, 8, 0.55] };
+      if (t === "low") return { tier: "low", label: info.risk_label || "Thấp", hex: "#22c55e", rgba: [34, 197, 94, 0.55] };
+      const c = Number((info && (info.predicted_cases != null ? info.predicted_cases : info.cases)) || 0);
+      const ratio = maxCases > 0 ? c / maxCases : 0;
+      if (ratio >= 0.7) return { tier: "very_high", label: "Rất cao", hex: "#dc2626", rgba: [220, 38, 38, 0.55] };
+      if (ratio >= 0.4) return { tier: "high", label: "Cao", hex: "#f97316", rgba: [249, 115, 22, 0.55] };
+      if (ratio >= 0.15) return { tier: "medium", label: "Trung bình", hex: "#eab308", rgba: [234, 179, 8, 0.55] };
+      return { tier: "low", label: "Thấp", hex: "#22c55e", rgba: [34, 197, 94, 0.55] };
+    }
+
+    function buildRegionPopupHtml(attrs) {
+      const a = attrs || {};
+      const riskLabel = a.risk_label || "Thấp";
+      const riskColor = a.risk_color || "#22c55e";
+      const textCol = a.risk_tier === "medium" ? "#0f172a" : "#ffffff";
+      const cases = Number(a.cases || 0);
+      const pred = a.predicted_cases != null ? Number(a.predicted_cases) : cases;
+      const inc = Number(a.incidence_rate || 0);
+      const tempM = a.temp_mean != null ? `${Number(a.temp_mean).toFixed(1)} °C` : "Chưa có dữ liệu";
+      const humM = a.humidity_mean != null ? `${Number(a.humidity_mean).toFixed(1)} %` : "Chưa có dữ liệu";
+      const rainM = a.rain_mm != null ? `${Number(a.rain_mm).toFixed(1)} mm` : "0.0 mm";
+      const recLine = a.recommendation ? `<p><b>Khuyến cáo y tế:</b> ${escapeHtml(a.recommendation)}</p>` : "";
+      return (
+        `<div style="line-height:1.55;font-size:13px;">` +
+        `<p><b>Mức độ nguy cơ:</b> <span style="display:inline-block;padding:2px 9px;border-radius:999px;background:${escapeHtml(riskColor)};color:${textCol};font-weight:700;">${escapeHtml(riskLabel)}</span></p>` +
+        `<p><b>Số ca dự báo (XGBoost):</b> <b>${pred.toFixed(1)} ca</b></p>` +
+        `<p><b>Số ca thực tế ghi nhận:</b> ${cases.toLocaleString()} ca (Suất mắc: ${inc.toFixed(2)}/100k dân)</p>` +
+        `<p><b>Nhiệt độ / Độ ẩm TB:</b> ${escapeHtml(tempM)} · ${escapeHtml(humM)} (Mưa: ${escapeHtml(rainM)})</p>` +
+        recLine +
+        `</div>`
+      );
+    }
+
+    function mountGeoJSONChoropleth(enrichedGeojson) {
+      if (!arcgisModules || !arcgisModules.GeoJSONLayer || !mapObj) return;
+      const { GeoJSONLayer } = arcgisModules;
+
+      if (geoChoroplethLayer) {
+        try { mapObj.remove(geoChoroplethLayer); } catch (_) {}
+        geoChoroplethLayer = null;
+        geoChoroplethLayerView = null;
+      }
+      if (lastGeoBlobUrl) {
+        try { URL.revokeObjectURL(lastGeoBlobUrl); } catch (_) {}
+        lastGeoBlobUrl = null;
+      }
+
+      const blob = new Blob([JSON.stringify(enrichedGeojson)], { type: "application/json" });
+      lastGeoBlobUrl = URL.createObjectURL(blob);
+
+      const outlineSym = { color: [255, 255, 255, 0.95], width: 1 };
+      const layer = new GeoJSONLayer({
+        url: lastGeoBlobUrl,
+        title: "🗺️ Tầng 1 · Nguy cơ theo Phường/Hành chính (4 mức)",
+        visible: layerVisibleState.choro && viewMode === "2d",
+        objectIdField: "oid",
+        outFields: ["*"],
+        fields: [
+          { name: "oid", type: "oid" },
+          { name: "region_name", type: "string" },
+          { name: "risk_tier", type: "string" },
+          { name: "risk_label", type: "string" },
+          { name: "risk_color", type: "string" },
+          { name: "cases", type: "double" },
+          { name: "predicted_cases", type: "double" },
+          { name: "incidence_rate", type: "double" },
+          { name: "temp_mean", type: "double" },
+          { name: "humidity_mean", type: "double" },
+          { name: "rain_mm", type: "double" },
+          { name: "recommendation", type: "string" }
+        ],
+        renderer: {
+          type: "unique-value",
+          field: "risk_tier",
+          defaultSymbol: {
+            type: "simple-fill",
+            color: [34, 197, 94, 0.55],
+            outline: outlineSym
+          },
+          uniqueValueInfos: [
+            {
+              value: "low",
+              label: "Thấp (#22c55e)",
+              symbol: { type: "simple-fill", color: [34, 197, 94, 0.55], outline: outlineSym }
+            },
+            {
+              value: "medium",
+              label: "Trung bình (#eab308)",
+              symbol: { type: "simple-fill", color: [234, 179, 8, 0.55], outline: outlineSym }
+            },
+            {
+              value: "high",
+              label: "Cao (#f97316)",
+              symbol: { type: "simple-fill", color: [249, 115, 22, 0.55], outline: outlineSym }
+            },
+            {
+              value: "very_high",
+              label: "Rất cao (#dc2626)",
+              symbol: { type: "simple-fill", color: [220, 38, 38, 0.55], outline: outlineSym }
+            }
+          ]
+        },
+        popupTemplate: {
+          title: "🗺️ {region_name}",
+          content: function (event) {
+            return buildRegionPopupHtml((event && event.graphic && event.graphic.attributes) || {});
+          }
+        }
+      });
+
+      geoChoroplethLayer = layer;
+      layer.watch("visible", (val) => {
+        if (viewMode === "2d") {
+          layerVisibleState.choro = Boolean(val);
+          syncLayerChipUI();
+        }
+      });
+      mapObj.add(layer, 0);
+      enforceLayerZOrder();
+
+      layer.load().then(() => {
+        if (viewMode === "2d" && geoChoroplethLayer === layer) {
+          choroplethLayer.visible = false;
+          if (activeView) {
+            activeView.whenLayerView(layer).then((lv) => {
+              if (geoChoroplethLayer === layer) geoChoroplethLayerView = lv;
+            }).catch(() => {});
+          }
+        }
+      }).catch(() => {
+        // Fallback sang GraphicsLayer nếu trình duyệt chặn Blob worker
+        if (choroplethLayer) {
+          choroplethLayer.visible = layerVisibleState.choro;
+        }
+      });
+    }
+
     function renderAllLayers(args) {
       if (!arcgisReady || !arcgisModules || !mapObj) return;
       const { Graphic, Polygon, Point, Circle } = arcgisModules;
 
-      // 1. Choropleth polygons (cache theo viewMode + view_key + feature count)
+      // 1. GeoJSONLayer + Choropleth polygons 4 mức nguy cơ (opacity 0.55, outline 1px) + Lớp Ranh giới trên heatmap
       const choroKey = viewMode + "|" + (args.view_key || "") + "|" + (args.geojson_data && args.geojson_data.features ? args.geojson_data.features.length : 0) + "|" + Object.keys(args.choropleth_values || {}).length;
       if (choroKey !== lastArcChoroKey) {
         lastArcChoroKey = choroKey;
         choroplethLayer.removeAll();
+        if (adminBoundaryLayer) adminBoundaryLayer.removeAll();
+        clearHoverHighlight();
+
         if (args.geojson_data && Array.isArray(args.geojson_data.features)) {
           const valsMap = args.choropleth_values || {};
           const allVals = Object.values(valsMap).map((v) => Number(v.cases || 0));
           const maxVal = allVals.length ? Math.max(...allVals, 1) : 1;
+          const enrichedFeatures = [];
 
-          args.geojson_data.features.forEach((feat) => {
+          args.geojson_data.features.forEach((feat, idx) => {
             const props = feat.properties || {};
-            const regionName = props.district || props.adm1_name1 || "Khu vực";
+            const regionName = getGeoFeatureKey(props);
             const info = valsMap[regionName] || {};
             const cases = Number(info.cases || 0);
             const inc = Number(info.incidence_rate || 0);
-            const pred = info.predicted_cases != null ? Number(info.predicted_cases) : null;
+            const pred = info.predicted_cases != null ? Number(info.predicted_cases) : cases;
+            const riskStyle = getRegionRiskStyle(info, maxVal);
+            const tempMean = info.temp_mean != null ? Number(info.temp_mean) : 27.5;
+            const humMean = info.humidity_mean != null ? Number(info.humidity_mean) : 78.0;
+            const rainMm = info.rain_mm != null ? Number(info.rain_mm) : 0.0;
+            const recTxt = info.recommendation || "Giám sát dịch tễ định kỳ theo khuyến cáo HCDC";
+
+            enrichedFeatures.push({
+              type: "Feature",
+              geometry: feat.geometry,
+              properties: {
+                oid: idx + 1,
+                region_name: regionName,
+                risk_tier: riskStyle.tier,
+                risk_label: riskStyle.label,
+                risk_color: riskStyle.hex,
+                cases: cases,
+                predicted_cases: pred,
+                incidence_rate: inc,
+                temp_mean: tempMean,
+                humidity_mean: humMean,
+                rain_mm: rainMm,
+                recommendation: recTxt
+              }
+            });
+
             const rings = geojsonGeometryToRings(feat.geometry);
             if (!rings.length) return;
-
             const poly = new Polygon({
               rings: rings,
               spatialReference: { wkid: 4326 }
             });
 
-            const rgba = getChoroplethRgba(cases, maxVal, 0.68);
             let symbol;
             if (viewMode === "3d") {
-              const extrudeHeight = Math.max(250, (cases / maxVal) * 6500);
+              const tierElev = riskStyle.tier === "very_high" ? 5500 : (riskStyle.tier === "high" ? 3400 : (riskStyle.tier === "medium" ? 1800 : 650));
+              const extrudeHeight = Math.max(tierElev, (cases / maxVal) * 6500);
               symbol = {
                 type: "polygon-3d",
                 symbolLayers: [{
                   type: "extrude",
                   size: extrudeHeight,
-                  material: { color: rgba },
+                  material: { color: riskStyle.rgba },
                   edges: {
                     type: "solid",
-                    color: [255, 255, 255, 0.85],
+                    color: [255, 255, 255, 0.95],
                     size: 1
                   }
                 }]
@@ -783,89 +1642,106 @@
             } else {
               symbol = {
                 type: "simple-fill",
-                color: rgba,
-                outline: { color: [255, 255, 255, 0.9], width: 1.2 }
+                color: riskStyle.rgba,
+                outline: { color: [255, 255, 255, 0.95], width: 1 }
               };
             }
 
-            const predLine = pred !== null
-              ? `<p><b>Dự báo XGBoost tháng tới:</b> ${pred.toFixed(1)} ca</p>`
-              : "";
+            const attrs = {
+              region_name: regionName,
+              risk_tier: riskStyle.tier,
+              risk_label: riskStyle.label,
+              risk_color: riskStyle.hex,
+              cases: cases,
+              predicted_cases: pred,
+              incidence_rate: inc,
+              temp_mean: tempMean,
+              humidity_mean: humMean,
+              rain_mm: rainMm,
+              recommendation: recTxt
+            };
 
             choroplethLayer.add(new Graphic({
               geometry: poly,
               symbol: symbol,
-              attributes: {
-                name: regionName,
-                cases: cases,
-                incidence_rate: inc.toFixed(2)
-              },
+              attributes: attrs,
               popupTemplate: {
-                title: "🗺️ {name}",
-                content: `<p><b>Số ca ghi nhận:</b> ${cases.toLocaleString()} ca</p>` +
-                         `<p><b>Suất mắc / 100k dân:</b> ${inc.toFixed(2)}</p>` +
-                         predLine +
-                         `<p><small>Nhấp vào khoảng trống hoặc khu vực để ghim phản ánh cộng đồng.</small></p>`
+                title: "🗺️ {region_name}",
+                content: function (event) {
+                  return buildRegionPopupHtml((event && event.graphic && event.graphic.attributes) || attrs);
+                }
               }
             }));
+
+            // Lớp Ranh giới Hành chính mảnh 1px tách biệt nằm phía trên Heatmap
+            if (adminBoundaryLayer) {
+              adminBoundaryLayer.add(new Graphic({
+                geometry: poly,
+                symbol: {
+                  type: "simple-fill",
+                  color: [0, 0, 0, 0],
+                  outline: { color: [255, 255, 255, 0.9], width: 1 }
+                }
+              }));
+            }
           });
+
+          if (viewMode === "2d") {
+            choroplethLayer.visible = layerVisibleState.choro;
+            mountGeoJSONChoropleth({ type: "FeatureCollection", features: enrichedFeatures });
+          } else {
+            if (geoChoroplethLayer) geoChoroplethLayer.visible = false;
+            choroplethLayer.visible = layerVisibleState.choro;
+          }
         }
       }
 
-      // 2. Geodesic Buffers & 3. Hotspots
-      bufferLayer.removeAll();
+      // 2. Lớp Điểm nóng HCDC / Cơ sở y tế (22px SVG Chữ thập đỏ, KHÔNG buffer rings)
       hotspotLayer.removeAll();
       (args.markers || []).forEach((pt) => {
         if (pt.lat == null || pt.lon == null) return;
         const lat = Number(pt.lat);
         const lon = Number(pt.lon);
-        const radiusM = Number(pt.radius_meters || 0);
-        const colorHex = pt.color || "#d90429";
-
-        if (radiusM > 0) {
-          const circleGeom = new Circle({
-            center: new Point({ longitude: lon, latitude: lat }),
-            radius: radiusM,
-            radiusUnit: "meters",
-            geodesic: true
-          });
-          bufferLayer.add(new Graphic({
-            geometry: circleGeom,
-            symbol: {
-              type: "simple-fill",
-              color: hexToRgba(colorHex, 0.16),
-              outline: { color: hexToRgba(colorHex, 0.9), width: 1.8 }
-            }
-          }));
-        }
-
-        const markerSize = Math.max(10, Math.min(24, Number(pt.radius_px || 12)));
         hotspotLayer.add(new Graphic({
           geometry: new Point({ longitude: lon, latitude: lat }),
           symbol: {
-            type: "simple-marker",
-            style: "circle",
-            color: hexToRgba(colorHex, 0.92),
-            size: markerSize,
-            outline: { color: [255, 255, 255, 1], width: 1.5 }
+            type: "picture-marker",
+            url: PLANNING_ICONS.hcdcCross,
+            width: "22px",
+            height: "22px"
           },
           attributes: {
-            title: pt.title || "Điểm nóng dịch tễ"
+            title: pt.title || "Điểm nóng HCDC"
           },
           popupTemplate: {
-            title: "🎯 {title}",
-            content: pt.popup_html || "Điểm giám sát dịch tễ"
+            title: "🏥 {title}",
+            content: pt.popup_html || "Điểm nóng dịch tễ HCDC"
           }
         }));
       });
 
-      // 4. Community Pins with HCDC Status
+      // 3. Community Pins (18px SVG Ghim tím than)
       renderPinsLayer(args.pins);
 
-      // 5. User location
+      // 4. Tầng Phân tầng 3 lớp (Nhiệt độ Thực tế + Dự báo Polygon + Dân số Hatch + Khí tượng KT + Ổ dịch Tam giác)
+      const ext = args.extended_layers || {};
+      const extSyncKey = (args.view_key || "") + "|" + (ext.selected_year || "") + "|" + (ext.selected_month || "");
+      if (extSyncKey !== lastExtSyncKey) {
+        lastExtSyncKey = extSyncKey;
+        liveTempOverride = null;
+      }
+
+      renderHeatmapLayer(ext, args.zoom);
+      renderRiskForecastLayer(args, ext);
+      renderWeatherOverlayLayer(ext);
+      renderPopulationOverlayLayer(args, ext);
+      renderHistoricalOutbreakLayer(ext);
+      enforceLayerZOrder();
+
+      // 6. User location
       renderUserLocation(args.user_location);
 
-      // 6. Draft pin from Python ("Ghim tại vị trí của tôi")
+      // 7. Draft pin from Python ("Ghim tại vị trí của tôi")
       if (args.selected_pin && args.selected_pin.lat != null && args.selected_pin.lon != null) {
         const spTs = args.selected_pin.ts || `${args.selected_pin.lat},${args.selected_pin.lon}`;
         if (spTs !== lastSelectedPinTs) {
@@ -873,6 +1749,439 @@
           openDraftPinOverlay(Number(args.selected_pin.lat), Number(args.selected_pin.lon));
         }
       }
+    }
+
+    function getTempFieldColor(tempC) {
+      if (tempC >= 33.5) return [220, 38, 38];   // Đỏ nóng dị thường
+      if (tempC >= 30.5) return [249, 115, 22];  // Cam nóng
+      if (tempC >= 26.5) return [234, 179, 8];   // Vàng ấm
+      if (tempC >= 23.1) return [16, 185, 129];  // Xanh mát
+      return [2, 132, 199];                      // Xanh lam lạnh dị thường
+    }
+
+    function renderHeatmapLayer(ext, zoomVal) {
+      if (!arcgisReady || !arcgisModules || !heatmapLayer) return;
+      const { Graphic, Point, Circle } = arcgisModules;
+      heatmapLayer.removeAll();
+
+      const rawTmp = (ext && ext.temperature_layer) || {};
+      const activeTmp = liveTempOverride || rawTmp;
+      const stations = Array.isArray(activeTmp.stations) ? activeTmp.stations : [];
+      const anomalies = Array.isArray(activeTmp.anomalies) ? activeTmp.anomalies : [];
+
+      const z = Number((activeView && activeView.zoom != null) ? activeView.zoom : (zoomVal || 10));
+      const hasDistrict = stations.some((s) => s.scope === "district");
+      const visibleStations = stations.filter((s) => {
+        if (!hasDistrict) return true;
+        if (z >= 9.0) {
+          return !(s.scope === "national" && s.province === "TP. Hồ Chí Minh");
+        }
+        return s.scope !== "district";
+      });
+
+      const badge = document.getElementById("tempSummaryBadge");
+      if (badge) {
+        const temps = visibleStations.map((s) => Number(s.temp_c || 0)).filter((v) => !Number.isNaN(v));
+        const meanT = temps.length ? (temps.reduce((a, b) => a + b, 0) / temps.length).toFixed(1) : ((rawTmp.summary && rawTmp.summary.mean_temp) || "--");
+        const liveTag = (liveTempOverride || (rawTmp.summary && rawTmp.summary.is_live)) ? "Live" : "Trạm";
+        const natCount = stations.filter((s) => s.scope !== "district").length;
+        badge.textContent = `🌡️ ${liveTag}: ${meanT}°C · Toàn quốc: ${natCount} tỉnh/thành · Dị thường: ${anomalies.length} điểm`;
+      }
+
+      const fieldR = z <= 7.5 ? 28000 : (z <= 10.5 ? 2600 : 1200);
+
+      // 1. Mặt trường nhiệt độ (°C toàn quốc & từng khu vực) + Nhãn °C trực tiếp trên bản đồ
+      if (tempFilterMode !== "anomalies") {
+        visibleStations.forEach((s) => {
+          if (s.lat == null || s.lon == null) return;
+          const pt = new Point({ longitude: Number(s.lon), latitude: Number(s.lat) });
+          const col = getTempFieldColor(Number(s.temp_c || 27.5));
+          const tempStr = Number(s.temp_c || 0).toFixed(1) + "°C";
+          const popupHtml =
+            `<p><b>Nhiệt độ hiện tại:</b> <b style="font-size:15px;">${tempStr}</b> (Nền TB: ${Number(s.baseline_temp || 27.5).toFixed(1)} °C · Chênh lệch: ${Number(s.delta_temp || 0) >= 0 ? "+" : ""}${Number(s.delta_temp || 0).toFixed(1)} °C)</p>` +
+            `<p><b>Khu vực:</b> ${escapeHtml(s.name || "")} (${escapeHtml(s.province || "")})</p>` +
+            `<p><b>Độ ẩm / Lượng mưa:</b> ${Number(s.humidity_pct || 0).toFixed(1)}% · ${Number(s.rain_mm || 0).toFixed(1)} mm</p>` +
+            `<p><b>Trạng thái nhiệt:</b> <b>${escapeHtml(s.anomaly_label || "Bình thường")}</b></p>` +
+            `<p><small>🕒 ${escapeHtml(s.obs_time || "")} · Nguồn: ${escapeHtml(s.source || "")}</small></p>`;
+
+          heatmapLayer.add(new Graphic({
+            geometry: new Circle({ center: pt, radius: fieldR, radiusUnit: "meters", geodesic: true }),
+            symbol: {
+              type: "simple-fill",
+              color: [col[0], col[1], col[2], 0.22],
+              outline: { width: 0 }
+            },
+            attributes: { _bgGraphic: true, name: s.name || "Trạm nhiệt độ" }
+          }));
+
+          heatmapLayer.add(new Graphic({
+            geometry: pt,
+            symbol: {
+              type: "picture-marker",
+              url: createTempCelsiusBadgeSvg(s),
+              width: "64px",
+              height: "28px"
+            },
+            attributes: {
+              _isInteractiveSymbol: true,
+              name: s.name || s.province || "Khu vực",
+              temp_c: tempStr
+            },
+            popupTemplate: {
+              title: "🌡️ Nhiệt độ Khu vực ({temp_c}): {name}",
+              content: popupHtml
+            }
+          }));
+        });
+      }
+
+      // 2. Các Điểm Nhiệt độ Dị thường đã lưu (Quá cao >= 33.5°C/+2.2°C hoặc Quá thấp <= 23°C/-2.2°C)
+      anomalies.forEach((a) => {
+        if (a.lat == null || a.lon == null) return;
+        const isHigh = a.anomaly_type === "high_anomaly" || Number(a.temp_c || 0) >= 33.5;
+        const pt = new Point({ longitude: Number(a.lon), latitude: Number(a.lat) });
+        const dSign = Number(a.delta_temp || 0) >= 0 ? "+" : "";
+        heatmapLayer.add(new Graphic({
+          geometry: pt,
+          symbol: {
+            type: "picture-marker",
+            url: isHigh ? PLANNING_ICONS.tempHigh : PLANNING_ICONS.tempLow,
+            width: "22px",
+            height: "22px"
+          },
+          attributes: { name: a.name || "Điểm dị thường nhiệt độ" },
+          popupTemplate: {
+            title: (isHigh ? "🔥 Dị thường Nhiệt Quá Cao: " : "❄️ Dị thường Nhiệt Quá Thấp: ") + "{name}",
+            content:
+              `<p><b>Nhiệt độ ghi nhận:</b> <b>${Number(a.temp_c || 0).toFixed(1)} °C</b> (${dSign}${Number(a.delta_temp || 0).toFixed(1)} °C so với nền ${Number(a.baseline_temp || 27.5).toFixed(1)} °C)</p>` +
+              `<p><b>Thời điểm lưu nhận:</b> ${escapeHtml(a.obs_time || a.obs_date || "")}</p>` +
+              `<p><b>Nguồn dữ liệu:</b> ${escapeHtml(a.source || "Hệ thống quan trắc")}</p>`
+          }
+        }));
+      });
+    }
+
+    function renderRiskForecastLayer(args, ext) {
+      // Tuyệt đối chỉ tô Polygon theo 4 mức dự báo (#22c55e, #eab308, #f97316, #dc2626), không đặt icon ở tâm phường
+      if (!arcgisReady || !arcgisModules || !riskMapLayer) return;
+      const { Graphic, Polygon } = arcgisModules;
+      const rf = (ext && ext.risk_forecast) || {};
+      const steps = rf.steps || {};
+      const stepData = steps[String(activeRiskStep)] || steps["1"] || {};
+      const renderKey = [
+        viewMode,
+        args ? args.view_key : "",
+        activeRiskStep,
+        Object.keys(stepData.regions || {}).length
+      ].join("|");
+
+      const stepLblEl = document.getElementById("riskStepLabel");
+      if (stepLblEl) {
+        stepLblEl.textContent = stepData.month_label || `Bước +${activeRiskStep}`;
+      }
+      if (renderKey === lastRiskRenderKey) return;
+      lastRiskRenderKey = renderKey;
+      riskMapLayer.removeAll();
+
+      const tierPalette = {
+        low: [34, 197, 94, 0.55],
+        medium: [234, 179, 8, 0.55],
+        high: [249, 115, 22, 0.55],
+        very_high: [220, 38, 38, 0.55]
+      };
+      const regionsMap = stepData.regions || {};
+      if (args && args.geojson_data && Array.isArray(args.geojson_data.features) && Object.keys(regionsMap).length) {
+        args.geojson_data.features.forEach((feat) => {
+          const props = feat.properties || {};
+          const regionName = getGeoFeatureKey(props);
+          const distKey = props.district || "";
+          const info = regionsMap[regionName] || regionsMap[distKey];
+          if (!info) return;
+          const rings = geojsonGeometryToRings(feat.geometry);
+          if (!rings.length) return;
+          const poly = new Polygon({ rings: rings, spatialReference: { wkid: 4326 } });
+          const rgba = tierPalette[info.tier_key] || tierPalette.low;
+          let sym;
+          if (viewMode === "3d") {
+            const tierH = info.tier_key === "very_high" ? 6500 : (info.tier_key === "high" ? 4000 : (info.tier_key === "medium" ? 2000 : 700));
+            sym = {
+              type: "polygon-3d",
+              symbolLayers: [{
+                type: "extrude",
+                size: tierH,
+                material: { color: rgba },
+                edges: { type: "solid", color: [255, 255, 255, 0.95], size: 1 }
+              }]
+            };
+          } else {
+            sym = {
+              type: "simple-fill",
+              color: rgba,
+              outline: { color: [255, 255, 255, 0.95], width: 1 }
+            };
+          }
+          const chgSign = Number(info.change_pct || 0) >= 0 ? "+" : "";
+          riskMapLayer.add(new Graphic({
+            geometry: poly,
+            symbol: sym,
+            attributes: {
+              region_name: regionName,
+              risk_tier: info.tier_key || "low",
+              risk_label: info.tier_label || "Thấp",
+              risk_color: info.color || "#22c55e",
+              predicted_cases: Number(info.predicted_cases || 0),
+              cases: Number(info.current_cases || 0),
+              recommendation: info.recommendation || ""
+            },
+            popupTemplate: {
+              title: "🔮 Dự báo Nguy cơ: {region_name}",
+              content:
+                `<p><b>Kỳ dự báo:</b> ${escapeHtml(stepData.month_label || "")}</p>` +
+                `<p><b>Mức độ nguy cơ:</b> <b style="color:${escapeHtml(info.color)}">${escapeHtml(info.tier_label)}</b></p>` +
+                `<p><b>Số ca dự báo XGBoost:</b> ${Number(info.predicted_cases || 0).toFixed(1)} ca</p>` +
+                `<p><b>Ca tháng hiện tại:</b> ${Number(info.current_cases || 0).toLocaleString()} ca (${chgSign}${Number(info.change_pct || 0).toFixed(1)}%)</p>` +
+                `<p><b>Khuyến cáo:</b> ${escapeHtml(info.recommendation || "")}</p>`
+            }
+          }));
+        });
+      }
+    }
+
+    function renderWeatherOverlayLayer(ext) {
+      if (!arcgisReady || !arcgisModules || !mapObj) return;
+      const { FeatureLayer, LabelClass, Graphic, Point } = arcgisModules;
+      const items = (ext && Array.isArray(ext.weather_overlay)) ? ext.weather_overlay : [];
+      const wKey = (lastArgs ? lastArgs.view_key : "") + "|" + items.length + "|" + (items[0] ? `${items[0].temp_c}_${items[0].rain_mm}` : "");
+      if (wKey === lastWeatherRenderKey && weatherOverlayLayer && mapObj.layers.includes(weatherOverlayLayer)) return;
+      lastWeatherRenderKey = wKey;
+
+      if (weatherOverlayLayer && mapObj.layers.includes(weatherOverlayLayer)) {
+        try { mapObj.remove(weatherOverlayLayer); } catch (_) {}
+      }
+
+      const sourceGraphics = items
+        .filter((w) => w.lat != null && w.lon != null)
+        .map((w, idx) => new Graphic({
+          geometry: new Point({ longitude: Number(w.lon), latitude: Number(w.lat) }),
+          attributes: {
+            oid: idx + 1,
+            name: String(w.name || "Trạm Khí tượng"),
+            period: String(w.period || ""),
+            temp_c: Number(w.temp_c || 0),
+            rain_mm: Number(w.rain_mm || 0),
+            humidity_pct: Number(w.humidity_pct || 0),
+            pm25: w.pm25 != null ? Number(w.pm25) : -1,
+            wind_kmh: w.wind_kmh != null ? Number(w.wind_kmh) : -1,
+            aedes_label: String(w.aedes_label || ""),
+            weather_label: `${Number(w.temp_c || 0).toFixed(1)}°C · ${Number(w.rain_mm || 0).toFixed(0)}mm`
+          }
+        }));
+
+      const labelClass = new LabelClass({
+        labelExpressionInfo: { expression: "$feature.weather_label" },
+        labelPlacement: "below-center",
+        deconflictionStrategy: "dynamic",
+        symbol: {
+          type: "text",
+          color: [3, 105, 161, 1],
+          haloColor: [255, 255, 255, 0.96],
+          haloSize: 1.5,
+          font: { size: 9.5, weight: "bold", family: "Arial, sans-serif" }
+        }
+      });
+
+      const wLayer = new FeatureLayer({
+        title: "🌦️ Tầng Điểm · Trạm Khí tượng (KT + Label)",
+        visible: layerVisibleState.weather,
+        source: sourceGraphics,
+        objectIdField: "oid",
+        geometryType: "point",
+        spatialReference: { wkid: 4326 },
+        outFields: ["*"],
+        fields: [
+          { name: "oid", type: "oid" },
+          { name: "name", type: "string" },
+          { name: "period", type: "string" },
+          { name: "temp_c", type: "double" },
+          { name: "rain_mm", type: "double" },
+          { name: "humidity_pct", type: "double" },
+          { name: "pm25", type: "double" },
+          { name: "wind_kmh", type: "double" },
+          { name: "aedes_label", type: "string" },
+          { name: "weather_label", type: "string" }
+        ],
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "picture-marker",
+            url: PLANNING_ICONS.weatherKT,
+            width: "22px",
+            height: "22px"
+          }
+        },
+        labelingInfo: [labelClass],
+        labelsVisible: true,
+        popupTemplate: {
+          title: "🌦️ Trạm Khí tượng: {name}",
+          content: function (event) {
+            const a = (event && event.graphic && event.graphic.attributes) || {};
+            const pmLine = Number(a.pm25) >= 0 ? `<p><b>Bụi mịn PM2.5:</b> ${Number(a.pm25).toFixed(1)} µg/m³</p>` : "";
+            const windLine = Number(a.wind_kmh) >= 0 ? `<p><b>Tốc độ gió TB:</b> ${Number(a.wind_kmh).toFixed(1)} km/h</p>` : "";
+            return (
+              `<p><b>Kỳ quan trắc:</b> ${escapeHtml(a.period || "")}</p>` +
+              `<p><b>Nhiệt độ TB:</b> ${Number(a.temp_c || 0).toFixed(1)} °C · <b>Lượng mưa:</b> ${Number(a.rain_mm || 0).toFixed(1)} mm</p>` +
+              `<p><b>Độ ẩm TB:</b> ${Number(a.humidity_pct || 0).toFixed(1)} %</p>` +
+              pmLine + windLine +
+              `<p><b>Điều kiện sinh sản Aedes:</b> <b>${escapeHtml(a.aedes_label || "")}</b></p>`
+            );
+          }
+        }
+      });
+
+      weatherOverlayLayer = wLayer;
+      wLayer.watch("visible", (val) => {
+        layerVisibleState.weather = Boolean(val);
+        syncLayerChipUI();
+      });
+      mapObj.add(wLayer);
+    }
+
+    function renderPopulationOverlayLayer(args, ext) {
+      // Đa giác hoa văn gạch (#475569) + Biểu đồ cột Mật độ dân số 3 năm (2023–2024–2025) trực tiếp trên map
+      if (!arcgisReady || !arcgisModules || !populationOverlayLayer) return;
+      const { Graphic, Polygon, Point } = arcgisModules;
+      const features = (args && args.geojson_data && Array.isArray(args.geojson_data.features)) ? args.geojson_data.features : [];
+      const popRegMap = (ext && ext.population_regions) || {};
+      const popList = (ext && Array.isArray(ext.population_overlay) && ext.population_overlay.length)
+        ? ext.population_overlay
+        : Object.values(popRegMap);
+      const z = Number((activeView && activeView.zoom != null) ? activeView.zoom : (args && args.zoom != null ? args.zoom : 10));
+      const zBand = z >= 11.4 ? 2 : (z >= 9.0 ? 1 : 0);
+      const pKey = (args ? args.view_key : "") + "|" + features.length + "|" + popList.length + "|" + zBand;
+      if (pKey === lastPopRenderKey) return;
+      lastPopRenderKey = pKey;
+      populationOverlayLayer.removeAll();
+
+      // 1. Tầng nền hoa văn gạch giữ nguyên nhìn xuyên thấu màu Nguy cơ
+      features.forEach((feat) => {
+        const props = feat.properties || {};
+        const regionName = getGeoFeatureKey(props);
+        const distKey = props.district || "";
+        const info = popRegMap[regionName] || popRegMap[distKey] || {};
+        const hatchStyle = info.hatch_style || "vertical";
+        const rings = geojsonGeometryToRings(feat.geometry);
+        if (!rings.length) return;
+        const poly = new Polygon({ rings: rings, spatialReference: { wkid: 4326 } });
+
+        populationOverlayLayer.add(new Graphic({
+          geometry: poly,
+          symbol: {
+            type: "simple-fill",
+            style: hatchStyle,
+            color: [71, 85, 105, 0.45],
+            outline: { color: [71, 85, 105, 0.35], width: 0.7 }
+          },
+          attributes: { _bgGraphic: true, name: regionName }
+        }));
+      });
+
+      // 2. Biểu đồ cột 3 năm (2023 – 2024 – 2025) đặt trực tiếp theo tọa độ từng khu vực
+      if (!popList.length) return;
+      const maxDensity = Number((ext && ext.population_max_density) || 0) ||
+        Math.max(...popList.map((x) => Number(x.density_2025 || x.density_2024 || 1)), 1);
+      const chartW = z >= 11.4 ? "72px" : "60px";
+      const chartH = z >= 11.4 ? "60px" : "50px";
+
+      const seenPts = new Set();
+      popList.forEach((info) => {
+        if (info.lat == null || info.lon == null) return;
+        const ptKey = `${Number(info.lat).toFixed(3)},${Number(info.lon).toFixed(3)},${info.name || ""}`;
+        if (seenPts.has(ptKey)) return;
+        seenPts.add(ptKey);
+
+        const d23 = Number(info.density_2023 || 0);
+        const d24 = Number(info.density_2024 || 0);
+        const d25 = Number(info.density_2025 || d24 || 0);
+        const localMax = Math.max(d23, d24, d25, 1);
+        const pct23 = Math.max(12, Math.round((d23 / localMax) * 100));
+        const pct24 = Math.max(12, Math.round((d24 / localMax) * 100));
+        const pct25 = Math.max(12, Math.round((d25 / localMax) * 100));
+        const p23 = Number(info.pop_2023 || 0);
+        const p24 = Number(info.pop_2024 || 0);
+        const p25 = Number(info.pop_2025 || info.population || 0);
+        const g3 = Number(info.growth_3y_pct || 0);
+
+        const popupHtml =
+          `<div style="font-size:12.5px;line-height:1.5;">` +
+          `<p style="margin:0 0 6px;"><b>Diện tích hành chính:</b> ${Number(info.area_km2 || 0).toLocaleString()} km² · <b>Tăng trưởng 3 năm:</b> <span style="color:#ea580c;font-weight:700;">${g3 >= 0 ? "+" : ""}${g3.toFixed(2)}%</span></p>` +
+          `<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;margin:6px 0;">` +
+          `<div style="font-weight:700;margin-bottom:6px;color:#0f172a;">📊 Biểu đồ Cột Mật độ Dân số 3 Năm (người/km²)</div>` +
+          `<div style="display:flex;align-items:flex-end;justify-content:space-around;height:78px;border-bottom:1.5px solid #cbd5e1;padding:4px 6px 0;">` +
+          `<div style="text-align:center;width:28%;"><div style="font-size:10.5px;font-weight:700;color:#4f46e5;">${Math.round(d23).toLocaleString()}</div><div style="height:${Math.round(pct23 * 0.48)}px;background:#6366f1;border-radius:4px 4px 0 0;margin:2px auto 0;width:26px;"></div></div>` +
+          `<div style="text-align:center;width:28%;"><div style="font-size:10.5px;font-weight:700;color:#0369a1;">${Math.round(d24).toLocaleString()}</div><div style="height:${Math.round(pct24 * 0.48)}px;background:#0284c7;border-radius:4px 4px 0 0;margin:2px auto 0;width:26px;"></div></div>` +
+          `<div style="text-align:center;width:28%;"><div style="font-size:10.5px;font-weight:700;color:#ea580c;">${Math.round(d25).toLocaleString()}</div><div style="height:${Math.round(pct25 * 0.48)}px;background:#f97316;border-radius:4px 4px 0 0;margin:2px auto 0;width:26px;"></div></div>` +
+          `</div>` +
+          `<div style="display:flex;justify-content:space-around;font-size:11px;font-weight:700;margin-top:3px;color:#334155;"><span>2023</span><span>2024</span><span>2025</span></div>` +
+          `</div>` +
+          `<table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-top:4px;">` +
+          `<tr style="background:#f1f5f9;"><th style="text-align:left;padding:3px 5px;">Năm</th><th style="text-align:right;padding:3px 5px;">Dân số</th><th style="text-align:right;padding:3px 5px;">Mật độ (ng/km²)</th></tr>` +
+          `<tr><td style="padding:3px 5px;">2023</td><td style="text-align:right;padding:3px 5px;">${p23.toLocaleString()}</td><td style="text-align:right;padding:3px 5px;">${d23.toLocaleString()}</td></tr>` +
+          `<tr><td style="padding:3px 5px;">2024</td><td style="text-align:right;padding:3px 5px;">${p24.toLocaleString()}</td><td style="text-align:right;padding:3px 5px;">${d24.toLocaleString()}</td></tr>` +
+          `<tr><td style="padding:3px 5px;font-weight:700;">2025</td><td style="text-align:right;padding:3px 5px;font-weight:700;">${p25.toLocaleString()}</td><td style="text-align:right;padding:3px 5px;font-weight:700;">${d25.toLocaleString()}</td></tr>` +
+          `</table>` +
+          `<p style="margin:6px 0 0;"><b>Phân tầng mật độ:</b> ${escapeHtml(info.density_tier || "")} · <b>Nhóm 0–14t:</b> ${Number(info.child_ratio_pct || 0).toFixed(1)}% · <b>SXH:</b> ${Number(info.cases || 0).toLocaleString()} ca</p>` +
+          `</div>`;
+
+        populationOverlayLayer.add(new Graphic({
+          geometry: new Point({ longitude: Number(info.lon), latitude: Number(info.lat) }),
+          symbol: {
+            type: "picture-marker",
+            url: createPop3YearBarChartSvg(info, maxDensity),
+            width: chartW,
+            height: chartH
+          },
+          attributes: {
+            _isInteractiveSymbol: true,
+            name: info.name || "Khu vực"
+          },
+          popupTemplate: {
+            title: "📊 Mật độ Dân số 3 năm (2023–2025): {name}",
+            content: popupHtml
+          }
+        }));
+      });
+    }
+
+    function renderHistoricalOutbreakLayer(ext) {
+      // Điểm Tam giác đỏ sẫm 22px chuẩn quy hoạch, xóa bỏ mọi vòng đệm xung quanh
+      if (!arcgisReady || !arcgisModules || !historicalOutbreakLayer) return;
+      const { Graphic, Point } = arcgisModules;
+      historicalOutbreakLayer.removeAll();
+      const items = (ext && Array.isArray(ext.historical_outbreaks)) ? ext.historical_outbreaks : [];
+      if (!items.length) return;
+
+      items.forEach((h) => {
+        if (h.lat == null || h.lon == null) return;
+        const pt = new Point({ longitude: Number(h.lon), latitude: Number(h.lat) });
+        historicalOutbreakLayer.add(new Graphic({
+          geometry: pt,
+          symbol: {
+            type: "picture-marker",
+            url: PLANNING_ICONS.outbreakTriangle,
+            width: "22px",
+            height: "22px"
+          },
+          attributes: { name: h.name || "Ổ dịch lịch sử" },
+          popupTemplate: {
+            title: "🔺 Ổ dịch Lịch sử: {name}",
+            content:
+              `<p><b>Địa bàn:</b> ${escapeHtml(h.district || "")}, ${escapeHtml(h.province || "")}</p>` +
+              `<p><b>Số tháng xuất hiện dịch (lịch sử):</b> ${Number(h.outbreak_months || 1)} tháng</p>` +
+              `<p><b>Tổng ca tích lũy lịch sử:</b> ${Number(h.total_cases || 0).toLocaleString()} ca</p>` +
+              `<p><b>Đỉnh dịch cao nhất / tháng:</b> ${Number(h.peak_cases || 0).toLocaleString()} ca</p>`
+          }
+        }));
+      });
     }
 
     function placeDraftPin(lat, lon) {
@@ -1029,6 +2338,9 @@
         "esri/views/MapView",
         "esri/views/SceneView",
         "esri/layers/GraphicsLayer",
+        "esri/layers/GeoJSONLayer",
+        "esri/layers/FeatureLayer",
+        "esri/layers/support/LabelClass",
         "esri/Graphic",
         "esri/geometry/Polygon",
         "esri/geometry/Point",
@@ -1038,27 +2350,98 @@
         "esri/widgets/Search",
         "esri/widgets/ScaleBar"
       ], function (
-        Map, MapView, SceneView, GraphicsLayer, Graphic,
+        Map, MapView, SceneView, GraphicsLayer, GeoJSONLayer, FeatureLayer, LabelClass, Graphic,
         Polygon, Point, Circle, LayerList, Expand, Search, ScaleBar
       ) {
         arcgisModules = {
-          Map, MapView, SceneView, GraphicsLayer, Graphic,
+          Map, MapView, SceneView, GraphicsLayer, GeoJSONLayer, FeatureLayer, LabelClass, Graphic,
           Polygon, Point, Circle, LayerList, Expand, Search, ScaleBar
         };
 
-        choroplethLayer = new GraphicsLayer({ title: "🗺️ Ranh giới Hành chính & Mật độ Ca" });
-        bufferLayer = new GraphicsLayer({ title: "⭕ Vùng đệm Khoanh vùng Ổ dịch" });
-        hotspotLayer = new GraphicsLayer({ title: "🎯 Điểm nóng Dịch tễ & HCDC" });
-        pinsLayer = new GraphicsLayer({ title: "📌 Phản ánh Cộng đồng" });
+        choroplethLayer = new GraphicsLayer({
+          title: "🗺️ Tầng 1 · Nguy cơ (3D / Dự phòng)",
+          listMode: "hide",
+          visible: false
+        });
+        riskMapLayer = new GraphicsLayer({
+          title: "🔮 Tầng 1 · Dự báo Nguy cơ (+1/+2/+3 tháng)",
+          visible: layerVisibleState.risk
+        });
+        populationOverlayLayer = new GraphicsLayer({
+          title: "👥 Tầng 1 · Mật độ Dân số (Hatch #475569)",
+          visible: layerVisibleState.pop
+        });
+        heatmapLayer = new GraphicsLayer({
+          title: "🌡️ Tầng 2 · Nhiệt độ Thực tế & Dị thường",
+          visible: layerVisibleState.heatmap
+        });
+        adminBoundaryLayer = new GraphicsLayer({
+          title: "🗾 Tầng 1 · Ranh giới Hành chính (1px)",
+          visible: layerVisibleState.boundary
+        });
+        hoverHighlightLayer = new GraphicsLayer({
+          title: "✨ Viền vùng đang trỏ chuột",
+          listMode: "hide"
+        });
+        weatherOverlayLayer = new GraphicsLayer({
+          title: "🌦️ Tầng 3 · Trạm Khí tượng (KT)",
+          visible: layerVisibleState.weather
+        });
+        historicalOutbreakLayer = new GraphicsLayer({
+          title: "🔺 Tầng 3 · Ổ dịch Lịch sử",
+          visible: layerVisibleState.hist
+        });
+        hotspotLayer = new GraphicsLayer({
+          title: "✚ Tầng 3 · Điểm nóng HCDC",
+          visible: layerVisibleState.hotspot
+        });
+        pinsLayer = new GraphicsLayer({
+          title: "📌 Tầng 3 · Phản ánh Cộng đồng",
+          visible: layerVisibleState.pins
+        });
         userLayer = new GraphicsLayer({ title: "📍 Vị trí của bạn", listMode: "hide" });
         draftLayer = new GraphicsLayer({ title: "📍 Ghim đang chọn", listMode: "hide" });
 
+        [
+          ["choro", choroplethLayer],
+          ["risk", riskMapLayer],
+          ["pop", populationOverlayLayer],
+          ["heatmap", heatmapLayer],
+          ["boundary", adminBoundaryLayer],
+          ["weather", weatherOverlayLayer],
+          ["hist", historicalOutbreakLayer],
+          ["hotspot", hotspotLayer],
+          ["pins", pinsLayer]
+        ].forEach(([key, lyr]) => {
+          lyr.watch("visible", (val) => {
+            if (key === "choro" && viewMode === "2d" && geoChoroplethLayer) return;
+            layerVisibleState[key] = Boolean(val);
+            syncLayerChipUI();
+          });
+        });
+
+        // Thứ tự Z-Index cố định từ dưới lên trên:
+        // Nguy cơ (4 mức) -> Mật độ dân (Hatch) -> Nhiệt độ Thực tế -> Ranh giới hành chính -> Điểm (Khí tượng, Ổ dịch, Điểm nóng, Phản ánh)
         mapObj = new Map({
           basemap: currentBasemap,
-          layers: [choroplethLayer, bufferLayer, hotspotLayer, pinsLayer, userLayer, draftLayer]
+          layers: [
+            choroplethLayer,
+            riskMapLayer,
+            populationOverlayLayer,
+            heatmapLayer,
+            adminBoundaryLayer,
+            hoverHighlightLayer,
+            weatherOverlayLayer,
+            historicalOutbreakLayer,
+            hotspotLayer,
+            pinsLayer,
+            userLayer,
+            draftLayer
+          ]
         });
 
         arcgisReady = true;
+        syncLayerChipUI();
 
         const initLat = (lastArgs && lastArgs.center_lat) || 10.7769;
         const initLon = (lastArgs && lastArgs.center_lon) || 106.7009;
